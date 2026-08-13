@@ -28,7 +28,7 @@ const SYSTEM_FIELDS = ['id', 'created_date', 'updated_date', 'created_by_id', 'c
 
 // Append-only, very high volume. Synced on id presence alone: no field level
 // diffing, because rewriting 90k log rows every pass is not worth the calls.
-const APPEND_ONLY = new Set(['MetaSyncRun', 'AuditLog', 'ErrorLog', 'RouteDecisionTrace', 'PageSnapshot']);
+const APPEND_ONLY = new Set(['MetaSyncRun']);
 
 // Never mirrored. User is a built-in entity the platform manages, and
 // MirrorSyncState belongs to this app only.
