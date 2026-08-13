@@ -34,6 +34,10 @@
     "resolver_notes": {
       "type": "string",
       "description": "Operator notes when approving or rejecting"
+    },
+    "migration_source_id": {
+      "type": "string",
+      "description": "Backup mirror only. The record id this row was copied from in the primary Legenex dashboard app. Used by the sync job to keep this app 1:1 with the primary. Not used by any dashboard logic."
     }
   },
   "required": [

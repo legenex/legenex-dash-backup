@@ -62,6 +62,10 @@
     "filter_routes": {
       "type": "string",
       "description": "JSON array of lead_route keys (standard, direct, data, event, queue) to run HLR on. Empty = standard, direct, data."
+    },
+    "migration_source_id": {
+      "type": "string",
+      "description": "Backup mirror only. The record id this row was copied from in the primary Legenex dashboard app. Used by the sync job to keep this app 1:1 with the primary. Not used by any dashboard logic."
     }
   },
   "required": [

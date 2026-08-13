@@ -91,6 +91,10 @@
     "triggers": {
       "type": "string",
       "description": "JSON array of trigger keys derived from the lead_status system field (on_received=Qualified, on_sold, on_unsold, on_dq=Disqualified, on_queued, on_rejected, on_duplicates, plus any custom lead_status values such as on_24m_lead). Empty array = fire on every lead (intake), gated only by filters."
+    },
+    "migration_source_id": {
+      "type": "string",
+      "description": "Backup mirror only. The record id this row was copied from in the primary Legenex dashboard app. Used by the sync job to keep this app 1:1 with the primary. Not used by any dashboard logic."
     }
   },
   "required": [

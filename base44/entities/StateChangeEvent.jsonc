@@ -112,6 +112,10 @@
       "type": "string",
       "format": "date-time",
       "description": "When this event was included in a digest. Null means not yet notified."
+    },
+    "migration_source_id": {
+      "type": "string",
+      "description": "Backup mirror only. The record id this row was copied from in the primary Legenex dashboard app. Used by the sync job to keep this app 1:1 with the primary. Not used by any dashboard logic."
     }
   },
   "required": [

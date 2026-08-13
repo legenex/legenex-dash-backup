@@ -35,6 +35,10 @@
     "source_code": {
       "type": "string",
       "description": "Optional link to a specific SupplierSource source_code when a supplier has more than one feed and coverage differs by feed. When null, this is the supplier level coverage for the state."
+    },
+    "migration_source_id": {
+      "type": "string",
+      "description": "Backup mirror only. The record id this row was copied from in the primary Legenex dashboard app. Used by the sync job to keep this app 1:1 with the primary. Not used by any dashboard logic."
     }
   },
   "required": [

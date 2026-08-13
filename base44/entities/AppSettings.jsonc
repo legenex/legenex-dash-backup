@@ -62,6 +62,10 @@
     "distribution_canary_allowlist": {
       "type": "string",
       "description": "Additive. JSON allowlist that defines which leads canary mode may deliver natively, e.g. {\"supplierKeys\":[\"...\"],\"campaignIds\":[\"...\"],\"sourceMarker\":\"...\"}. Empty or absent means canary delivers nothing and legacy stays authoritative."
+    },
+    "migration_source_id": {
+      "type": "string",
+      "description": "Backup mirror only. The record id this row was copied from in the primary Legenex dashboard app. Used by the sync job to keep this app 1:1 with the primary. Not used by any dashboard logic."
     }
   },
   "required": []
