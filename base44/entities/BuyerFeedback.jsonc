@@ -1,0 +1,63 @@
+{
+  "name": "BuyerFeedback",
+  "type": "object",
+  "properties": {
+    "lead_id": {
+      "type": "string",
+      "description": "Reference to the Lead record this feedback is about (nullable if no lead matched)"
+    },
+    "buyer_id": {
+      "type": "string",
+      "description": "Reference to the Buyer record that submitted this feedback"
+    },
+    "matched_by": {
+      "type": "string",
+      "enum": [
+        "",
+        "phone",
+        "email",
+        "manual"
+      ],
+      "default": "",
+      "description": "How the lead was matched: phone, email, or manual (added in portal)"
+    },
+    "disposition": {
+      "type": "string",
+      "description": "Mapped disposition from our taxonomy (e.g. Converted, Wrong Number)"
+    },
+    "raw_disposition": {
+      "type": "string",
+      "description": "The buyer's own free text or code before AI mapping"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "outcome": {
+      "type": "string",
+      "description": "Short outcome summary provided by the buyer"
+    },
+    "revenue_value": {
+      "type": "number",
+      "default": 0,
+      "description": "Revenue value the buyer attributes to this lead, if any"
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "manual",
+        "webhook"
+      ],
+      "default": "manual",
+      "description": "manual = added in the portal, webhook = posted to the feedback endpoint"
+    },
+    "match_confidence": {
+      "type": "number",
+      "default": 1,
+      "description": "AI mapping confidence 0-1 for the raw->taxonomy disposition mapping"
+    }
+  },
+  "required": [
+    "buyer_id",
+    "disposition"
+  ]
+}

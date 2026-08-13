@@ -1,0 +1,28 @@
+{
+  // Additive (lead distribution platform). Ordered routing group under a Campaign.
+  // Caller model: operator-only writes via distributionConfig; read by processLead
+  // (service role) + simulator. Draft by default; only lifecycle==='active' routes.
+  "name": "RouteGroup",
+  "type": "object",
+  "properties": {
+    "campaign_id": { "type": "string", "description": "Campaign this group belongs to" },
+    "name": { "type": "string" },
+    "method": {
+      "type": "string",
+      "enum": ["priority", "weighted", "round_robin", "auction", "hybrid"],
+      "default": "priority"
+    },
+    "order_index": { "type": "number", "default": 0, "description": "Waterfall evaluation order (ascending)" },
+    "price_weight": { "type": "number", "default": 0.5, "description": "Hybrid: weight on normalized price" },
+    "priority_weight": { "type": "number", "default": 0.5, "description": "Hybrid: weight on normalized priority" },
+    "rr_cursor_name": { "type": "string", "description": "Counter name backing round_robin rotation" },
+    "active": { "type": "boolean", "default": false },
+    "lifecycle": { "type": "string", "enum": ["draft", "active", "paused", "archived"], "default": "draft" },
+    "config_version_id": { "type": "string", "description": "Additive. Id of the immutable RouteConfigVersion this group was published from" },
+    "config_hash": { "type": "string", "description": "Additive. Hash of the published config for trace resolution" },
+    "published_by": { "type": "string", "description": "Additive. Operator user id who last published" },
+    "published_at": { "type": "string", "format": "date-time", "description": "Additive. When last published" },
+    "change_reason": { "type": "string", "description": "Additive. Reason for the last publish" }
+  },
+  "required": ["campaign_id", "name", "method"]
+}

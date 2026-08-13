@@ -1,0 +1,27 @@
+{
+  "name": "ImportTemplate",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Template display name, usually the source"
+    },
+    "target": {
+      "type": "string",
+      "enum": [
+        "lead",
+        "bank"
+      ],
+      "default": "lead",
+      "description": "Which entity this template imports into: Lead or BankTransaction"
+    },
+    "mapping": {
+      "type": "string",
+      "description": "JSON object mapping source CSV column -> target field name"
+    }
+  },
+  "required": [
+    "name",
+    "target"
+  ]
+}

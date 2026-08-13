@@ -1,0 +1,71 @@
+// TOOLS STRUCTURAL REBUILD reference (Performance OS). This is a REBUILD, not a restyle. Every page gets the new
+// STRUCTURE, wired to real data, honest zeros, no mock rows, no em dashes. Preserve all existing queries, actions,
+// settings writes, and the Payload Tester behavior (it fires a synthetic lead through the real processLead pipeline;
+// do not change its posting behavior). Pipeline, portals, and permissions untouched. Tokens for both themes.
+//
+// SHARED TOOLS SHELL: create src/components/tools/ToolsShell.jsx. Each tool PAGE wraps its content in it, passing
+//   title, subtitle, and optional right-side actions. The shell renders:
+//   Header row: the page title + a small green "LIVE" pill, with Search and Refresh buttons on the right. Subtitle below.
+//   Footer: a TOOLS TELEMETRY bar pinned under the content: "TOOLS TELEMETRY" + AUTOMATION ENGINE Live + ALERT RULES N
+//     + CALC FIELDS N + VERIFICATION n/2 + LAST TEST RUN <time or never> + JOBS QUEUED N + "refreshed Xs ago".
+//     All values REAL (NotificationRule active count, Calculated field count, HLR+Email enabled out of 2, last PayloadTest run).
+//   Load the telemetry once inside ToolsShell and reuse.
+//
+// TOOLS RAIL (ToolsNav): keep the routes (Dashboard /tools, Notifications /notifications, Calculated Fields
+//   /calculated-fields, Verification /verification, Payload Tester /payload-tester). Add a "TOOLS" uppercase group
+//   label at the top; give the active item a 2px inset primary left border in addition to bg-primary/10 text-primary;
+//   add an "Automation engine" status card at the bottom (bg-card, border-border) with a PulseDot and
+//   "Running - N jobs queued" (green), N from real queued jobs (0 when none).
+//
+// ATOMS (src/components/tools/toolsUi.jsx): StatChip (uppercase micro-label, big tabular value, tone), Toggle
+//   (w-9 h-5, track status-sold when on else border-border, white knob), Tag pill (token tints).
+//
+// COLOR -> TOKEN: #0A0E15 bg-background, #131924/#182030 bg-card, #243044 border-border, #EEF2F8 text-foreground,
+//   #8B95A8 text-muted-foreground, #5A6478 text-muted-foreground/70, #E5484D primary, #3DD68C status-sold,
+//   #E8A33D status-unsold. MOTION: rise-in stagger, hover lift on cards, PulseDot on live status.
+//
+// ============================ PAGE STRUCTURES ============================
+//
+// DASHBOARD (ToolsDashboard.jsx). Title "Tools". Subtitle "Operational tooling: automation, quality gates and pipeline diagnostics."
+//   1) AI TOOLING AUDIT banner (Panel): brain icon + a factual audit line computed from real state (for example:
+//      "The pipeline is live but unguarded: no notification rules, no calculated fields, and phone verification is off.
+//      N leads passed through with zero quality gating."), with "Run pipeline test" (routes to Payload Tester) and
+//      "Add first rule" (routes to Notifications) buttons.
+//   2) Four tool cards (ToolTile) in a 2-col grid: Notifications, Calculated Fields, Verification, Payload Tester.
+//      Each card: icon, title, description, a real status pill (N active rules / N fields / 1 of 2 active / Last run: <time>),
+//      a tone dot, a hint (failures currently go unnoticed / campaign attribute is unmapped / HLR not configured /
+//      recommended first action), and an arrow that routes to that tool.
+//
+// NOTIFICATIONS (Notifications.jsx). Title "Notifications". Subtitle "Alert rules for failures, spikes and silence across the pipeline."
+//   Top chips: "N active rules" + "N sent this month" (NotificationRule + NotificationEvent). Right: New Rule.
+//   1) Active Rules panel: list of NotificationRule; empty state "No rules configured" with the warning copy.
+//   2) AI-suggested rules panel: suggestion rows (Delivery failure = any destination POST returns non-200; Supplier
+//      silence = no leads for 6+ hours in business hours; Buyer rejection spike = rejection rate over 20% over 25 leads;
+//      Unsold backlog = unsold queue over 10 leads). Each row: icon, name, description, a channel label (Slack/Email),
+//      and a Toggle that, when enabled, creates the NotificationRule. "Enable all" action. These are suggestion templates,
+//      not fake data.
+//   3) Delivery Channels panel: Email (from the user/AppSettings, shown connected), Slack (Connect via IntegrationConfig),
+//      Webhook (Connect). Real connection state.
+//
+// CALCULATED FIELDS (CustomCalculations.jsx). Title "Calculated Fields". Subtitle "Derived fields computed on ingest, used in routing and reports."
+//   Top chips: "N fields defined" + "evaluated on ingest". Right: Import / Export, New Field.
+//   1) Defined Fields panel: table (Field, Formula, Status, Actions) of the real Calculated CustomField + CustomCalculation
+//      records; empty state "No calculated fields".
+//   2) AI-suggested fields panel: suggestion rows (campaign = MAP(optin_url, {...}); lead_age_days = DAYS_BETWEEN(incident_date, NOW());
+//      quality_score = SCORE(phone_valid, email_valid, injury_type, has_attorney)). Each: a green field-name pill, the
+//      formula in mono, a description, and an Add button that creates the field. Suggestions, not fake data.
+//
+// VERIFICATION (Verification.jsx). Title "Verification". Subtitle "Phone and email quality gates protecting buyer acceptance."
+//   Two panels side by side:
+//   Phone HLR Lookup: HlrSettings enabled Toggle, "Not configured/Active" line, StatChips CHECKED / FAILED / EST. SAVES
+//     (real counts from leads hlr_status), and a "Configure HLR provider" button. Keep testHlr.
+//   Email Validation: EmailValidationSettings enabled Toggle, "Active: syntax, MX, disposable" line, StatChips CHECKED /
+//     PASSED / FLAGGED (from leads email_valid), and a pass-rate progress bar with "X% pass rate, sample of N". Keep testEmail.
+//   Then a Verification Log panel: table (Time, Lead masked, Check, Result, Latency) from real lead verification records,
+//   with Export. Then an AI read note (factual).
+//
+// PAYLOAD TESTER (PayloadTester.jsx). Title "Payload Tester". Subtitle "Fire a synthetic lead through the full pipeline and inspect every hop."
+//   Two panels: Test Payload (POST https://api.legenex.com/functions/leads label, a JSON editor with the sample lead,
+//   Copy and Sample buttons, and a "Run through pipeline" button that calls sendPayloadTest) and Pipeline Trace (empty
+//   state "Run the payload to see each hop", then the real hop-by-hop trace after running). Keep sendPayloadTest behavior
+//   exactly (it runs through the real processLead pipeline). Do not change what it posts.

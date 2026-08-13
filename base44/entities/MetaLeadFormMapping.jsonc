@@ -1,0 +1,120 @@
+{
+  "name": "MetaLeadFormMapping",
+  "properties": {
+    "brand": {
+      "description": "Brand snapshot from the chosen Legenex campaign.",
+      "type": "string"
+    },
+    "campaign_id": {
+      "description": "Reference to the Legenex Campaign this form's leads belong to.",
+      "type": "string"
+    },
+    "campaign_name": {
+      "description": "Denormalized campaign name for display.",
+      "type": "string"
+    },
+    "connection_id": {
+      "description": "Reference to the MetaConnection whose token can read this form.",
+      "type": "string"
+    },
+    "enabled": {
+      "default": true,
+      "description": "When false this form is ignored entirely.",
+      "type": "boolean"
+    },
+    "field_map": {
+      "description": "JSON object mapping Meta lead field names to Legenex lead fields, for example {\"email\":\"email\",\"phone_number\":\"mobile\"}.",
+      "type": "string"
+    },
+    "form_id": {
+      "description": "Meta leadgen form id.",
+      "type": "string"
+    },
+    "form_name": {
+      "type": "string"
+    },
+    "ingest_mode": {
+      "default": "disabled",
+      "description": "disabled = mapping stored but nothing is ingested. reporting_only = leads imported for reporting without distribution. process_lead = leads enter the live pipeline. Ingestion is wired separately; disabled is the safe default.",
+      "enum": [
+        "disabled",
+        "reporting_only",
+        "process_lead"
+      ],
+      "type": "string"
+    },
+    "last_error": {
+      "description": "Last ingestion error message. Empty when healthy.",
+      "type": "string"
+    },
+    "last_ingested_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "leads_ingested": {
+      "default": 0,
+      "description": "Running count of leads ingested through this form mapping.",
+      "type": "number"
+    },
+    "page_id": {
+      "description": "Meta Page that owns the form.",
+      "type": "string"
+    },
+    "page_name": {
+      "type": "string"
+    },
+    "platform": {
+      "default": "meta",
+      "enum": [
+        "meta"
+      ],
+      "type": "string"
+    },
+    "supplier_id": {
+      "description": "Reference to the Supplier these leads are attributed to (the source).",
+      "type": "string"
+    },
+    "supplier_name": {
+      "description": "Denormalized supplier name snapshot.",
+      "type": "string"
+    },
+    "vertical": {
+      "description": "Vertical snapshot from the chosen Legenex campaign.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "connection_id",
+    "page_id",
+    "form_id"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  },
+  "type": "object",
+  "unique": [
+    [
+      "platform",
+      "form_id"
+    ]
+  ]
+}

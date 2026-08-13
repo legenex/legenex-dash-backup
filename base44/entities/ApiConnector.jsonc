@@ -1,0 +1,158 @@
+{
+  "name": "ApiConnector",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "platform": {
+      "type": "string",
+      "enum": [
+        "facebook",
+        "tiktok",
+        "google",
+        "snapchat",
+        "taboola",
+        "other"
+      ],
+      "default": "facebook",
+      "description": "Conversion platform this connector belongs to. Tabs in the Conversion Events UI are scoped by this value. Existing records without a platform default to facebook (for facebook_capi) or other."
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "facebook_capi",
+        "webhook",
+        "generic_http"
+      ],
+      "default": "facebook_capi"
+    },
+    "enabled": {
+      "type": "boolean",
+      "default": true
+    },
+    "sort_order": {
+      "type": "number",
+      "default": 0
+    },
+    "filter_verticals": {
+      "type": "string",
+      "description": "JSON array of vertical codes to match against the lead's vertical field. Empty array = match all"
+    },
+    "filter_brands": {
+      "type": "string",
+      "description": "JSON array of brand names to match. Empty array = match all"
+    },
+    "filter_suppliers": {
+      "type": "string",
+      "description": "JSON array of supplier names or SIDs to match. Empty array = match all"
+    },
+    "filter_supplier_types": {
+      "type": "string",
+      "description": "JSON array of supplier types (Internal, External, Calls) to match. Empty array = match all"
+    },
+    "filter_routes": {
+      "type": "string",
+      "description": "JSON array of lead_route keys (standard, direct, data, event, queue) to match. Empty array = match all processing routes"
+    },
+    "filter_conditions": {
+      "type": "string",
+      "description": "JSON array of {field, operator, value} conditions evaluated against enriched lead data (including calculated fields). All must match for the connector to fire. Empty = no conditions. Operators: equals, not_equals, contains, not_contains, starts_with, ends_with, is_empty, is_not_empty"
+    },
+    "fb_pixel_id": {
+      "type": "string"
+    },
+    "fb_access_token": {
+      "type": "string",
+      "description": "Facebook CAPI access token (masked in UI)"
+    },
+    "fb_test_event_code": {
+      "type": "string"
+    },
+    "fb_api_version": {
+      "type": "string",
+      "default": "v21.0"
+    },
+    "lead_event_name": {
+      "type": "string",
+      "default": "Lead",
+      "description": "Legacy field \u2014 migrated to received_event_name"
+    },
+    "received_event_name": {
+      "type": "string",
+      "description": "Event name fired on the Qualified trigger (key on_received). Falls back to 'Lead' if blank."
+    },
+    "sold_event_name": {
+      "type": "string",
+      "default": "SubmittedApplication",
+      "description": "Event name fired on the Sold trigger. No fallback \u2014 if blank, the Sold event does not fire."
+    },
+    "unsold_event_name": {
+      "type": "string",
+      "description": "Event name fired on the Unsold trigger. Falls back to 'Lead' if blank."
+    },
+    "queued_event_name": {
+      "type": "string",
+      "description": "Event name fired on the Queued trigger. Falls back to 'Lead' if blank."
+    },
+    "dq_event_name": {
+      "type": "string",
+      "description": "Event name fired on the Disqualified trigger. No fallback \u2014 if blank, the DQ event does not fire."
+    },
+    "rejected_event_name": {
+      "type": "string",
+      "description": "Event name fired on the Rejected trigger. Falls back to 'Lead' if blank."
+    },
+    "duplicates_event_name": {
+      "type": "string",
+      "description": "Event name fired on the Duplicates trigger. Falls back to 'Lead' if blank."
+    },
+    "action_source": {
+      "type": "string",
+      "default": "website"
+    },
+    "auto_hash_capi": {
+      "type": "boolean",
+      "default": true,
+      "description": "When true, automatically SHA-256 hashes Meta-required user_data fields (em, ph, fn, ln, ct, st, zp, country, external_id, db, ge) after normalizing. Manual |sha256 transforms on individual tokens are respected and not double-hashed."
+    },
+    "target_url": {
+      "type": "string"
+    },
+    "http_method": {
+      "type": "string",
+      "enum": [
+        "POST",
+        "GET"
+      ],
+      "default": "POST"
+    },
+    "content_type": {
+      "type": "string",
+      "enum": [
+        "application/json",
+        "application/x-www-form-urlencoded"
+      ],
+      "default": "application/json"
+    },
+    "headers": {
+      "type": "string",
+      "description": "JSON array of {key, value} header rows"
+    },
+    "payload_template": {
+      "type": "string",
+      "description": "JSON template string with {{token}} placeholders"
+    },
+    "trigger_data_overrides": {
+      "type": "string",
+      "description": "JSON map of trigger_key -> { custom_data field: value } overrides applied on top of the template's custom_data for that trigger. Values support {{token}} placeholders. e.g. {\"on_dq\":{\"qualification_status\":\"Disqualified Lead\"}}"
+    },
+    "triggers": {
+      "type": "string",
+      "description": "JSON array of trigger keys derived from the lead_status system field (on_received=Qualified, on_sold, on_unsold, on_dq=Disqualified, on_queued, on_rejected, on_duplicates, plus any custom lead_status values such as on_24m_lead). Empty array = fire on every lead (intake), gated only by filters."
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

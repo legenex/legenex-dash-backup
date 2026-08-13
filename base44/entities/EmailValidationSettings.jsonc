@@ -1,0 +1,24 @@
+{
+  "name": "EmailValidationSettings",
+  "type": "object",
+  "properties": {
+    "enabled": {
+      "type": "boolean",
+      "default": true,
+      "description": "When true, inbound emails are validated (format + DNS MX) and the result is written to the email_valid system field for forwarding."
+    },
+    "filter_suppliers": {
+      "type": "string",
+      "description": "JSON array of supplier names or SIDs to validate email for. Empty = all suppliers."
+    },
+    "filter_supplier_types": {
+      "type": "string",
+      "description": "JSON array of supplier types (Internal, External, Calls). Empty = all."
+    },
+    "filter_routes": {
+      "type": "string",
+      "description": "JSON array of lead_route keys (standard, direct, data, event, queue) to validate email on. Empty = standard, direct, data."
+    }
+  },
+  "required": []
+}

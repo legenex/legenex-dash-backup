@@ -1,0 +1,31 @@
+{
+  // Additive (lead distribution platform). Durable delivery record (replaces JSON-blob logging).
+  // Uniqueness (lead_id, sub_delivery_id, attempt_number); index (status, next_retry_at) for the retry worker; portals see only allowlisted outcome fields. destination_id retained additively for legacy records.
+  // Caller model: processLead + authorized manual retry.
+  "name": "DeliveryAttempt",
+  "type": "object",
+  "properties": {
+    "lead_id": { "type": "string", "description": "Lead being delivered" },
+    "sub_delivery_id": { "type": "string", "description": "CANONICAL endpoint the attempt targets. Retries and health/circuit-breaker key on this so they are per endpoint, not per buyer." },
+    "destination_id": { "type": "string", "description": "DEPRECATED (compatibility only): legacy destination id. Superseded by sub_delivery_id." },
+    "trigger": { "type": "string", "description": "What triggered this attempt (e.g. route, retry, manual)" },
+    "attempt_number": { "type": "number", "default": 1, "description": "Sequential attempt number for this lead+destination" },
+    "idempotency_key": { "type": "string", "description": "Idempotency key for the outbound delivery" },
+    "status": {
+      "type": "string",
+      "enum": ["pending", "sent", "accepted", "rejected", "duplicate", "queued", "error", "dead_letter"],
+      "default": "pending"
+    },
+    "is_primary": { "type": "boolean", "default": false, "description": "Whether this is the primary/winning delivery" },
+    "request_meta": { "type": "string", "description": "JSON, secrets redacted" },
+    "response_meta": { "type": "string", "description": "JSON, PII minimized" },
+    "http_status": { "type": "number", "description": "HTTP status code of the delivery response" },
+    "latency_ms": { "type": "number", "description": "Round-trip latency in milliseconds" },
+    "error_class": { "type": "string", "description": "Classified error type when the attempt fails" },
+    "next_retry_at": { "type": "string", "format": "date-time", "description": "When the retry worker should next attempt" },
+    "created_at": { "type": "string", "format": "date-time" },
+    "started_at": { "type": "string", "format": "date-time" },
+    "completed_at": { "type": "string", "format": "date-time" }
+  },
+  "required": ["lead_id", "destination_id"]
+}

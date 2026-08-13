@@ -1,0 +1,24 @@
+{
+  // Additive (lead distribution platform). Ping-post bid ledger.
+  // Caller model: processLead.
+  "name": "BidAttempt",
+  "type": "object",
+  "properties": {
+    "lead_id": { "type": "string", "description": "Lead being bid on" },
+    "route_member_id": { "type": "string", "description": "RouteMember placing the bid" },
+    "destination_id": { "type": "string", "description": "Destination pinged for a bid" },
+    "ping_sent_at": { "type": "string", "format": "date-time", "description": "When the ping was sent" },
+    "bid_amount": { "type": "number", "description": "Bid amount returned by the destination" },
+    "bid_id": { "type": "string", "description": "Destination-side bid identifier" },
+    "bid_expires_at": { "type": "string", "format": "date-time", "description": "When the bid offer expires" },
+    "won": { "type": "boolean", "default": false, "description": "Whether this bid won the auction" },
+    "post_attempt_id": { "type": "string", "description": "DeliveryAttempt id for the resulting post" },
+    "status": {
+      "type": "string",
+      "enum": ["ping", "bid", "won", "lost", "expired", "error"],
+      "default": "ping"
+    },
+    "response_meta": { "type": "string", "description": "JSON PII-minimized" }
+  },
+  "required": ["lead_id"]
+}

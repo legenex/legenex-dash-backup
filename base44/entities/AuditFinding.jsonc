@@ -1,0 +1,250 @@
+{
+  "name": "AuditFinding",
+  "type": "object",
+  "properties": {
+    "run_id": {
+      "type": "string",
+      "description": "AuditRun this finding belongs to"
+    },
+    "check_id": {
+      "type": "string",
+      "description": "Stable slug, e.g. design.tokens.raw_color or portal.scoping.buyer_isolation"
+    },
+    "layer": {
+      "type": "string",
+      "enum": [
+        "static",
+        "runtime",
+        "ui",
+        "benchmark"
+      ],
+      "description": "Which layer produced the finding"
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "probe",
+        "script",
+        "walkthrough",
+        "benchmark",
+        "manual",
+        "ai_review",
+        "human_comment"
+      ],
+      "description": "Mechanism that produced it"
+    },
+    "verdict": {
+      "type": "string",
+      "enum": [
+        "pass",
+        "fail",
+        "warn",
+        "skip",
+        "needs_env"
+      ],
+      "description": "needs_env means unverifiable from here, never closed by assumption"
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "critical",
+        "high",
+        "medium",
+        "low",
+        "info"
+      ],
+      "description": "Impact if unaddressed. Passes carry info."
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "correctness",
+        "security",
+        "data_integrity",
+        "design_system",
+        "usability",
+        "performance",
+        "observability",
+        "capability_gap",
+        "documentation"
+      ],
+      "description": "What kind of problem this is"
+    },
+    "surface": {
+      "type": "string",
+      "description": "Page route, function name, entity, or file path the check targeted"
+    },
+    "evidence_path": {
+      "type": "string",
+      "description": "File and line, request id, or record id backing the observation"
+    },
+    "expected": {
+      "type": "string",
+      "description": "What the check required"
+    },
+    "observed": {
+      "type": "string",
+      "description": "What the check actually saw"
+    },
+    "detail": {
+      "type": "string",
+      "description": "Longer explanation or reproduction steps"
+    },
+    "value_score": {
+      "type": "number",
+      "description": "1 to 5, benefit of addressing"
+    },
+    "effort_score": {
+      "type": "number",
+      "description": "1 to 5, cost of addressing"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "acknowledged",
+        "fixed",
+        "accepted",
+        "wont_fix",
+        "duplicate"
+      ],
+      "description": "Operator triage state, set in the UI, not by the harness"
+    },
+    "first_seen_run_id": {
+      "type": "string",
+      "description": "Earliest run in which this check_id and surface failed"
+    },
+    "duration_ms": {
+      "type": "number",
+      "description": "How long this check took"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "page_key": {
+      "type": "string",
+      "description": "ProgressPage this finding belongs to. Set for findings raised in the Progress Control Center; blank for whole-app static checks."
+    },
+    "origin": {
+      "type": "string",
+      "enum": [
+        "machine",
+        "ai_review",
+        "human"
+      ],
+      "default": "machine",
+      "description": "Who raised it. AI output is never treated as fact without evidence."
+    },
+    "title": {
+      "type": "string",
+      "description": "Short statement of the problem, for the findings list"
+    },
+    "description": {
+      "type": "string",
+      "description": "Longer write up in the reporter's own words"
+    },
+    "finding_type": {
+      "type": "string",
+      "enum": [
+        "ui_inconsistency",
+        "ux_problem",
+        "incorrect_metric",
+        "data_inconsistency",
+        "backend_defect",
+        "missing_functionality",
+        "performance",
+        "permission",
+        "security",
+        "mobile",
+        "accessibility",
+        "missing_state",
+        "integration",
+        "migration_blocker",
+        "technical_debt",
+        "copy_terminology",
+        "user_request"
+      ],
+      "description": "Workflow classification, distinct from the machine category field"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "P0",
+        "P1",
+        "P2",
+        "P3",
+        "P4"
+      ],
+      "description": "P0 is a migration or production blocker. Any open P0 caps the migration recommendation at not ready."
+    },
+    "confidence": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "default": "medium",
+      "description": "How sure the reporter is. Low confidence findings must be marked requires_verification."
+    },
+    "evidence_type": {
+      "type": "string",
+      "enum": [
+        "code",
+        "runtime",
+        "screenshot",
+        "data",
+        "user_feedback",
+        "inference",
+        "unknown"
+      ],
+      "default": "unknown",
+      "description": "Observation versus inference. inference and unknown never count toward evidence coverage."
+    },
+    "requires_verification": {
+      "type": "boolean",
+      "default": false,
+      "description": "Set when the claim is not yet backed by evidence. Such findings are displayed as unconfirmed and excluded from blocking gate maths."
+    },
+    "suggested_fix": {
+      "type": "string"
+    },
+    "acceptance_criteria": {
+      "type": "string",
+      "description": "What would prove this finding resolved"
+    },
+    "open_question": {
+      "type": "string",
+      "description": "A question only Nick's business knowledge can answer"
+    },
+    "assignee": {
+      "type": "string"
+    },
+    "reporter": {
+      "type": "string"
+    },
+    "thread_id": {
+      "type": "string",
+      "description": "ReviewThread this finding was converted from"
+    },
+    "change_request_id": {
+      "type": "string",
+      "description": "ChangeRequest raised to fix this finding"
+    },
+    "verification_evidence": {
+      "type": "string",
+      "description": "What proves the fix, once status is fixed"
+    },
+    "resolved_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "run_id",
+    "check_id",
+    "layer",
+    "verdict"
+  ]
+}

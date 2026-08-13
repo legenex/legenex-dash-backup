@@ -1,0 +1,116 @@
+{
+  "name": "OutboundWebhook",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Display name, e.g. Notify Slack on sold lead"
+    },
+    "enabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this webhook fires. Created disabled so a payload can be tested before anything leaves the system."
+    },
+    "trigger": {
+      "type": "string",
+      "enum": [
+        "lead_created",
+        "lead_status_changed",
+        "call_created",
+        "call_status_changed",
+        "manual"
+      ],
+      "default": "manual",
+      "description": "What causes this webhook to fire. manual means it only ever runs from the Test button, which is the safe default."
+    },
+    "url": {
+      "type": "string",
+      "description": "Absolute https endpoint the payload is posted to"
+    },
+    "api_key": {
+      "type": "string",
+      "description": "The API key or token this connection authenticates with, stored on the record. Admin-only by RLS. Never rendered in a list view; the UI shows a masked hint and reveals the value only on an explicit action."
+    },
+    "credential_env": {
+      "type": "string",
+      "description": "NAME of the environment secret holding the token, never the token itself. Resolved server side at send time and never returned to the browser."
+    },
+    "auth_header": {
+      "type": "string",
+      "description": "Authorization header template, e.g. 'Bearer {{secret}}'. {{secret}} is replaced server side with the value of credential_env. Blank sends no Authorization header."
+    },
+    "headers": {
+      "type": "string",
+      "description": "JSON object of additional static headers. Never put a credential here; use credential_env and auth_header."
+    },
+    "filters": {
+      "type": "string",
+      "description": "JSON array of {field, operator, value} conditions, using the same operator set as the rest of the app. All must pass for the webhook to fire. An empty array fires on every matching trigger."
+    },
+    "payload_fields": {
+      "type": "string",
+      "description": "JSON array of {key, source, value} describing the body. source 'field' takes the record's value for `value`; source 'static' sends `value` verbatim; source 'custom_field' takes the named CustomField. Order is preserved so the body reads the way the receiver expects."
+    },
+    "payload_mode": {
+      "type": "string",
+      "enum": [
+        "builder",
+        "template"
+      ],
+      "default": "builder",
+      "description": "builder composes the body from payload_fields. template sends payload_template verbatim with {{field}} placeholders substituted."
+    },
+    "payload_template": {
+      "type": "string",
+      "description": "Raw JSON body used when payload_mode is template. Supports {{field}} placeholders resolved against the record."
+    },
+    "last_sent_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_status": {
+      "type": "string",
+      "description": "Outcome of the most recent send, e.g. 'HTTP 200' or 'Filtered out'"
+    },
+    "last_error": {
+      "type": "string",
+      "description": "Most recent failure summary. Never contains the credential."
+    },
+    "sent_count": {
+      "type": "number",
+      "default": 0
+    },
+    "error_count": {
+      "type": "number",
+      "default": 0
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

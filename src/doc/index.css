@@ -1,0 +1,113 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Legenex brand: #252E39 bg, #EE5656 primary, #FFFFFF text */
+    --background: 212 20% 17%;
+    --foreground: 0 0% 95%;
+    --card: 213 19% 20%;
+    --card-foreground: 0 0% 95%;
+    --popover: 213 19% 23%;
+    --popover-foreground: 0 0% 95%;
+    --primary: 0 82% 63%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 212 18% 25%;
+    --secondary-foreground: 0 0% 80%;
+    --muted: 212 18% 22%;
+    --muted-foreground: 212 10% 55%;
+    --accent: 212 18% 26%;
+    --accent-foreground: 0 0% 95%;
+    --destructive: 0 82% 63%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 212 15% 28%;
+    --input: 212 15% 24%;
+    --ring: 0 82% 63%;
+    --chart-1: 0 82% 63%;
+    --chart-2: 142 71% 45%;
+    --chart-3: 38 92% 50%;
+    --chart-4: 0 82% 63%;
+    --chart-5: 217 91% 60%;
+    --radius: 0.625rem;
+    --font-heading: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-body: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-display: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+    --sidebar-background: 213 20% 14%;
+    --sidebar-foreground: 212 10% 65%;
+    --sidebar-primary: 0 82% 63%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 212 18% 22%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 212 15% 24%;
+    --sidebar-ring: 0 82% 63%;
+  }
+
+  .dark {
+    --background: 212 20% 17%;
+    --foreground: 0 0% 95%;
+    --card: 213 19% 20%;
+    --card-foreground: 0 0% 95%;
+    --popover: 213 19% 23%;
+    --popover-foreground: 0 0% 95%;
+    --primary: 0 82% 63%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 212 18% 25%;
+    --secondary-foreground: 0 0% 80%;
+    --muted: 212 18% 22%;
+    --muted-foreground: 212 10% 55%;
+    --accent: 212 18% 26%;
+    --accent-foreground: 0 0% 95%;
+    --destructive: 0 82% 63%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 212 15% 28%;
+    --input: 212 15% 24%;
+    --ring: 0 82% 63%;
+    --chart-1: 0 82% 63%;
+    --chart-2: 142 71% 45%;
+    --chart-3: 38 92% 50%;
+    --chart-4: 0 82% 63%;
+    --chart-5: 217 91% 60%;
+    --sidebar-background: 213 20% 14%;
+    --sidebar-foreground: 212 10% 65%;
+    --sidebar-primary: 0 82% 63%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 212 18% 22%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 212 15% 24%;
+    --sidebar-ring: 0 82% 63%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-body;
+  }
+}
+
+/* Status colors */
+.status-sold { color: #22C55E; }
+.status-unsold { color: #F59E0B; }
+.status-error { color: #EF4444; }
+.status-processing { color: #3B82F6; }
+
+.bg-status-sold { background-color: rgba(34, 197, 94, 0.15); }
+.bg-status-unsold { background-color: rgba(245, 158, 11, 0.15); }
+.bg-status-error { background-color: rgba(239, 68, 68, 0.15); }
+.bg-status-processing { background-color: rgba(59, 130, 246, 0.15); }
+.status-queued { color: #A855F7; }
+.bg-status-queued { background-color: rgba(168, 85, 247, 0.15); }
+.status-duplicate { color: #06B6D4; }
+.bg-status-duplicate { background-color: rgba(6, 182, 212, 0.15); }
+
+/* Scrollbar styling */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: hsl(222, 15%, 20%); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: hsl(222, 15%, 28%); }

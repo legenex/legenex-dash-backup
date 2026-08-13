@@ -1,0 +1,40 @@
+{
+  "name": "CertBackupStore",
+  "type": "object",
+  "properties": {
+    "lead_match_key": {
+      "type": "string",
+      "description": "Normalized email (lowercase, trimmed) or phone (digits only) for lookup"
+    },
+    "trustedform_url": {
+      "type": "string",
+      "description": "Exact cert string as captured at the LeadShook page, never modified"
+    },
+    "original_session_timestamp": {
+      "type": "string",
+      "description": "Captured client-side the moment xxTrustedFormCertUrl populated; copied verbatim, never server-generated"
+    },
+    "optin_url": {
+      "type": "string"
+    },
+    "user_agent": {
+      "type": "string"
+    },
+    "client_ip": {
+      "type": "string"
+    },
+    "source": {
+      "type": "string",
+      "default": "leadshook_frontend"
+    },
+    "captured_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Server receive time, separate from session timestamp"
+    }
+  },
+  "required": [
+    "lead_match_key",
+    "trustedform_url"
+  ]
+}

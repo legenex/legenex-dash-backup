@@ -1,0 +1,260 @@
+{
+  "name": "Lead",
+  "type": "object",
+  "properties": {
+    "supplier_name": {
+      "type": "string",
+      "description": "Name of the supplier who sent this lead"
+    },
+    "supplier_key_id": {
+      "type": "string",
+      "description": "Reference to ApiKey record"
+    },
+    "buyer_id": {
+      "type": "string",
+      "description": "Reference to the Buyer record this lead was delivered to (set on sold delivery or by feedback matching)"
+    },
+    "buyer_feedback": {
+      "type": "string",
+      "description": "Latest buyer feedback disposition (from our taxonomy) for this lead, used by reporting"
+    },
+    "raw_payload": {
+      "type": "string",
+      "description": "JSON string of the original inbound payload"
+    },
+    "mapped_fields": {
+      "type": "string",
+      "description": "JSON string of normalised fields"
+    },
+    "first_name": {
+      "type": "string"
+    },
+    "last_name": {
+      "type": "string"
+    },
+    "mobile": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "email_normalized": {
+      "type": "string",
+      "description": "Lowercased, trimmed email. The identity match key used by leadbyteWebhook and leadDedupe. Null when the value is absent or not a valid address, so junk never becomes a match key. Written by processLead via src/lib/leadIdentity.js."
+    },
+    "mobile_normalized": {
+      "type": "string",
+      "description": "Bare 10-digit US mobile (no country code, no formatting). The identity match key used alongside email_normalized. Null when the number cannot be resolved to a valid NANP number."
+    },
+    "email_valid": {
+      "type": "string",
+      "enum": [
+        "Yes",
+        "No"
+      ],
+      "description": "Email deliverability result from the free validation service (format + DNS MX lookup). Runs on the same lead_routes as the HLR lookup."
+    },
+    "lead_id": {
+      "type": "number",
+      "description": "Unique sequential lead identifier"
+    },
+    "revenue": {
+      "type": "number",
+      "description": "Revenue attributed to this lead"
+    },
+    "conv_value": {
+      "type": "number",
+      "description": "Conversion value attributed to this lead"
+    },
+    "hlr_request": {
+      "type": "string",
+      "description": "JSON string of HLR request body"
+    },
+    "hlr_response": {
+      "type": "string",
+      "description": "JSON string of HLR response"
+    },
+    "hlr_status": {
+      "type": "string",
+      "description": "HLR lookup result status e.g. Exact Match"
+    },
+    "hlr_summary_score": {
+      "type": "number",
+      "description": "HLR summary score 0-100"
+    },
+    "hlr_error": {
+      "type": "string",
+      "description": "HLR error message if lookup failed"
+    },
+    "leadbyte_request": {
+      "type": "string",
+      "description": "JSON string of payload sent to LeadByte"
+    },
+    "leadbyte_response": {
+      "type": "string",
+      "description": "JSON string of LeadByte response"
+    },
+    "leadbyte_queue_id": {
+      "type": "string"
+    },
+    "leadbyte_record_status": {
+      "type": "string",
+      "description": "e.g. Approved, Rejected"
+    },
+    "leadbyte_lead_id": {
+      "type": "number"
+    },
+    "leadbyte_rejection_id": {
+      "type": "string"
+    },
+    "leadbyte_process_time": {
+      "type": "number",
+      "description": "LeadByte processing time in seconds"
+    },
+    "final_status": {
+      "type": "string",
+      "enum": [
+        "Processing",
+        "Sold",
+        "Qualified",
+        "Unsold",
+        "Queued",
+        "Disqualified",
+        "Returned",
+        "Rejected",
+        "Duplicate",
+        "Converted",
+        "Fake",
+        "Error"
+      ],
+      "default": "Processing"
+    },
+    "lead_route": {
+      "type": "string",
+      "description": "Additive. The resolved processing route this lead took (standard, gateway, direct, data, event, queue, internal, test). Recorded for reporting and for reading shadow/canary comparisons; the live decision still comes from the inbound payload."
+    },
+    "campaign_id": {
+      "type": "string",
+      "description": "Additive. Internal Campaign record id this lead resolved to, from the posted campaign_id when supplied, otherwise matched on vertical. Empty when no campaign matched."
+    },
+    "queue_reason": {
+      "type": "string",
+      "description": "Reason the lead was queued for manual handling"
+    },
+    "trustedform_valid": {
+      "type": "boolean",
+      "description": "Whether the TrustedForm cert URL passed validation"
+    },
+    "cert_source": {
+      "type": "string",
+      "description": "Origin of the TrustedForm cert: inbound or backup_store"
+    },
+    "capi_log": {
+      "type": "string",
+      "description": "JSON list of {connector, event_name, pixel, http_status, fbtrace_id}"
+    },
+    "delivery_log": {
+      "type": "string",
+      "description": "JSON list of {connector, trigger, http_status, success, error, timestamp} for LeadByteConnector deliveries"
+    },
+    "delivery_error": {
+      "type": "string",
+      "description": "Summary of any delivery or connector destinations that failed to fire for this lead. Populated from delivery_log. Does not affect final_status."
+    },
+    "error_stage": {
+      "type": "string",
+      "description": "Stage where error occurred if any"
+    },
+    "response_returned": {
+      "type": "string",
+      "description": "JSON string of response sent back to supplier"
+    },
+    "processed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "process_time_ms": {
+      "type": "number"
+    },
+    "archived": {
+      "type": "boolean",
+      "default": false
+    },
+    "import_batch_id": {
+      "type": "string",
+      "description": "Batch id stamped on leads created via CSV import, used for filtering and rollback"
+    },
+    "supplier_payout": {
+      "type": "number",
+      "description": "Supplier payout reported by LeadByte, for true CPL and margin"
+    },
+    "buyer_name": {
+      "type": "string",
+      "description": "Buyer name reported by LeadByte"
+    },
+    "buyer_conversion": {
+      "type": "string",
+      "description": "Buyer conversion status reported by LeadByte"
+    },
+    "buyer_returned": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the buyer returned this lead"
+    },
+    "buyer_return_reason": {
+      "type": "string",
+      "description": "Reason given for a buyer return"
+    },
+    "lead_tier": {
+      "type": "string",
+      "description": "Lead tier reported by LeadByte"
+    },
+    "lead_score": {
+      "type": "number",
+      "description": "Lead score reported by LeadByte"
+    },
+    "lead_vertical": {
+      "type": "string",
+      "description": "Vertical reported by LeadByte, e.g. MVA"
+    },
+    "leadbyte_outcome_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the outcome webhook was received"
+    },
+    "leadbyte_outcome_payload": {
+      "type": "string",
+      "description": "Full raw JSON of the LeadByte outcome webhook"
+    },
+    "revenue_source": {
+      "type": "string",
+      "description": "How the revenue value on this lead was determined: leadbyte_buyers, leadbyte_root, direct_route, or unknown. Diagnostic only, does not affect final_status."
+    }
+  },
+  "required": [
+    "supplier_name",
+    "final_status"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

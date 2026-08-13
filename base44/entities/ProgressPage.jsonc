@@ -1,0 +1,297 @@
+{
+  "name": "ProgressPage",
+  "type": "object",
+  "properties": {
+    "page_key": {
+      "type": "string",
+      "description": "Stable key from scripts/generate-page-inventory.mjs. Unique. Never hand edited."
+    },
+    "section_key": {
+      "type": "string",
+      "description": "Section slug, e.g. leads, operations, lead-distribution"
+    },
+    "section_label": {
+      "type": "string",
+      "description": "Human label of the section, e.g. Lead Distribution"
+    },
+    "title": {
+      "type": "string",
+      "description": "Page title as shown in the Application Review tree"
+    },
+    "route": {
+      "type": "string",
+      "description": "Route path, including any ?tab= for tab surfaces"
+    },
+    "parent_route": {
+      "type": "string",
+      "description": "Set on tab surfaces, points at the page that hosts the tab"
+    },
+    "tab": {
+      "type": "string",
+      "description": "Query string tab value when route_type is tab"
+    },
+    "host_scope": {
+      "type": "string",
+      "enum": [
+        "dashboard",
+        "docs+dashboard",
+        "progress+dashboard",
+        "api",
+        "progress"
+      ],
+      "description": "Which host serves this surface"
+    },
+    "portal_scope": {
+      "type": "string",
+      "enum": [
+        "operator",
+        "buyer_portal",
+        "supplier_portal",
+        "public",
+        "progress"
+      ],
+      "description": "Audience. Portal surfaces carry isolation requirements."
+    },
+    "route_type": {
+      "type": "string",
+      "enum": [
+        "page",
+        "tab",
+        "detail",
+        "redirect",
+        "catchall",
+        "component"
+      ],
+      "description": "Kind of surface. Redirects and catchalls are inventoried but carry no readiness weight."
+    },
+    "redirect_to": {
+      "type": "string",
+      "description": "Destination when route_type is redirect"
+    },
+    "component": {
+      "type": "string",
+      "description": "React element name mounted by the router"
+    },
+    "component_path": {
+      "type": "string",
+      "description": "Repo path of the page component"
+    },
+    "layouts": {
+      "type": "string",
+      "description": "JSON array of the layout chain wrapping this route"
+    },
+    "auth": {
+      "type": "string",
+      "enum": [
+        "protected",
+        "public"
+      ],
+      "description": "Whether the route sits inside ProtectedRoute"
+    },
+    "nav_visibility": {
+      "type": "string",
+      "enum": [
+        "nav",
+        "hidden"
+      ],
+      "description": "hidden means reachable but absent from the operator sidebar"
+    },
+    "permission_key": {
+      "type": "string",
+      "description": "Permission key from src/lib/permissions.js that gates this route"
+    },
+    "roles": {
+      "type": "string",
+      "description": "JSON array of role presets that can reach this surface"
+    },
+    "entity_dependencies": {
+      "type": "string",
+      "description": "JSON array of Base44 entities read by this page, derived from the import graph"
+    },
+    "function_dependencies": {
+      "type": "string",
+      "description": "JSON array of backend functions invoked by this page"
+    },
+    "component_dependencies": {
+      "type": "string",
+      "description": "JSON array of source files in this page's transitive import graph"
+    },
+    "criticality": {
+      "type": "string",
+      "enum": [
+        "critical",
+        "high",
+        "normal",
+        "low"
+      ],
+      "default": "normal",
+      "description": "Human judgement. Drives readiness weight: critical 5, high 3, normal 1, low 0.5"
+    },
+    "readiness_weight": {
+      "type": "number",
+      "description": "Explicit override of the weight implied by criticality"
+    },
+    "business_owner": {
+      "type": "string"
+    },
+    "technical_owner": {
+      "type": "string"
+    },
+    "lifecycle_status": {
+      "type": "string",
+      "enum": [
+        "not_started",
+        "defined",
+        "in_progress",
+        "implemented_unverified",
+        "verified",
+        "blocked"
+      ],
+      "default": "not_started",
+      "description": "The six state model. implemented_unverified is NOT verified, and a developer saying done cannot set verified."
+    },
+    "verification_status": {
+      "type": "string",
+      "enum": [
+        "unverified",
+        "partial",
+        "verified",
+        "failed"
+      ],
+      "default": "unverified",
+      "description": "Derived from VerificationRecord evidence, never set by hand in the UI"
+    },
+    "dimension_scores": {
+      "type": "string",
+      "description": "JSON object of the seven readiness dimensions, each 0 to 100. Missing dimensions score 0."
+    },
+    "readiness_score": {
+      "type": "number",
+      "description": "Computed 0 to 100. Written only by progressReadiness. Explainable from dimension_scores and lifecycle."
+    },
+    "readiness_explanation": {
+      "type": "string",
+      "description": "JSON breakdown showing how readiness_score was reached, so the number is never a black box"
+    },
+    "blocked_reason": {
+      "type": "string",
+      "description": "Required when lifecycle_status is blocked"
+    },
+    "migration_required": {
+      "type": "boolean",
+      "description": "Whether this surface must work before LeadByte can be switched off"
+    },
+    "leadbyte_equivalent": {
+      "type": "string",
+      "description": "The LeadByte screen or capability this replaces, blank when there is none"
+    },
+    "leadbyte_parity": {
+      "type": "string",
+      "enum": [
+        "not_assessed",
+        "no_equivalent",
+        "gap",
+        "partial",
+        "parity",
+        "better"
+      ],
+      "default": "not_assessed"
+    },
+    "known_risks": {
+      "type": "string",
+      "description": "JSON array of risk strings carried over from human metadata"
+    },
+    "purpose": {
+      "type": "string",
+      "description": "What the page is intended to do and who uses it"
+    },
+    "strengths": {
+      "type": "string",
+      "description": "What it currently does well. Evidence backed."
+    },
+    "gaps": {
+      "type": "string",
+      "description": "What appears incomplete or inconsistent"
+    },
+    "human_notes": {
+      "type": "string",
+      "description": "Nick's notes. Never overwritten by any sync."
+    },
+    "needs_human_review": {
+      "type": "boolean",
+      "default": false,
+      "description": "Set when a conclusion depends on business knowledge only Nick has"
+    },
+    "review_complete": {
+      "type": "boolean",
+      "default": false,
+      "description": "Nick has looked at this page and is satisfied it is done. Independent of readiness_score, which is evidence based. A section counts as complete when every page in it is ticked."
+    },
+    "review_completed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "review_completed_by": {
+      "type": "string"
+    },
+    "open_findings_count": {
+      "type": "number",
+      "default": 0
+    },
+    "p0_findings_count": {
+      "type": "number",
+      "default": 0
+    },
+    "last_code_change": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Most recent change to this page or a file in its dependency graph"
+    },
+    "last_reviewed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_audit_run_id": {
+      "type": "string",
+      "description": "Most recent AuditRun that produced findings against this surface"
+    },
+    "review_stale": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when code changed after the last review. Not set for unrelated commits."
+    },
+    "inventory_synced_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last time the generated fields were refreshed from the manifest"
+    }
+  },
+  "required": [
+    "page_key",
+    "route",
+    "title",
+    "section_key"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

@@ -1,0 +1,72 @@
+// Report views redesign, part 1: shared atoms + the Daily Performance view.
+// Each standard report view becomes its own purpose-built component, routed by Reports.jsx.
+// Create shared module src/components/reports/reportViewAtoms.jsx exporting ReportKpi, THead, TRow, AINote.
+// Create src/components/reports/views/DailyReport.jsx and route active === 'std:daily' to it in Reports.jsx,
+// keeping PerformanceCanvas for 'std:performance_overview' and all custom reports.
+// ALL values REAL via reportMetrics (dailySeries, applyFilters, money). Honest zeros. No mock/seed data. No em dashes.
+// Tokens: bg-card, border-border, text-foreground, text-muted-foreground, text-primary. Tone accents may be inline
+// hex (risk red #E5484D, good green #3DD68C) for borders/dots/bars only.
+
+// ---- ReportKpi (top KPI tile: label, big value, hint, tone) ----
+export const ReportKpi = ({ label, value, hint, tone /* 'good' | 'risk' | undefined */ }) => {
+  const hex = tone === 'risk' ? '#E5484D' : tone === 'good' ? '#3DD68C' : null;
+  return (
+    <div className="rounded-lg border bg-card p-4" style={{ borderColor: hex ? `${hex}44` : undefined }}>
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-[9.5px] font-semibold tracking-[0.1em] uppercase text-muted-foreground truncate">{label}</span>
+        {hex && <span className="w-1.5 h-1.5 rounded-full" style={{ background: hex }} />}
+      </div>
+      <div className="text-[26px] font-bold tabular-nums mt-1 text-foreground">{value}</div>
+      {hint && <div className="text-[10.5px] mt-0.5 text-muted-foreground">{hint}</div>}
+      <div className="h-0.5 rounded-full mt-3 bg-border/70">
+        <div className="h-full rounded-full opacity-70" style={{ width: '38%', background: hex || 'hsl(var(--primary))' }} />
+      </div>
+    </div>
+  );
+};
+
+// ---- THead / TRow (report tables; first col(s) left, numeric cols right-aligned + font-mono) ----
+export const THead = ({ cols, template, first = 1 }) => (
+  <div className="grid gap-2 px-4 py-2.5 border-b border-border text-[9.5px] font-semibold tracking-[0.1em] uppercase text-muted-foreground/70 bg-background/40"
+    style={{ gridTemplateColumns: template }}>
+    {cols.map((c, i) => (<span key={c} className={i < first ? '' : 'text-right'}>{c}</span>))}
+  </div>
+);
+export const TRow = ({ template, cells, first = 1, highlight }) => (
+  <div className="grid gap-2 px-4 py-2.5 border-b border-border items-center hover:bg-foreground/[0.02]"
+    style={{ gridTemplateColumns: template, background: highlight ? 'rgba(232,163,61,0.06)' : undefined }}>
+    {cells.map((c, j) => (
+      <span key={j} className={`text-[12px] ${j < first ? 'font-medium text-foreground' : 'text-right font-mono tabular-nums text-muted-foreground'}`}>{c}</span>
+    ))}
+  </div>
+);
+
+// ---- AINote (the "AI read" callout; content is a FACTUAL note computed from the real numbers, never fabricated) ----
+export const AINote = ({ children }) => (
+  <div className="flex items-start gap-2.5 p-3 rounded-lg border border-primary/30 bg-primary/[0.06]">
+    <p className="text-[11.5px] leading-relaxed text-muted-foreground"><span className="font-semibold text-primary">AI read:</span> {children}</p>
+  </div>
+);
+
+// ---- DailyReport: src/components/reports/views/DailyReport.jsx ----
+// Props: { leads, adSpend, filters }. Compute: const rows = dailySeries(applyFilters(leads, filters), adSpend, 14).
+// rows are oldest-first {date, leads, sold, revenue, cost, spend, profit}; render the table most-recent-first.
+// KPIs (compute from rows, no fabrication):
+//   Best Day        -> date of the row with max leads (format like "Jul 05"); hint "N leads" (add " - only active day" if exactly one active day).
+//   Daily Avg Leads -> (sum leads / rows.length) to 2 decimals; hint "last 14 days".
+//   Active Days     -> `${activeCount}/${rows.length}`; tone 'risk' when activeCount * 2 < rows.length; hint "M silent days".
+//   Daily Avg Profit-> money(sum profit / rows.length); tone 'good' when > 0; hint "no sold leads" when total sold is 0.
+// AINote -> factual, e.g. `${silent} of ${rows.length} days are silent; ${bestDate} is the latest ingestion signal.`
+// Table  -> "Daily Metrics": THead ["Date","Leads","Sold","Revenue","Cost","Spend","Profit"] template "1.3fr repeat(6, 1fr)".
+//   One TRow per day (most recent first), highlight when leads>0, show an "active" pill on active days, money() on $ columns.
+const DailyReport = ({ leads, adSpend, filters }) => (
+  <div className="space-y-5">
+    <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
+      {/* four ReportKpi tiles computed as above */}
+    </div>
+    {/* AINote with the computed factual summary */}
+    <div className="rounded-xl border border-border bg-card shadow-[0_12px_32px_-16px_rgba(0,0,0,0.35)] overflow-hidden">
+      {/* header row: "Daily Metrics" title + Export button, then THead, then a scrollable list of TRow per day */}
+    </div>
+  </div>
+);

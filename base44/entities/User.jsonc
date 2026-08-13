@@ -1,0 +1,44 @@
+{
+  "name": "User",
+  "type": "object",
+  "properties": {
+    "role": {
+      "type": "string",
+      "description": "Platform role of the user in the app",
+      "enum": [
+        "admin",
+        "user"
+      ]
+    },
+    "base_role": {
+      "type": "string",
+      "enum": [
+        "owner",
+        "admin",
+        "manager",
+        "supplier",
+        "buyer"
+      ],
+      "description": "Granular app role preset that pre-fills the permission checklist"
+    },
+    "permissions": {
+      "type": "string",
+      "description": "JSON object map of permission key -> true for every section/page/function this user can access"
+    },
+    "linked_buyer_id": {
+      "type": "string",
+      "description": "For buyer-role users: the id of the Buyer record their portal is scoped to"
+    },
+    "linked_supplier_id": {
+      "type": "string",
+      "description": "For supplier-role users: the id of the Supplier record their portal is scoped to"
+    },
+    "timezone": {
+      "type": "string",
+      "description": "User's preferred timezone (IANA name), set from the Profile settings page"
+    }
+  },
+  "required": [
+    "role"
+  ]
+}

@@ -1,0 +1,84 @@
+{
+  "name": "BenchmarkCriterion",
+  "type": "object",
+  "properties": {
+    "capability": {
+      "type": "string",
+      "description": "Short name, e.g. Ping-post auction with buyer bid response"
+    },
+    "area": {
+      "type": "string",
+      "enum": [
+        "routing",
+        "delivery",
+        "lead_quality",
+        "duplicates",
+        "returns_and_disputes",
+        "pricing_and_caps",
+        "reporting",
+        "portals",
+        "integrations",
+        "compliance",
+        "billing",
+        "administration"
+      ],
+      "description": "Functional area of the platform"
+    },
+    "definition": {
+      "type": "string",
+      "description": "What the capability means in concrete behavioural terms"
+    },
+    "competitor_reference": {
+      "type": "string",
+      "description": "Platforms known to do this well, e.g. LeadByte, Phonexa, LeadConduit"
+    },
+    "competitor_notes": {
+      "type": "string",
+      "description": "How they implement it, in enough detail to compare against"
+    },
+    "source_url": {
+      "type": "string",
+      "description": "Public documentation backing the competitor note"
+    },
+    "verified_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the competitor claim was last checked against its source"
+    },
+    "legenex_verdict": {
+      "type": "string",
+      "enum": [
+        "has",
+        "partial",
+        "absent",
+        "out_of_scope",
+        "unassessed"
+      ],
+      "description": "out_of_scope means a deliberate product decision, not a gap"
+    },
+    "legenex_evidence": {
+      "type": "string",
+      "description": "File, function, page, or entity that supports the verdict"
+    },
+    "value_score": {
+      "type": "number",
+      "description": "1 to 5, commercial value of closing the gap"
+    },
+    "effort_score": {
+      "type": "number",
+      "description": "1 to 5, build cost of closing the gap"
+    },
+    "blocks_cutover": {
+      "type": "boolean",
+      "description": "True only if LeadByte cannot be retired without it"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "capability",
+    "area",
+    "legenex_verdict"
+  ]
+}

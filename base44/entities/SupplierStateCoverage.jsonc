@@ -1,0 +1,75 @@
+{
+  "name": "SupplierStateCoverage",
+  "type": "object",
+  "properties": {
+    "supplier_id": {
+      "type": "string",
+      "description": "Reference to a Supplier record"
+    },
+    "vertical": {
+      "type": "string",
+      "description": "The vertical code this coverage applies to, for example MVA or WC"
+    },
+    "state": {
+      "type": "string",
+      "description": "Two letter US state code, uppercase"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this supplier is currently live in this state for this vertical"
+    },
+    "paused_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this state coverage was paused. Nullable."
+    },
+    "paused_reason": {
+      "type": "string",
+      "description": "Reason this state coverage was paused. Nullable."
+    },
+    "paused_by": {
+      "type": "string",
+      "description": "The user id who paused it. Nullable."
+    },
+    "source_code": {
+      "type": "string",
+      "description": "Optional link to a specific SupplierSource source_code when a supplier has more than one feed and coverage differs by feed. When null, this is the supplier level coverage for the state."
+    }
+  },
+  "required": [
+    "supplier_id",
+    "vertical",
+    "state"
+  ],
+  "unique": [
+    [
+      "supplier_id",
+      "vertical",
+      "state",
+      "source_code"
+    ]
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

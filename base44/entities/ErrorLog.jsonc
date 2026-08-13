@@ -1,0 +1,49 @@
+{
+  "name": "ErrorLog",
+  "type": "object",
+  "properties": {
+    "lead_id": {
+      "type": "string",
+      "description": "Reference to Lead record, nullable"
+    },
+    "stage": {
+      "type": "string",
+      "enum": [
+        "auth",
+        "validation",
+        "mapping",
+        "hlr",
+        "leadbyte",
+        "system"
+      ]
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "warning",
+        "error",
+        "critical"
+      ],
+      "default": "error"
+    },
+    "message": {
+      "type": "string"
+    },
+    "detail": {
+      "type": "string",
+      "description": "JSON string with full error details"
+    },
+    "supplier_name": {
+      "type": "string"
+    },
+    "resolved": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "stage",
+    "severity",
+    "message"
+  ]
+}

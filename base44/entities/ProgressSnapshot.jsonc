@@ -1,0 +1,118 @@
+{
+  "name": "ProgressSnapshot",
+  "type": "object",
+  "properties": {
+    "snapshot_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Day key in America/Regina. One snapshot per day, upserted so re-running is idempotent."
+    },
+    "platform_readiness": {
+      "type": "number",
+      "description": "Weighted readiness across all counted surfaces, 0 to 100"
+    },
+    "migration_readiness": {
+      "type": "number",
+      "description": "Weighted readiness across cutover-required capabilities only, 0 to 100"
+    },
+    "page_completion": {
+      "type": "number",
+      "description": "Percent of counted pages at implemented_unverified or better"
+    },
+    "verified_pages": {
+      "type": "number",
+      "description": "Percent of counted pages at verified"
+    },
+    "pages_total": {
+      "type": "number"
+    },
+    "pages_verified": {
+      "type": "number"
+    },
+    "pages_blocked": {
+      "type": "number"
+    },
+    "findings_open": {
+      "type": "number"
+    },
+    "findings_p0": {
+      "type": "number"
+    },
+    "findings_opened_today": {
+      "type": "number"
+    },
+    "findings_resolved_today": {
+      "type": "number"
+    },
+    "change_requests_open": {
+      "type": "number"
+    },
+    "change_requests_verified": {
+      "type": "number"
+    },
+    "gates_passing": {
+      "type": "number"
+    },
+    "gates_total": {
+      "type": "number"
+    },
+    "gates_blocking_failing": {
+      "type": "number"
+    },
+    "recommendation": {
+      "type": "string",
+      "enum": [
+        "not_ready",
+        "conditional",
+        "ready"
+      ],
+      "description": "Capped at not_ready while any blocking gate fails or any P0 is open"
+    },
+    "confidence": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "description": "Low whenever a material share of the score rests on inference rather than evidence"
+    },
+    "section_readiness": {
+      "type": "string",
+      "description": "JSON object of section_key to readiness, for the by-section chart"
+    },
+    "capability_readiness": {
+      "type": "string",
+      "description": "JSON object of migration group_key to readiness, for the parity chart"
+    },
+    "evidence_coverage": {
+      "type": "number",
+      "description": "Percent of the score backed by evidence rather than inference. Drives confidence."
+    }
+  },
+  "required": [
+    "snapshot_date"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

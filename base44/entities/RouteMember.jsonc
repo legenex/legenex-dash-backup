@@ -1,0 +1,129 @@
+{
+  "name": "RouteMember",
+  "type": "object",
+  "properties": {
+    "route_group_id": {
+      "type": "string",
+      "description": "RouteGroup this member belongs to"
+    },
+    "buyer_id": {
+      "type": "string",
+      "description": "Buyer that owns this destination"
+    },
+    "sub_delivery_id": {
+      "type": "string",
+      "description": "CANONICAL destination pointer: the SubDelivery this member delivers to. Must resolve to an active SubDelivery whose parent Delivery is active and belongs to this member's buyer, else the member is CONFIG_INVALID and ineligible."
+    },
+    "destination_id": {
+      "type": "string",
+      "description": "DEPRECATED (compatibility only): legacy LeadByteConnector/ApiConnector id. Superseded by sub_delivery_id as the canonical destination. Retained additively for existing records; do not use for new members."
+    },
+    "destination_name": {
+      "type": "string",
+      "description": "Optional operator-facing display name for this destination member. Nullable."
+    },
+    "alias": {
+      "type": "string",
+      "description": "Optional short alias for this destination member. Nullable."
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    },
+    "priority": {
+      "type": "number",
+      "default": 1,
+      "description": "Priority ranking within the group (lower wins)"
+    },
+    "weight": {
+      "type": "number",
+      "default": 1,
+      "description": "Relative weight for weighted/round_robin distribution"
+    },
+    "reserve_price": {
+      "type": "number",
+      "description": "Minimum acceptable price for this member"
+    },
+    "price_mode": {
+      "type": "string",
+      "enum": [
+        "fixed",
+        "rule",
+        "auction"
+      ],
+      "default": "fixed"
+    },
+    "fixed_price": {
+      "type": "number",
+      "description": "Price used when price_mode is fixed"
+    },
+    "payout_type": {
+      "type": "string",
+      "enum": [
+        "flat_cpl",
+        "revenue_pct",
+        "profit_pct"
+      ],
+      "default": "flat_cpl",
+      "description": "Payout basis for this destination. Nullable."
+    },
+    "conditional_pricing_enabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "When true, conditional pricing rules apply on top of the base per-lead amount."
+    },
+    "filters": {
+      "type": "string",
+      "description": "JSON: states/zips/counties/verticals/brands/suppliers/sources"
+    },
+    "conditions": {
+      "type": "string",
+      "description": "JSON condition tree for qualification"
+    },
+    "caps": {
+      "type": "string",
+      "description": "JSON: total/hourly/daily/weekly/monthly limits"
+    },
+    "budget_caps": {
+      "type": "string",
+      "description": "JSON: daily/weekly/monthly/total budget (spend) limits for this destination. Nullable."
+    },
+    "kpi_metrics": {
+      "type": "string",
+      "description": "JSON: KPI targets for this destination, e.g. {\"target_cpa\": 45}. Nullable."
+    },
+    "transforms": {
+      "type": "string",
+      "description": "JSON array of field transform rules (value map rules) applied for this destination. Nullable."
+    },
+    "ping_config": {
+      "type": "string",
+      "description": "JSON: ping URL, format, timeout, headers, ping body template, response parsing (accept field/operator/value), real-time price toggle for this destination. Nullable."
+    },
+    "delivery_config": {
+      "type": "string",
+      "description": "JSON: delivery method (webhook/email/google_sheet/ghl/sms), endpoint URL, format, timeout, headers, post body template for this destination. Nullable."
+    },
+    "integration_complete": {
+      "type": "boolean",
+      "default": false,
+      "description": "Operator marker that this destination's integration has been reviewed and activated. Nullable."
+    },
+    "schedule": {
+      "type": "string",
+      "description": "JSON: timezone + windows"
+    },
+    "suppression_list_id": {
+      "type": "string",
+      "description": "Suppression list applied to this member"
+    },
+    "pause_reason": {
+      "type": "string",
+      "description": "Reason this member is paused, if any"
+    }
+  },
+  "required": [
+    "route_group_id",
+    "buyer_id"
+  ]
+}

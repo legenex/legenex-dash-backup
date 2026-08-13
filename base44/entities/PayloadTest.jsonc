@@ -1,0 +1,26 @@
+{
+  "name": "PayloadTest",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Friendly name for this saved payload test"
+    },
+    "target_url": {
+      "type": "string",
+      "description": "Buyer endpoint URL to POST the generated payload to"
+    },
+    "payload_template": {
+      "type": "string",
+      "description": "JSON template with [token] placeholders (the Payload Builder)"
+    },
+    "test_data": {
+      "type": "string",
+      "description": "Raw sample data (JSON or key=value) that AI uses to populate the payload"
+    }
+  },
+  "required": [
+    "name",
+    "payload_template"
+  ]
+}

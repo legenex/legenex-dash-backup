@@ -1,0 +1,17 @@
+{
+  "name": "IntegrationConfig",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Integration key e.g. whatsapp"
+    },
+    "config": {
+      "type": "string",
+      "description": "JSON string of credentials/settings for this integration"
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

@@ -1,0 +1,99 @@
+{
+  "name": "AuditRun",
+  "type": "object",
+  "properties": {
+    "run_id": {
+      "type": "string",
+      "description": "Stable id for this run; every AuditFinding carries it"
+    },
+    "layers": {
+      "type": "string",
+      "description": "JSON array of layers executed, e.g. [\"static\",\"runtime\"]"
+    },
+    "trigger": {
+      "type": "string",
+      "enum": [
+        "manual",
+        "scheduled",
+        "post_change"
+      ],
+      "description": "What started the run"
+    },
+    "write_mode": {
+      "type": "string",
+      "enum": [
+        "read_only"
+      ],
+      "description": "Locked to read_only. The harness never mutates operational records."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "running",
+        "completed",
+        "failed",
+        "aborted"
+      ],
+      "description": "Lifecycle of the run itself"
+    },
+    "app_commit": {
+      "type": "string",
+      "description": "Git sha of the app at run time, for reproducibility"
+    },
+    "distribution_mode_observed": {
+      "type": "string",
+      "description": "Mode read (never written) at run time"
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "finished_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "duration_ms": {
+      "type": "number",
+      "description": "Wall clock duration of the run"
+    },
+    "checks_total": {
+      "type": "number"
+    },
+    "checks_pass": {
+      "type": "number"
+    },
+    "checks_fail": {
+      "type": "number"
+    },
+    "checks_warn": {
+      "type": "number"
+    },
+    "checks_needs_env": {
+      "type": "number"
+    },
+    "new_failures": {
+      "type": "number",
+      "description": "Failures not present in the previous completed run"
+    },
+    "resolved_since_previous": {
+      "type": "number",
+      "description": "Previous failures now passing"
+    },
+    "previous_run_id": {
+      "type": "string",
+      "description": "Run this one is diffed against"
+    },
+    "abort_reason": {
+      "type": "string",
+      "description": "Set when a deny-list guard or precondition stopped the run"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "run_id",
+    "status",
+    "started_at"
+  ]
+}

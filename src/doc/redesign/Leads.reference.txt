@@ -1,0 +1,35 @@
+// LEADS STRUCTURAL REBUILD reference (Performance OS). REBUILD, not a restyle. Every Leads view uses the shared
+// table, so restyling it plus the rail, filter bar, and shell covers All Leads, Sold, Unsold, Disqualified,
+// Rejected, and Queued. Wired to REAL leads, honest empty states, no mock rows, no em dashes. Preserve ALL existing
+// LeadsTable logic: sorting, filtering, the Column Manager, saved filters, pagination, row selection, bulk actions,
+// the lead detail modal, CSV export, and Queue Recovery. Pipeline and portals untouched. Tokens for both themes.
+//
+// SHARED LEADS SHELL: create src/components/leads/LeadsShell.jsx used by LeadsTable (which knows the view).
+//   Header row: the view title (All Leads / Sold Leads / Unsold Leads / Disqualified Leads / Rejected Leads /
+//     Queued Leads) + a small green LIVE pill, with Refresh, Columns, and Export CSV on the right, and the "N leads"
+//     count. Subtitle per view (for example "All processed leads with full trace data", "Sold leads with revenue and buyer data").
+//   Footer: a LEADS TELEMETRY bar: "LEADS TELEMETRY" + a live-stream dot ("Live stream connected") + TOTAL N +
+//     SOLD N + QUEUED N + ERRORS N + LAST LEAD <time> + "refreshed Xs ago". Real values.
+//
+// LEADS RAIL (LeadsNav.jsx): "LEADS" uppercase group label; the six views each with an icon and a live count badge
+//   (amber background when the count is > 0, else muted). Active item = soft-red pill (bg-primary/10, text-primary)
+//   with a 2px inset primary left border. At the bottom, a queued-alert status card (amber) when there are leads
+//   queued over 5 hours ("N queued 5h+ / manual handling needed"), otherwise hidden.
+//
+// FILTER BAR (LeadsFilterBar.jsx): a Panel row with the search box, All Status / All Suppliers / All Sources / All
+//   Time dropdowns, a Filters button, and Save, all in the token style.
+//
+// LEAD TABLE (LeadsTable.jsx): a Panel wrapping a THead (checkbox, TIMESTAMP, FULL NAME, VERTICAL, LEAD TYPE, STATUS,
+//   REVENUE, STATE, SUPPLIER, BUYER, EMAIL, VERIFICATION) and LeadRow rows with rise-in motion and row hover; clicking
+//   a row opens the existing lead detail modal. Row cells: timestamp mono muted; full name bold; vertical as a green
+//   Tag; lead type as a Tag when present; STATUS as a toned pill; revenue green mono; state mono; supplier; buyer;
+//   email mono truncated; verification mono. Honest empty state when a view has no leads.
+//
+// STATUS PILL TONES (map final_status to a tone): Sold -> status-sold (green); Unsold -> status-unsold (amber);
+//   Disqualified -> orange (#E8A33D); Queued -> violet (#8B7CF6); Duplicate -> blue (#5B8DEF); Returned -> slate;
+//   Rejected / Error -> primary red; Processing -> slate. Tone accents may be inline hex for violet/blue; use tokens
+//   and the status-sold / status-unsold helpers for green/amber.
+//
+// COLOR -> TOKEN: #0A0E15 bg-background, #131924/#182030 bg-card, #243044 border-border, #EEF2F8 text-foreground,
+//   #8B95A8 text-muted-foreground, #5A6478 text-muted-foreground/70, #E5484D primary, #3DD68C status-sold,
+//   #E8A33D status-unsold. rail bg #0E131D bg-sidebar. MOTION: rise-in stagger on rows, hover, PulseDot on live.

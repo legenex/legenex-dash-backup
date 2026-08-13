@@ -1,0 +1,47 @@
+{
+  "name": "Report",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Report display name"
+    },
+    "group": {
+      "type": "string",
+      "enum": [
+        "standard",
+        "custom"
+      ],
+      "default": "custom",
+      "description": "Which sidebar group this report belongs to"
+    },
+    "base_page": {
+      "type": "string",
+      "default": "performance_overview",
+      "description": "Which built-in report layout this is based on (performance_overview, daily, campaign, pnl, ad, buyer, supplier)"
+    },
+    "pinned_filters": {
+      "type": "string",
+      "description": "JSON object of pinned filter values e.g. {\"buyer_id\":\"AG1\"}"
+    },
+    "cards": {
+      "type": "string",
+      "description": "JSON array of metric card configs {id, metric, x, y, w, h}"
+    },
+    "widgets": {
+      "type": "string",
+      "description": "JSON array of widget configs {id, type, w, columns, settings}"
+    },
+    "extra_columns": {
+      "type": "string",
+      "description": "JSON array of custom field names added as columns"
+    },
+    "sort_order": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

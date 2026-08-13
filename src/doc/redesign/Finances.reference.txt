@@ -1,0 +1,57 @@
+// FINANCES STRUCTURAL REBUILD reference (Performance OS). This is a REBUILD, not a restyle. Every page below
+// gets the new STRUCTURE, wired to real data, honest zeros, no mock rows, no em dashes. Preserve all existing
+// queries, syncs, dialogs, CRUD and permission gating. Pipeline and portals untouched. Tokens for both themes.
+//
+// SHARED FINANCE SHELL (wrap every tab): create src/components/finances/FinanceShell.jsx used by Finances.jsx.
+//   Header row: "Finances / <TabName>" (the "/ <TabName>" in a lighter weight) + a small green "LIVE" pill,
+//     with Compare and Refresh buttons on the right. Subtitle per tab (see each tab).
+//   Footer: a FINANCE TELEMETRY bar pinned under the content: "FINANCE TELEMETRY" + BANK FEED <Online/Offline>
+//     + UNMATCHED IN $X + OPEN GAPS N + OVERDUE $X + PAYOUTS OWING $X + AD SPEND SYNC n/3 + "auto-refresh on".
+//     All values REAL (bankTx connected?, unmatched sum, open gaps count, overdue sum, payouts owing, synced platforms).
+//   Rail: keep the FinanceNav rail with the FINANCES label, active inset-primary pill, and the Mercury status card.
+//
+// SIDE MENU (FinancesNav): already updated. Keep the Mercury card (connected -> green, else red "bank truth unavailable").
+//
+// SHARED ATOMS (src/components/finances/financeUi.jsx): StatChip (uppercase micro-label, big tabular value, tone
+//   dot, thin progress bar), a small metric tile, and a CashChart (ComposedChart, area money-in, line money-out,
+//   over a faint grid, with a "No bank activity in range / Connect Mercury" empty overlay when bankTx is empty).
+//
+// COLOR -> TOKEN: #0A0E15 bg-background, #131924/#182030 bg-card, #243044 border-border, #EEF2F8 text-foreground,
+//   #8B95A8 text-muted-foreground, #5A6478 text-muted-foreground/70, #E5484D primary, #3DD68C status-sold,
+//   #E8A33D status-unsold. MOTION: rise-in stagger, hover lift, shimmer sweep on the metrics board, PulseDot on live.
+//
+// ============================ PAGE STRUCTURES ============================
+//
+// OVERVIEW (ReconciliationTab). Subtitle: "Cash truth: what came in, what went out, and what still doesn't reconcile."
+//   1) Pinned metrics board (Panel): row of 4 pinned StatChips = Verified Cash In (bank-confirmed income, from bankTx
+//      category 'revenue'), Revenue Gap (booked minus invoiced), Total At Risk (sum of open gaps), Resolve Rate
+//      (gaps closed vs opened). Then category toggle chips with counts: Cash Position, Receivables, Payables,
+//      Reconciliation. The active category shows its metric cards, e.g. Cash Position -> Money In, Money Out,
+//      Net Cash, Bank Balance (from bankTx; Bank Balance blank when no feed). When bankTx empty, show a subtle
+//      "All metrics flat, no bank feed connected yet." hint.
+//   2) Cash In vs Cash Out chart (Panel, 14 days) using CashChart, with the empty overlay when no bank activity.
+//   3) Open Gaps by Counterparty (Panel) with Generate AI Insights (reconInsights). Green "no open gaps" state.
+//   4) Counterparty Reconciliation table (Panel, THead/TRow): Name, Type, Leads, Revenue, Cost, Profit, Invoiced,
+//      Paid, Flag. Keep reconcile()/workbench() from '@/lib/financeMetrics'.
+//
+// BANK FEED (BankFeedTab). Subtitle: "Live bank feed: Mercury sync, CSV import and AI categorization."
+//   StatChips: Money In, Money Out, Net. Actions: Connect Mercury, Import CSV, AI Categorize (keep syncMercury +
+//   categorizeTransactions). "N unmatched transactions in the queue" line. BankTransaction table (Date, Description,
+//   Category, Matched, Amount) with the "No transactions yet / Connect Mercury" empty state. AI interpretation note.
+//
+// INVOICES (InvoicesTab). Subtitle: "Buyer invoices raised, awaiting payment, and collected."
+//   Status filter pills: All, Draft, Issued, Awaiting Payment, Paid. StatChips: Outstanding, Awaiting Payment,
+//   Overdue (red), Collected (green). Actions: Export, Import CSV, New Invoice. Invoice table (Invoice, Buyer,
+//   Amount, Leads, Status, Action). "No invoices / Create first invoice" empty state. Keep all CRUD.
+//
+// BUYER PAYMENTS (BuyerPaymentsTab). Subtitle: "Cash actually received from buyers, matched against invoices."
+//   StatChips: Received (green), This Month, Avg Days To Pay. Actions: Export, Record Payment (keep the dialog).
+//   Payments table (Buyer, Method, Date, Amount). "No payments recorded / Record a payment" empty state. AI note.
+//
+// SUPPLIER PAYOUTS (SupplierPayoutsTab). Subtitle: "What is owed to suppliers and what has been paid."
+//   StatChips: Owing, Paid, Declared Cost (or similar from SupplierPayout). Actions: Export, Record Payout.
+//   Payouts table (Supplier, Declared Cost, Ad Spend, True Cost, Payouts Issued, Paid, Owing). Empty state. AI note.
+//
+// AD SPEND (AdSpendTab). Subtitle: "Synced platform spend and the true CPL it produces."
+//   StatChip: Total Ad Spend (synced). Action: Export. "No ad spend synced / Connect Meta in Settings Integrations"
+//   panel. True CPL by Supplier table + the ad spend table (Date, Platform, Supplier, Source, Spend). Keep syncMetaSpend.

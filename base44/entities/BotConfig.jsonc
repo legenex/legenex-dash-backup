@@ -1,0 +1,98 @@
+{
+  "name": "BotConfig",
+  "type": "object",
+  "properties": {
+    "bot_key": {
+      "type": "string",
+      "enum": [
+        "data",
+        "build"
+      ],
+      "description": "Which bot this config is for"
+    },
+    "name": {
+      "type": "string",
+      "default": "DataBot",
+      "description": "Display name"
+    },
+    "tagline": {
+      "type": "string",
+      "description": "Short description shown under the bot name"
+    },
+    "avatar_url": {
+      "type": "string",
+      "description": "Avatar image URL. Nullable."
+    },
+    "greeting": {
+      "type": "string",
+      "description": "Welcome message shown when the bot starts"
+    },
+    "enabled": {
+      "type": "boolean",
+      "default": true,
+      "description": "Master enable for this bot"
+    },
+    "auto_open_seconds": {
+      "type": "number",
+      "default": 0,
+      "description": "Auto-open the bot after N seconds. 0 = never."
+    },
+    "escalate_after_turns": {
+      "type": "number",
+      "default": 6,
+      "description": "Number of user turns before suggesting escalation"
+    },
+    "max_messages_per_session": {
+      "type": "number",
+      "default": 30
+    },
+    "log_transcripts": {
+      "type": "boolean",
+      "default": true,
+      "description": "Log full transcripts for KB improvement"
+    },
+    "model": {
+      "type": "string",
+      "default": "gpt-4o-mini",
+      "description": "OpenAI model used by this bot"
+    },
+    "temperature": {
+      "type": "number",
+      "default": 0.4
+    },
+    "max_tokens": {
+      "type": "number",
+      "default": 600
+    },
+    "instructions": {
+      "type": "string",
+      "description": "Full system instructions for the bot"
+    }
+  },
+  "required": [
+    "bot_key"
+  ],
+  "unique": [
+    [
+      "bot_key"
+    ]
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": true,
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

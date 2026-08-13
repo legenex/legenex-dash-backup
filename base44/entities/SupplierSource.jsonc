@@ -1,0 +1,118 @@
+{
+  "name": "SupplierSource",
+  "type": "object",
+  "properties": {
+    "supplier_id": {
+      "type": "string",
+      "description": "Reference to a Supplier record"
+    },
+    "source_code": {
+      "type": "string",
+      "description": "Optional supplier SubID (SSID) for this source, formed as sid-brand, for example LGNX-DS or LGNX-CMC. When present it is the primary match key for inbound leads: the payload ssid wins over any brand fallback. A supplier with a single source does not need one."
+    },
+    "brand": {
+      "type": "string",
+      "description": "Optional supplier_brand this source resolves for. Used as the fallback match when an inbound lead carries no ssid: the source whose brand equals the lead's supplier_brand is selected. Lets one supplier hold sources on different brands, for example LGNX holding CMC and Dont Settle."
+    },
+    "pricing_model": {
+      "type": "string",
+      "enum": [
+        "none",
+        "flat_cpl",
+        "profit_pct",
+        "revenue_pct",
+        "tiered"
+      ],
+      "description": "Pricing model for this source. none means this source carries no CPL of its own (used by Internal supplier sources whose cost comes from mapped ad accounts, and by any source that should fall back to the lead's supplier_payout)."
+    },
+    "profit_pct": {
+      "type": "number",
+      "description": "Percentage of profit, where profit is revenue minus cost. Used when pricing_model is profit_pct. Nullable."
+    },
+    "revenue_pct": {
+      "type": "number",
+      "description": "Percentage of revenue. Used when pricing_model is revenue_pct. Nullable."
+    },
+    "flat_cpl": {
+      "type": "number",
+      "description": "Flat cost per lead. Used when pricing_model is flat_cpl. Nullable."
+    },
+    "tier_rules": {
+      "type": "array",
+      "description": "Used when pricing_model is tiered. Each element has a conditions array using the exact same {field, operator, value} condition shape and operators as the LeadByteConnector field conditions (equals, not_equals, contains, not_contains, starts_with, ends_with, is_empty, is_not_empty, gt, lt), plus a numeric price. Rules are evaluated top down and the first match wins. Per-state CPL is expressed here with a condition on the state field. Nullable.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "conditions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "field": {
+                  "type": "string"
+                },
+                "operator": {
+                  "type": "string",
+                  "enum": [
+                    "equals",
+                    "not_equals",
+                    "contains",
+                    "not_contains",
+                    "starts_with",
+                    "ends_with",
+                    "is_empty",
+                    "is_not_empty",
+                    "gt",
+                    "lt"
+                  ]
+                },
+                "value": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "price": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "supplier_id",
+    "pricing_model"
+  ],
+  "unique": [
+    [
+      "supplier_id",
+      "source_code"
+    ]
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

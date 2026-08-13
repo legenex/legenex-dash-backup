@@ -1,0 +1,19 @@
+{
+  // Additive (lead distribution platform). Append-only audit of operator actions on
+  // the distribution platform: configuration publish/pause/archive/rollback and
+  // distribution_mode transitions. Records who, when, action, from/to, and reason.
+  // Caller model: written only by operator-only backend functions (service role).
+  "name": "DistributionAudit",
+  "type": "object",
+  "properties": {
+    "action": { "type": "string", "description": "e.g. publish, pause, archive, rollback, mode_change" },
+    "entity_type": { "type": "string", "description": "RouteGroup | AppSettings" },
+    "entity_id": { "type": "string" },
+    "from_value": { "type": "string" },
+    "to_value": { "type": "string" },
+    "reason": { "type": "string" },
+    "actor_id": { "type": "string", "description": "Operator user id who performed the action" },
+    "created_at": { "type": "string", "format": "date-time" }
+  },
+  "required": ["action", "actor_id"]
+}

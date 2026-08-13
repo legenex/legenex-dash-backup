@@ -1,0 +1,24 @@
+{
+  "name": "Counter",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Unique name identifying the counter sequence (e.g. lead_id)"
+    },
+    "value": {
+      "type": "number",
+      "default": 0,
+      "description": "Current value of the counter"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the counter was last incremented"
+    }
+  },
+  "required": [
+    "name",
+    "value"
+  ]
+}

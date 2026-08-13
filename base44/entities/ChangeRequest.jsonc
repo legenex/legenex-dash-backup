@@ -1,0 +1,156 @@
+{
+  "name": "ChangeRequest",
+  "type": "object",
+  "properties": {
+    "reference": {
+      "type": "string",
+      "description": "Human reference, e.g. CR-014. Unique."
+    },
+    "title": {
+      "type": "string"
+    },
+    "page_key": {
+      "type": "string",
+      "description": "Primary ProgressPage this work targets"
+    },
+    "additional_page_keys": {
+      "type": "string",
+      "description": "JSON array of other pages affected"
+    },
+    "capability_key": {
+      "type": "string",
+      "description": "MigrationRequirement key when the work is migration driven rather than page driven"
+    },
+    "problem": {
+      "type": "string",
+      "description": "What is wrong today, in evidence terms"
+    },
+    "user_request": {
+      "type": "string",
+      "description": "Nick's own words, preserved verbatim so intent survives the rewrite into a prompt"
+    },
+    "proposed_solution": {
+      "type": "string"
+    },
+    "scope": {
+      "type": "string"
+    },
+    "non_goals": {
+      "type": "string",
+      "description": "Explicit do-not-touch list. Required before a prompt can be approved."
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "P0",
+        "P1",
+        "P2",
+        "P3",
+        "P4"
+      ],
+      "default": "P3"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "needs_context",
+        "ready_for_review",
+        "approved",
+        "ready_for_implementation",
+        "in_progress",
+        "implemented",
+        "awaiting_verification",
+        "changes_requested",
+        "verified",
+        "released",
+        "rejected",
+        "blocked"
+      ],
+      "default": "draft"
+    },
+    "assignee": {
+      "type": "string",
+      "description": "Person or agent the work is assigned to, e.g. Morne, Claude chat, Claude Code"
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "related_finding_ids": {
+      "type": "string",
+      "description": "JSON array of AuditFinding ids this change request resolves"
+    },
+    "related_thread_ids": {
+      "type": "string",
+      "description": "JSON array of ReviewThread ids that motivated it"
+    },
+    "prompt_draft_id": {
+      "type": "string",
+      "description": "Current PromptDraft generated for this change request"
+    },
+    "touches_red_surface": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when the work touches processLead, live connectors, Conversion Events, distribution_mode, credentials, live endpoints, billing records, buyer pricing, TrustedForm, or portal scoping. Requires Nick's explicit approval before implementation."
+    },
+    "red_surfaces": {
+      "type": "string",
+      "description": "JSON array naming which RED surfaces are involved"
+    },
+    "rollback_approach": {
+      "type": "string"
+    },
+    "estimated_risk": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "default": "medium"
+    },
+    "acceptance_criteria": {
+      "type": "string",
+      "description": "Testable conditions. A change request cannot reach verified without these."
+    },
+    "verification_evidence": {
+      "type": "string",
+      "description": "JSON array of VerificationRecord ids"
+    },
+    "activity_log": {
+      "type": "string",
+      "description": "JSON array of {at, actor, from, to, note} status transitions"
+    },
+    "blocked_reason": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "reference",
+    "title",
+    "status"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

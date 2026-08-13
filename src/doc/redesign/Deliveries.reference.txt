@@ -1,0 +1,60 @@
+// Deliveries redesign reference. Restyle src/components/settings/SettingsLeadByte.jsx (the Deliveries page body).
+// Keep the existing Destinations / Response Builder / Delivery Logs tabs and ALL delivery config, payload
+// templates, filters, conditions, triggers, and actions (Edit, Duplicate, Enable/Disable, Delete). The live
+// LeadByte forwarding, Conversion Events firing, and Deliveries must not regress. Render REAL data and honest
+// empty states. No mock/seed data. Reuse the same token mapping as the other redesigns (panel gradient ->
+// bg-card, #243044 -> border-border, #EEF2F8 -> text-foreground, #8B95A8/#5A6478 -> muted foreground tokens,
+// #E5484D -> primary, #3DD68C -> status-sold). No em dashes.
+
+const DeliveriesPage = () => {
+  const [sub, setSub] = useState("Destinations");
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <SubTabs tabs={["Destinations", "Response Builder", "Delivery Logs"]} active={sub} onSelect={setSub} />
+        {sub === "Destinations" && (
+          <div className="flex gap-2">
+            <Btn icon={Download}>Import / Export</Btn>
+            <Btn icon={Plus} primary>Add Destination</Btn>
+          </div>
+        )}
+      </div>
+
+      {sub === "Destinations" && (
+        <div className="space-y-3">
+          {destinations.map((d, i) => (
+            <motion.div key={d.name} variants={rise} initial="hidden" animate="show" custom={i}>
+              {/* Each destination is a Panel (bg-card, rounded-xl, border-border). Name + kind Tag + vertical Tag,
+                  the endpoint URL as muted mono code, then a row of condition/trigger Tag pills, then RowActions
+                  (Active status + Edit + Duplicate + Disable + Delete) aligned right. */}
+              <Panel className="px-5 py-4 flex flex-col md:flex-row md:items-center gap-3">
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-[13.5px] font-semibold" style={{ color: C.text }}>{d.name}</span>
+                    <Tag>{d.kind}</Tag>
+                    <Tag tone="green">● {d.vertical}</Tag>
+                  </div>
+                  <code className="block text-[11.5px] font-mono truncate mt-1" style={{ color: C.dim }}>{d.url}</code>
+                  <div className="flex flex-wrap gap-1.5 mt-2">
+                    {d.tags.map(([t, tone]) => (<Tag key={t} tone={tone}>{t}</Tag>))}
+                  </div>
+                </div>
+                <RowActions />
+              </Panel>
+            </motion.div>
+          ))}
+        </div>
+      )}
+
+      {sub === "Response Builder" && (
+        <Panel><EmptyState icon={FileText} title="No response templates"
+          note="Build supplier-facing response payloads with field mapping per destination." action="Create response template" /></Panel>
+      )}
+
+      {sub === "Delivery Logs" && (
+        <Panel><EmptyState icon={Send} title="No deliveries in period"
+          note="Logs appear as soon as a destination fires." action="Check pipeline" /></Panel>
+      )}
+    </div>
+  );
+};

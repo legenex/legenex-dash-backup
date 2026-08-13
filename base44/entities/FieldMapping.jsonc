@@ -1,0 +1,18 @@
+{
+  "name": "FieldMapping",
+  "type": "object",
+  "properties": {
+    "source_field": {
+      "type": "string",
+      "description": "Inbound payload key"
+    },
+    "target_field": {
+      "type": "string",
+      "description": "Normalized lead field the source key maps to"
+    }
+  },
+  "required": [
+    "source_field",
+    "target_field"
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  // Additive (lead distribution platform). Idempotent cap reservation tying a lead to a consumed cap slot.
+  // Uniqueness (idempotency_key, route_member_id) guarantees no double-consume on retry.
+  // Caller model: processLead.
+  "name": "CapReservation",
+  "type": "object",
+  "properties": {
+    "idempotency_key": { "type": "string", "description": "Idempotency key for the reservation attempt" },
+    "lead_id": { "type": "string", "description": "Lead the reservation is held for" },
+    "route_member_id": { "type": "string", "description": "RouteMember whose cap is being reserved" },
+    "price": { "type": "number", "description": "Price locked in at reservation time" },
+    "state": {
+      "type": "string",
+      "enum": ["reserved", "finalized", "released"],
+      "default": "reserved"
+    },
+    "wallet_txn_id": { "type": "string", "description": "Wallet transaction id when finalized" },
+    "created_at": { "type": "string", "format": "date-time" },
+    "updated_at": { "type": "string", "format": "date-time" }
+  },
+  "required": ["idempotency_key", "route_member_id"]
+}

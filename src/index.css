@@ -1,0 +1,241 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Light palette: near-white surfaces, dark text, same Legenex red primary */
+    --background: 210 20% 98%;
+    --foreground: 212 24% 16%;
+    --card: 0 0% 100%;
+    --card-foreground: 212 24% 16%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 212 24% 16%;
+    --primary: 358 74% 59%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 212 16% 93%;
+    --secondary-foreground: 212 24% 22%;
+    --muted: 212 16% 94%;
+    --muted-foreground: 212 12% 42%;
+    --accent: 212 16% 92%;
+    --accent-foreground: 212 24% 16%;
+    --destructive: 358 74% 59%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 212 16% 88%;
+    --input: 212 16% 90%;
+    --ring: 358 74% 59%;
+    --chart-1: 172 68% 55%;
+    --chart-2: 206 61% 47%;
+    --chart-3: 250 48% 60%;
+    --chart-4: 180 82% 41%;
+    --chart-5: 152 65% 54%;
+    --radius: 0.625rem;
+    --font-heading: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-body: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-display: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+    --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+    --sidebar-background: 210 22% 96%;
+    --sidebar-foreground: 212 12% 40%;
+    --sidebar-primary: 358 74% 59%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 212 16% 91%;
+    --sidebar-accent-foreground: 212 24% 16%;
+    --sidebar-border: 212 16% 86%;
+    --sidebar-ring: 358 74% 59%;
+  }
+
+  .dark {
+    /* Canvas #0A0E15 */
+    --background: 217 33% 6%;
+    /* Foreground #EEF2F8 */
+    --foreground: 214 33% 96%;
+    /* Panel #131924 */
+    --card: 217 30% 11%;
+    --card-foreground: 214 33% 96%;
+    /* Raised panel / popover #182030 */
+    --popover: 218 33% 14%;
+    --popover-foreground: 214 33% 96%;
+    /* Primary accent red #E5484D */
+    --primary: 358 74% 59%;
+    --primary-foreground: 0 0% 100%;
+    /* Secondary surface #182030 */
+    --secondary: 218 33% 14%;
+    --secondary-foreground: 216 15% 70%;
+    /* Muted surface #131924, muted text #8B95A8 */
+    --muted: 217 30% 11%;
+    --muted-foreground: 219 14% 60%;
+    /* Accent / hover surface #182030 */
+    --accent: 218 33% 14%;
+    --accent-foreground: 214 33% 96%;
+    --destructive: 358 74% 59%;
+    --destructive-foreground: 0 0% 98%;
+    /* Border #243044 */
+    --border: 218 30% 21%;
+    --input: 218 30% 18%;
+    --ring: 358 74% 59%;
+    /* Data-viz series: teal, blue, purple, cyan, green */
+    --chart-1: 172 68% 55%;
+    --chart-2: 206 61% 47%;
+    --chart-3: 250 48% 60%;
+    --chart-4: 180 82% 41%;
+    --chart-5: 152 65% 54%;
+    /* Sidebar — slightly deeper than canvas */
+    --sidebar-background: 217 33% 8%;
+    --sidebar-foreground: 219 14% 60%;
+    --sidebar-primary: 358 74% 59%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 218 33% 14%;
+    --sidebar-accent-foreground: 214 33% 96%;
+    --sidebar-border: 217 26% 16%;
+    --sidebar-ring: 358 74% 59%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-body;
+    overscroll-behavior: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  /* Main scrollable container: keep scroll chaining from bouncing the webview */
+  .app-scroll {
+    overscroll-behavior: contain;
+  }
+  /* Respect device notches below lg only. Desktop padding is untouched. */
+  @media (max-width: 1023px) {
+    .app-scroll {
+      padding-bottom: calc(60px + env(safe-area-inset-bottom) + 1rem);
+      padding-left: max(1rem, env(safe-area-inset-left));
+      padding-right: max(1rem, env(safe-area-inset-right));
+    }
+  }
+  /* Prevent accidental text selection on interactive controls */
+  button,
+  [role="tab"],
+  [data-radix-collection-item] {
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  /* Rescue: operators must be able to copy ids, emails, phones, endpoint URLs */
+  td, code, pre, .font-mono {
+    user-select: text;
+    -webkit-user-select: text;
+  }
+  /* Faint 1px line grid across the app canvas, behind all content */
+  .dark body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image:
+      linear-gradient(to right, hsl(var(--border) / 0.2) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(var(--border) / 0.2) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+  /* Keep interactive content above the grid layer */
+  #root { position: relative; z-index: 1; }
+}
+
+/* Cards / panels: subtle 180deg gradient on the panel surface */
+.dark [data-slot="card"],
+.dark .bg-card {
+  background-image: linear-gradient(180deg, #182030 0%, #131924 100%);
+}
+
+/* Status colors.
+
+   These base values are the LIGHT theme, chosen to stay legible on a white
+   card. The dark theme overrides them below with the brighter originals.
+
+   They used to be defined once, tuned for the dark theme only, which left the
+   yellow Unsold tag at roughly 1.7:1 against a light background: bright yellow
+   text on a pale yellow fill, effectively invisible. Sold, Returned and
+   Disqualified had the same problem to a lesser degree. */
+.status-sold { color: #0F7B4F; }
+.status-unsold { color: #8A6100; }
+.status-disqualified { color: #B4530A; }
+.status-rejected { color: #C3363B; }
+.status-converted { color: #BE1E63; }
+.status-lead-error { color: #7E22CE; }
+.status-returned { color: #A0521B; }
+.status-queued { color: #5546A8; }
+.status-error { color: #C3363B; }
+.status-duplicate { color: #24618F; }
+.status-processing { color: #24618F; }
+
+/* Dark theme: the original brighter values, which need the extra luminance to
+   read against a near-black card. */
+.dark .status-sold { color: #3DD68C; }
+.dark .status-unsold { color: #FACC14; }
+.dark .status-disqualified { color: #F97316; }
+.dark .status-rejected { color: #E5484D; }
+.dark .status-converted { color: #EC4899; }
+.dark .status-lead-error { color: #A855F7; }
+.dark .status-returned { color: #FFB082; }
+.dark .status-queued { color: #7564CC; }
+.dark .status-error { color: #E5484D; }
+.dark .status-duplicate { color: #3182BD; }
+.dark .status-processing { color: #3182BD; }
+
+.bg-status-sold { background-color: rgba(61, 214, 140, 0.12); }
+.bg-status-unsold { background-color: rgba(250, 204, 20, 0.15); }
+.bg-status-disqualified { background-color: rgba(249, 115, 22, 0.15); }
+.bg-status-rejected { background-color: rgba(229, 72, 77, 0.15); }
+.bg-status-converted { background-color: rgba(236, 72, 153, 0.15); }
+.bg-status-lead-error { background-color: rgba(168, 85, 247, 0.15); }
+.bg-status-returned { background-color: rgba(255, 176, 130, 0.18); }
+.bg-status-queued { background-color: rgba(117, 100, 204, 0.15); }
+.bg-status-error { background-color: rgba(229, 72, 77, 0.12); }
+.bg-status-duplicate { background-color: rgba(49, 130, 189, 0.15); }
+.bg-status-processing { background-color: rgba(49, 130, 189, 0.15); }
+
+/* Status border colors. These were referenced by components (e.g. DocsUI warn
+   panels, PortalEnablementCard) before they existed, which silently rendered no
+   border and pushed one component to hardcode a raw hsl value. Defined here so
+   the semantic token is real and DESIGN-SYSTEM.md can be followed. */
+.border-status-sold { border-color: rgba(61, 214, 140, 0.4); }
+.border-status-unsold { border-color: rgba(250, 204, 20, 0.4); }
+.border-status-error { border-color: rgba(229, 72, 77, 0.4); }
+
+/* Aliased status backgrounds used by finance KPI gap chips */
+.status-sold-bg { background-color: rgba(61, 214, 140, 0.12); }
+.status-error-bg { background-color: rgba(229, 72, 77, 0.12); }
+.status-warn-bg { background-color: rgba(250, 204, 20, 0.15); }
+
+/* Qualification & custom lead-status colors */
+.status-qualified { color: #41D9C7; }
+.bg-status-qualified { background-color: rgba(65, 217, 199, 0.15); }
+.status-24m { color: #3DD68C; }
+.bg-status-24m { background-color: rgba(61, 214, 140, 0.12); }
+
+/* Neutral grey tag for operation / meta tags (Default, conditions, etc.) */
+.tag-neutral { color: #8B95A8; background-color: rgba(139, 149, 168, 0.12); }
+
+/* Utility: hide scrollbar while keeping scroll (used by the mobile sub-nav rail and tab strips) */
+@layer utilities {
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  /* Minimum comfortable touch target, mobile only */
+  @media (max-width: 1023px) {
+    .tap-target { min-height: 44px; min-width: 44px; }
+  }
+}
+
+/* Scrollbar styling — light theme: thin, soft red */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #E5484D; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #d23a3f; }
+
+/* Dark theme: muted blue-gray thumb matching the new border */
+.dark ::-webkit-scrollbar-thumb { background: hsl(218, 30%, 21%); }
+.dark ::-webkit-scrollbar-thumb:hover { background: hsl(218, 30%, 30%); }

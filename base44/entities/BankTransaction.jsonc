@@ -1,0 +1,72 @@
+{
+  "name": "BankTransaction",
+  "type": "object",
+  "properties": {
+    "source": {
+      "type": "string",
+      "enum": [
+        "mercury",
+        "csv",
+        "manual"
+      ],
+      "default": "mercury"
+    },
+    "external_id": {
+      "type": "string",
+      "description": "Provider transaction id for dedupe"
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "description": {
+      "type": "string"
+    },
+    "amount": {
+      "type": "number",
+      "description": "Positive = money in, negative = money out"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "",
+        "tech",
+        "media",
+        "personal",
+        "payouts",
+        "revenue",
+        "other"
+      ],
+      "default": ""
+    },
+    "ai_categorized": {
+      "type": "boolean",
+      "default": false
+    },
+    "matched_entity_type": {
+      "type": "string",
+      "enum": [
+        "",
+        "buyer",
+        "supplier",
+        "invoice",
+        "payout"
+      ],
+      "default": ""
+    },
+    "matched_entity_id": {
+      "type": "string"
+    },
+    "matched_entity_name": {
+      "type": "string"
+    },
+    "reconciled": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "date",
+    "amount"
+  ]
+}

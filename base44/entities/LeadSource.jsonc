@@ -1,0 +1,163 @@
+{
+  "name": "LeadSource",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Display name of this lead source"
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "google_sheets",
+        "ringba",
+        "truecall"
+      ],
+      "description": "Source type: Google Sheets pull, or Ringba/TrueCall inbound call webhook"
+    },
+    "enabled": {
+      "type": "boolean",
+      "default": true
+    },
+    "supplier_name": {
+      "type": "string",
+      "description": "Supplier this source's leads are attributed to"
+    },
+    "campaign_id": {
+      "type": "string",
+      "description": "Campaign this source's leads are attributed to"
+    },
+    "api_key_id": {
+      "type": "string",
+      "description": "Reference to the ApiKey record used to authenticate ingestion through processLead"
+    },
+    "mapping": {
+      "type": "string",
+      "description": "JSON object mapping source column/payload key -> our lead field name"
+    },
+    "sheet_id": {
+      "type": "string",
+      "description": "Google Sheets spreadsheet ID (extracted from URL)"
+    },
+    "worksheet": {
+      "type": "string",
+      "description": "Worksheet/tab name to read from"
+    },
+    "sync_interval": {
+      "type": "string",
+      "enum": [
+        "1m",
+        "15m",
+        "1h",
+        "6h",
+        "daily"
+      ],
+      "default": "1m",
+      "description": "How often the scheduled sync pulls rows. New sheets are continuous (every scheduler tick). The longer intervals remain for sheets that should not be hammered."
+    },
+    "dedupe_column": {
+      "type": "string",
+      "description": "Source column used as the de-dupe key; falls back to a hash of the whole row"
+    },
+    "seen_keys": {
+      "type": "string",
+      "description": "JSON array of de-dupe markers already ingested, so the same row is not ingested twice"
+    },
+    "webhook_key": {
+      "type": "string",
+      "description": "Secret key appended to the inbound call webhook URL (Ringba/TrueCall)"
+    },
+    "last_synced_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_sync_status": {
+      "type": "string",
+      "description": "Short result of the last sync/event e.g. 'Ingested 4 rows'"
+    },
+    "ingested_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Total leads ingested through this source"
+    },
+    "purpose": {
+      "type": "string",
+      "enum": [
+        "leads",
+        "buyer_feedback",
+        "inbound_calls",
+        "call_attribution",
+        "disqualified",
+        "cost"
+      ],
+      "default": "leads",
+      "description": "What this sheet is for. Decides where synced rows are written. Absent or 'leads' means ingest through processLead, which is the pre-existing behaviour."
+    },
+    "spreadsheet_name": {
+      "type": "string",
+      "description": "Human readable spreadsheet title, cached from Google so the list does not show bare IDs"
+    },
+    "google_account": {
+      "type": "string",
+      "description": "Email of the Google account this sheet is read with. One connected account today; the field exists so multi-account does not need a migration."
+    },
+    "match_field": {
+      "type": "string",
+      "description": "Our field used to find the record this row belongs to, e.g. email, mobile, sid, buyer_id, lead_id, utm_source"
+    },
+    "match_column": {
+      "type": "string",
+      "description": "Sheet column holding the match value"
+    },
+    "match_field_2": {
+      "type": "string",
+      "description": "Fallback field to match on when the primary finds nothing, e.g. mobile first then email"
+    },
+    "match_column_2": {
+      "type": "string",
+      "description": "Sheet column holding the fallback match value"
+    },
+    "buyer_codes": {
+      "type": "string",
+      "description": "JSON array of buyer_code values this sheet covers. One buyer pins every row to it; several means the buyer is resolved per row from a buyer column, falling back to the lead's own buyer."
+    },
+    "date_column": {
+      "type": "string",
+      "description": "Sheet column holding the row's event date, used for bucketing and for cost attribution"
+    },
+    "date_field": {
+      "type": "string",
+      "description": "Our date field the date column is written to"
+    },
+    "included_columns": {
+      "type": "string",
+      "description": "JSON array of sheet columns to read. Empty or absent means every column."
+    },
+    "link_type": {
+      "type": "string",
+      "enum": [
+        "none",
+        "buyer",
+        "supplier"
+      ],
+      "default": "none",
+      "description": "Whether this sheet belongs to a buyer, a supplier, or neither"
+    },
+    "buyer_code": {
+      "type": "string",
+      "description": "Buyer this sheet belongs to, held as buyer_code to match how Lead.buyer_id is stored"
+    },
+    "purpose_config": {
+      "type": "string",
+      "description": "JSON object of per-purpose options, e.g. which column carries the disposition or the spend amount"
+    },
+    "last_run_counts": {
+      "type": "string",
+      "description": "JSON object of the last run's outcome counts: read, matched, written, skipped, errored"
+    }
+  },
+  "required": [
+    "name",
+    "kind"
+  ]
+}

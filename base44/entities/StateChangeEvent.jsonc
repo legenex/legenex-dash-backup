@@ -1,0 +1,144 @@
+{
+  "name": "StateChangeEvent",
+  "type": "object",
+  "properties": {
+    "vertical": {
+      "type": "string",
+      "description": "The vertical code"
+    },
+    "state": {
+      "type": "string",
+      "description": "Two letter US state code, uppercase"
+    },
+    "direction": {
+      "type": "string",
+      "enum": [
+        "opened",
+        "closed",
+        "repriced"
+      ],
+      "description": "Direction of this state change"
+    },
+    "old_client_type": {
+      "type": "string",
+      "description": "Previous effective client type. Nullable."
+    },
+    "new_client_type": {
+      "type": "string",
+      "description": "New effective client type. Nullable."
+    },
+    "old_cpl": {
+      "type": "number",
+      "description": "Previous CPL. Nullable."
+    },
+    "new_cpl": {
+      "type": "number",
+      "description": "New CPL. Nullable."
+    },
+    "triggered_by_buyer_id": {
+      "type": "string",
+      "description": "Buyer record id that triggered this change. Nullable."
+    },
+    "triggered_by_user_id": {
+      "type": "string",
+      "description": "User record id that triggered this change. Nullable."
+    },
+    "notified_supplier_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Supplier record ids successfully reached on at least one channel for this event"
+    },
+    "notification_status": {
+      "type": "object",
+      "description": "Per channel delivery outcome, shaped as {email: {sent, failed, errors}, slack: {...}, whatsapp: {...}}. Nullable.",
+      "properties": {
+        "email": {
+          "type": "object",
+          "properties": {
+            "sent": {
+              "type": "number"
+            },
+            "failed": {
+              "type": "number"
+            },
+            "errors": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "slack": {
+          "type": "object",
+          "properties": {
+            "sent": {
+              "type": "number"
+            },
+            "failed": {
+              "type": "number"
+            },
+            "errors": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "whatsapp": {
+          "type": "object",
+          "properties": {
+            "sent": {
+              "type": "number"
+            },
+            "failed": {
+              "type": "number"
+            },
+            "errors": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "notified_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this event was included in a digest. Null means not yet notified."
+    }
+  },
+  "required": [
+    "vertical",
+    "state",
+    "direction"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

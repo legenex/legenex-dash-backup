@@ -1,0 +1,397 @@
+/*
+ * Legenex Lead Gateway - Full Application CSS
+ * 
+ * This file contains the complete design system for the Legenex Lead Gateway app.
+ * It is portable and can be dropped into any Tailwind CSS + shadcn/ui project.
+ * 
+ * Requirements:
+ *   - tailwindcss
+ *   - tailwindcss-animate
+ *   - shadcn/ui components (Button, Input, Label, Switch, Dialog, Tabs, Badge, etc.)
+ *   - Google Fonts: Inter + JetBrains Mono
+ * 
+ * Usage:
+ *   1. Import this file in your CSS entry point (e.g., src/index.css)
+ *   2. Copy the theme.extend block into your tailwind.config.js
+ *   3. Add class="dark" to <html> (app is dark-only)
+ *   4. Use Tailwind token classes (bg-primary, text-muted-foreground, etc.) in JSX
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   DESIGN TOKENS
+   All colors are HSL triplets (no hsl() wrapper) so Tailwind
+   can compose them with opacity: hsl(var(--primary) / 0.1)
+   
+   Brand: bg #252E39, primary #EE5656, text #FFFFFF
+   The app is dark-only; .dark mirrors :root.
+   ============================================================ */
+@layer base {
+  :root {
+    /* Core palette */
+    --background: 212 20% 17%;          /* #252E39 - page background */
+    --foreground: 0 0% 95%;             /* #F2F2F2 - body text */
+    --card: 213 19% 20%;                /* #323B45 - cards / panels */
+    --card-foreground: 0 0% 95%;
+    --popover: 213 19% 23%;             /* #3A434E - dropdowns, modals */
+    --popover-foreground: 0 0% 95%;
+    --primary: 0 82% 63%;               /* #EE5656 - brand red */
+    --primary-foreground: 0 0% 100%;    /* #FFFFFF */
+    --secondary: 212 18% 25%;           /* #353D48 */
+    --secondary-foreground: 0 0% 80%;
+    --muted: 212 18% 22%;               /* #2E353F - muted backgrounds, tab bars */
+    --muted-foreground: 212 10% 55%;    /* #8B94A0 - hints, labels, meta text */
+    --accent: 212 18% 26%;              /* #38414C - hover surfaces */
+    --accent-foreground: 0 0% 95%;
+    --destructive: 0 82% 63%;           /* #EE5656 - same as primary */
+    --destructive-foreground: 0 0% 98%;
+    --border: 212 15% 28%;              /* #3D454F - all borders */
+    --input: 212 15% 24%;               /* #343B45 - form inputs */
+    --ring: 0 82% 63%;                  /* #EE5656 - focus rings */
+    
+    /* Chart palette */
+    --chart-1: 0 82% 63%;               /* #EE5656 - red */
+    --chart-2: 142 71% 45%;             /* #22C55E - green (sold) */
+    --chart-3: 38 92% 50%;              /* #F59E0B - amber (unsold) */
+    --chart-4: 0 82% 63%;               /* #EE5656 - red */
+    --chart-5: 217 91% 60%;             /* #3B82F6 - blue (info) */
+    
+    /* Radius */
+    --radius: 0.625rem;                 /* 10px base radius */
+    
+    /* Typography */
+    --font-heading: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-body: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-display: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+
+    /* Sidebar-specific tokens (darker than page bg) */
+    --sidebar-background: 213 20% 14%;  /* #1C2229 */
+    --sidebar-foreground: 212 10% 65%;  /* #99A1AD - inactive nav text */
+    --sidebar-primary: 0 82% 63%;       /* #EE5656 - active accent */
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 212 18% 22%;      /* #2E353F - hover bg */
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 212 15% 24%;      /* #343B45 */
+    --sidebar-ring: 0 82% 63%;
+  }
+
+  /* Dark theme mirrors :root (app is dark-only) */
+  .dark {
+    --background: 212 20% 17%;
+    --foreground: 0 0% 95%;
+    --card: 213 19% 20%;
+    --card-foreground: 0 0% 95%;
+    --popover: 213 19% 23%;
+    --popover-foreground: 0 0% 95%;
+    --primary: 0 82% 63%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 212 18% 25%;
+    --secondary-foreground: 0 0% 80%;
+    --muted: 212 18% 22%;
+    --muted-foreground: 212 10% 55%;
+    --accent: 212 18% 26%;
+    --accent-foreground: 0 0% 95%;
+    --destructive: 0 82% 63%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 212 15% 28%;
+    --input: 212 15% 24%;
+    --ring: 0 82% 63%;
+    --chart-1: 0 82% 63%;
+    --chart-2: 142 71% 45%;
+    --chart-3: 38 92% 50%;
+    --chart-4: 0 82% 63%;
+    --chart-5: 217 91% 60%;
+    --sidebar-background: 213 20% 14%;
+    --sidebar-foreground: 212 10% 65%;
+    --sidebar-primary: 0 82% 63%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 212 18% 22%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 212 15% 24%;
+    --sidebar-ring: 0 82% 63%;
+  }
+}
+
+/* ============================================================
+   BASE LAYER
+   ============================================================ */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-body;
+  }
+}
+
+/* ============================================================
+   STATUS COLORS - Lead Lifecycle
+   Text + background tint pairs for lead final_status values.
+   Usage: <span className="status-sold bg-status-sold rounded-md px-2 py-0.5">
+   ============================================================ */
+.status-sold        { color: #22C55E; }
+.status-unsold      { color: #EAB308; }
+.status-disqualified{ color: #F97316; }
+.status-rejected    { color: #EC4899; }
+.status-returned    { color: #FFB082; }
+.status-queued      { color: #A855F7; }
+.status-error       { color: #EF4444; }
+.status-duplicate   { color: #3B82F6; }
+.status-processing  { color: #3B82F6; }
+
+.bg-status-sold        { background-color: rgba(34, 197, 94, 0.15); }
+.bg-status-unsold      { background-color: rgba(234, 179, 8, 0.15); }
+.bg-status-disqualified{ background-color: rgba(249, 115, 22, 0.15); }
+.bg-status-rejected    { background-color: rgba(236, 72, 153, 0.15); }
+.bg-status-returned    { background-color: rgba(255, 176, 130, 0.18); }
+.bg-status-queued      { background-color: rgba(168, 85, 247, 0.15); }
+.bg-status-error       { background-color: rgba(239, 68, 68, 0.15); }
+.bg-status-duplicate   { background-color: rgba(59, 130, 246, 0.15); }
+.bg-status-processing  { background-color: rgba(59, 130, 246, 0.15); }
+
+/* Qualification & custom lead-status colors */
+.status-qualified { color: #62b6cb; }
+.bg-status-qualified { background-color: rgba(98, 182, 203, 0.15); }
+.status-24m { color: #82d1b8; }
+.bg-status-24m { background-color: rgba(130, 209, 184, 0.15); }
+
+/* Neutral grey tag for operation / meta tags (Default, conditions, etc.) */
+.tag-neutral { color: #a5aab3; background-color: rgba(165, 170, 179, 0.12); }
+
+/* ============================================================
+   SCROLLBAR
+   ============================================================ */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: hsl(222, 15%, 20%); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: hsl(222, 15%, 28%); }
+
+/* ============================================================
+   LAYOUT UTILITIES
+   ============================================================ */
+
+/* App layout: fixed sidebar + scrollable main */
+.app-layout {
+  @apply h-screen bg-background overflow-hidden;
+}
+
+.app-sidebar {
+  @apply fixed left-0 top-0 bottom-0 w-[248px] bg-sidebar flex flex-col border-r border-sidebar-border z-50;
+  border-top-right-radius: 16px;
+  border-bottom-right-radius: 16px;
+}
+
+.app-main {
+  @apply ml-[248px] h-screen;
+}
+
+.app-main-inner {
+  @apply h-full overflow-y-auto p-6 lg:p-8 max-w-[1400px];
+}
+
+/* ============================================================
+   SIDEBAR NAV STYLES
+   ============================================================ */
+
+/* Single nav link - inactive */
+.nav-link {
+  @apply flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-all duration-150 relative
+    text-sidebar-foreground hover:text-foreground hover:bg-sidebar-accent;
+}
+
+/* Single nav link - active */
+.nav-link-active {
+  @apply bg-primary/10 text-foreground;
+}
+
+/* Active left accent bar */
+.nav-active-bar {
+  @apply absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-primary rounded-r-full;
+}
+
+/* Dropdown child link - inactive */
+.nav-child {
+  @apply flex items-center px-3 py-1.5 rounded-md text-[12px] font-medium transition-all duration-150
+    text-sidebar-foreground hover:text-foreground hover:bg-sidebar-accent;
+}
+
+/* Dropdown child link - active */
+.nav-child-active {
+  @apply bg-primary/10 text-primary;
+}
+
+/* Dropdown children container */
+.nav-children {
+  @apply ml-4 pl-3 border-l border-sidebar-border space-y-0.5 mt-0.5 mb-1;
+}
+
+/* ============================================================
+   CARD / PANEL
+   ============================================================ */
+.legenex-card {
+  @apply bg-card border border-border rounded-[10px];
+}
+
+.legenex-card-header {
+  @apply px-5 py-4 border-b border-border;
+}
+
+.legenex-card-title {
+  @apply text-[13px] font-semibold text-foreground;
+}
+
+.legenex-card-subtitle {
+  @apply text-[11px] text-muted-foreground mt-0.5;
+}
+
+/* ============================================================
+   TABLE
+   ============================================================ */
+.legenex-table {
+  @apply w-full text-[13px];
+}
+
+.legenex-table-header {
+  @apply border-b border-border bg-muted/50;
+}
+
+.legenex-table-th {
+  @apply text-left px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground;
+}
+
+.legenex-table-body {
+  @apply divide-y divide-border;
+}
+
+.legenex-table-row {
+  @apply hover:bg-accent/40 transition-colors;
+}
+
+.legenex-table-td {
+  @apply px-4 py-3;
+}
+
+/* ============================================================
+   BADGE / PILL
+   ============================================================ */
+.legenex-badge {
+  @apply inline-flex items-center rounded-md px-2.5 py-0.5 text-[10px] font-semibold border-0;
+}
+
+.legenex-badge-primary {
+  @apply bg-primary/20 text-primary;
+}
+
+.legenex-badge-secondary {
+  @apply bg-accent text-muted-foreground border border-border;
+}
+
+.legenex-badge-neutral {
+  @apply bg-muted text-muted-foreground;
+}
+
+/* ============================================================
+   SECTION HEADER
+   ============================================================ */
+.section-header {
+  @apply text-[12px] font-semibold text-muted-foreground uppercase tracking-wider;
+}
+
+.section-divider {
+  @apply flex-1 h-px bg-border;
+}
+
+/* ============================================================
+   FORM
+   ============================================================ */
+.legenex-label {
+  @apply text-[12px] font-medium;
+}
+
+.legenex-hint {
+  @apply text-[11px] text-muted-foreground;
+}
+
+.legenex-input {
+  @apply bg-background border border-input rounded-md h-9 px-3 text-sm
+    focus-visible:ring-1 focus-visible:ring-ring;
+}
+
+/* ============================================================
+   EMPTY STATE
+   ============================================================ */
+.legenex-empty {
+  @apply px-4 py-8 text-center text-muted-foreground text-[13px];
+}
+
+/* ============================================================
+   PAGE HEADER
+   ============================================================ */
+.page-title {
+  @apply text-xl font-semibold text-foreground;
+}
+
+.page-subtitle {
+  @apply text-sm text-muted-foreground mt-1;
+}
+
+/* ============================================================
+   MONO / DATA
+   ============================================================ */
+.mono-data {
+  @apply font-mono text-[11px] text-muted-foreground;
+}
+
+.mono-data-sm {
+  @apply font-mono text-[12px];
+}
+
+/* ============================================================
+   TAILWIND CONFIG MAPPING (for reference)
+   Copy this into tailwind.config.js theme.extend:
+   
+   colors: {
+     background: 'hsl(var(--background))',
+     foreground: 'hsl(var(--foreground))',
+     card: { DEFAULT: 'hsl(var(--card))', foreground: 'hsl(var(--card-foreground))' },
+     popover: { DEFAULT: 'hsl(var(--popover))', foreground: 'hsl(var(--popover-foreground))' },
+     primary: { DEFAULT: 'hsl(var(--primary))', foreground: 'hsl(var(--primary-foreground))' },
+     secondary: { DEFAULT: 'hsl(var(--secondary))', foreground: 'hsl(var(--secondary-foreground))' },
+     muted: { DEFAULT: 'hsl(var(--muted))', foreground: 'hsl(var(--muted-foreground))' },
+     accent: { DEFAULT: 'hsl(var(--accent))', foreground: 'hsl(var(--accent-foreground))' },
+     destructive: { DEFAULT: 'hsl(var(--destructive))', foreground: 'hsl(var(--destructive-foreground))' },
+     border: 'hsl(var(--border))',
+     input: 'hsl(var(--input))',
+     ring: 'hsl(var(--ring))',
+     chart: { 1: 'hsl(var(--chart-1))', 2: 'hsl(var(--chart-2))', 3: 'hsl(var(--chart-3))', 4: 'hsl(var(--chart-4))', 5: 'hsl(var(--chart-5))' },
+     sidebar: {
+       DEFAULT: 'hsl(var(--sidebar-background))',
+       foreground: 'hsl(var(--sidebar-foreground))',
+       primary: 'hsl(var(--sidebar-primary))',
+       'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',
+       accent: 'hsl(var(--sidebar-accent))',
+       'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
+       border: 'hsl(var(--sidebar-border))',
+       ring: 'hsl(var(--sidebar-ring))'
+     }
+   },
+   fontFamily: {
+     heading: ['var(--font-heading)'],
+     body: ['var(--font-body)'],
+     display: ['var(--font-display)'],
+     mono: ['var(--font-mono)']
+   },
+   borderRadius: {
+     lg: 'var(--radius)',
+     md: 'calc(var(--radius) - 2px)',
+     sm: 'calc(var(--radius) - 4px)'
+   },
+   plugins: [require("tailwindcss-animate")],
+   darkMode: ["class"]
+   ============================================================ */

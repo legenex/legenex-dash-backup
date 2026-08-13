@@ -1,0 +1,126 @@
+{
+  "name": "InboundWebhookRoute",
+  "properties": {
+    "api_key_id": {
+      "description": "ApiKey record id this webhook is presented with. Auth is by key, so several webhooks may share one key.",
+      "type": "string"
+    },
+    "api_key_name": {
+      "description": "ApiKey friendly name, denormalized for display",
+      "type": "string"
+    },
+    "enabled": {
+      "default": true,
+      "description": "Whether this webhook accepts inbound requests",
+      "type": "boolean"
+    },
+    "error_count": {
+      "default": 0,
+      "description": "Total processing errors on this webhook",
+      "type": "number"
+    },
+    "event_type": {
+      "description": "Optional pinned lifecycle status for this webhook. Leave blank for dynamic: the status is then read from lead_status on the payload. Accepts Sold, Unsold, Returned, Rejected, Duplicate, Disqualified, Converted.",
+      "type": "string"
+    },
+    "last_error": {
+      "description": "Summary of the most recent processing error",
+      "type": "string"
+    },
+    "last_received_at": {
+      "description": "Timestamp of the last successful receipt on this webhook",
+      "format": "date-time",
+      "type": "string"
+    },
+    "name": {
+      "description": "Display name for this inbound webhook, e.g. Inbounds Webhook or Legenex Webhook",
+      "type": "string"
+    },
+    "notes": {
+      "description": "Free text note, e.g. which platform posts to this webhook",
+      "type": "string"
+    },
+    "purpose": {
+      "description": "What this webhook carries. Absent or 'lead_outcome' is the pre-existing behaviour: a buyer or platform posting a lifecycle status. 'buyer_feedback' writes a BuyerFeedback record, 'inbound_call' records a call outcome, 'cost' records spend.",
+      "enum": [
+        "lead_outcome",
+        "buyer_feedback",
+        "inbound_call",
+        "cost"
+      ],
+      "default": "lead_outcome",
+      "type": "string"
+    },
+    "match_field": {
+      "description": "Our field used to find the lead this payload belongs to: sid, buyer_id, email, mobile, lead_id or utm_source. Absent means the built-in resolution order, which is what every existing route uses.",
+      "type": "string"
+    },
+    "match_key": {
+      "description": "Payload key holding the match value, when the sender does not use one of the known aliases",
+      "type": "string"
+    },
+    "date_key": {
+      "description": "Payload key holding the event date for this receipt",
+      "type": "string"
+    },
+    "field_map": {
+      "description": "JSON object mapping payload key -> our field name, applied before the built-in alias resolution. Lets a sender post its own column names without a code change.",
+      "type": "string"
+    },
+    "provider": {
+      "description": "DEPRECATED. Legacy source-system tag from the per-route token model. Retained for history only, no longer written or displayed.",
+      "type": "string"
+    },
+    "receipt_count": {
+      "default": 0,
+      "description": "Total successful receipts on this webhook",
+      "type": "number"
+    },
+    "supplier_name": {
+      "description": "Optional supplier attribution when the payload carries no sid. The sid on the payload always wins.",
+      "type": "string"
+    },
+    "sid": {
+      "description": "Optional supplier code this route is pinned to, taken from the chosen supplier source. Used only when the payload carries no sid of its own; the payload always wins.",
+      "type": "string"
+    },
+    "ssid": {
+      "description": "Optional supplier source code (SSID) this route is pinned to. Used only when the payload carries no ssid of its own; the payload always wins. Lets one supplier's routes be told apart, e.g. CAC-CALLS against DS-CALLS.",
+      "type": "string"
+    },
+    "token_hash": {
+      "description": "DEPRECATED. SHA-256 of the old per-route token. Retained so legacy leadbyteWebhook routes keep working during cutover.",
+      "type": "string"
+    },
+    "token_hint": {
+      "description": "DEPRECATED. Last 4 characters of the old per-route token, display only.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  },
+  "type": "object"
+}

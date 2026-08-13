@@ -1,0 +1,43 @@
+{
+  "name": "ReturnRequest",
+  "type": "object",
+  "properties": {
+    "lead_id": {
+      "type": "string",
+      "description": "Reference to the Lead record being returned"
+    },
+    "buyer_id": {
+      "type": "string",
+      "description": "Reference to the Buyer record requesting the return"
+    },
+    "reason": {
+      "type": "string",
+      "description": "Buyer's reason for the return request"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "requested",
+        "approved",
+        "rejected"
+      ],
+      "default": "requested"
+    },
+    "requested_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "resolved_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "resolver_notes": {
+      "type": "string",
+      "description": "Operator notes when approving or rejecting"
+    }
+  },
+  "required": [
+    "buyer_id",
+    "reason"
+  ]
+}

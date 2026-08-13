@@ -1,0 +1,44 @@
+{
+  "name": "SupplierPayout",
+  "type": "object",
+  "properties": {
+    "supplier_name": {
+      "type": "string"
+    },
+    "amount": {
+      "type": "number"
+    },
+    "lead_count": {
+      "type": "number",
+      "default": 0
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "issued",
+        "paid"
+      ],
+      "default": "draft"
+    },
+    "period_start": {
+      "type": "string",
+      "format": "date"
+    },
+    "period_end": {
+      "type": "string",
+      "format": "date"
+    },
+    "paid_amount": {
+      "type": "number",
+      "default": 0
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "supplier_name",
+    "amount"
+  ]
+}

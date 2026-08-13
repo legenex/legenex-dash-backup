@@ -1,0 +1,31 @@
+{
+  "name": "Webhook",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "url": {
+      "type": "string"
+    },
+    "secret": {
+      "type": "string"
+    },
+    "events": {
+      "type": "string",
+      "description": "JSON array of event names e.g. [\"lead.sold\",\"lead.unsold\"]"
+    },
+    "enabled": {
+      "type": "boolean",
+      "default": true
+    },
+    "headers": {
+      "type": "string",
+      "description": "JSON object of custom headers"
+    }
+  },
+  "required": [
+    "name",
+    "url"
+  ]
+}

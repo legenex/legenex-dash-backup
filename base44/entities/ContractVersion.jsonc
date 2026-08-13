@@ -1,0 +1,44 @@
+{
+  "name": "ContractVersion",
+  "properties": {
+    "campaign_id": {
+      "description": "Campaign record id this snapshot belongs to.",
+      "type": "string"
+    },
+    "campaign_name": {
+      "description": "Denormalized campaign name at time of publish.",
+      "type": "string"
+    },
+    "change_summary": {
+      "description": "Human readable note on what changed from the previous version.",
+      "type": "string"
+    },
+    "content_hash": {
+      "description": "SHA256 of contract_json. Used as the ETag on /functions/contract.",
+      "type": "string"
+    },
+    "contract_json": {
+      "description": "Full serialized intake contract as published.",
+      "type": "string"
+    },
+    "is_current": {
+      "default": true,
+      "description": "True for the latest published version of a campaign.",
+      "type": "boolean"
+    },
+    "published_by": {
+      "description": "Email of the user who published this version.",
+      "type": "string"
+    },
+    "version": {
+      "description": "Contract version number captured at publish time.",
+      "type": "number"
+    }
+  },
+  "required": [
+    "campaign_id",
+    "version",
+    "contract_json"
+  ],
+  "type": "object"
+}

@@ -1,0 +1,76 @@
+{
+  "name": "AdSpendMapping",
+  "type": "object",
+  "properties": {
+    "platform": {
+      "type": "string",
+      "enum": [
+        "meta",
+        "google_ads",
+        "taboola",
+        "tiktok"
+      ],
+      "default": "meta"
+    },
+    "ad_account_id": {
+      "type": "string",
+      "description": "Meta ad account id (act_XXXX)"
+    },
+    "ad_account_name": {
+      "type": "string"
+    },
+    "meta_campaign_id": {
+      "type": "string",
+      "description": "Optional specific Meta campaign id when match_level is campaign/adset"
+    },
+    "meta_campaign_name": {
+      "type": "string"
+    },
+    "match_level": {
+      "type": "string",
+      "enum": [
+        "ad_account",
+        "campaign",
+        "ad_set"
+      ],
+      "default": "ad_account"
+    },
+    "vertical": {
+      "type": "string",
+      "description": "Vertical code this spend maps to"
+    },
+    "brand": {
+      "type": "string",
+      "description": "Brand code / name this spend maps to"
+    },
+    "supplier_name": {
+      "type": "string",
+      "description": "Supplier this spend is attributed to for true CPL"
+    },
+    "cost_source": {
+      "type": "string",
+      "description": "Cost attribution source label"
+    },
+    "sync_interval": {
+      "type": "string",
+      "enum": [
+        "15m",
+        "1h",
+        "6h",
+        "daily"
+      ],
+      "default": "1h"
+    },
+    "enabled": {
+      "type": "boolean",
+      "default": true
+    },
+    "last_synced_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "platform"
+  ]
+}

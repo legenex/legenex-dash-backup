@@ -1,0 +1,23 @@
+{
+  // Additive (lead distribution platform). A named buyer destination container. A
+  // Delivery always belongs to exactly ONE Buyer and holds one or more SubDelivery
+  // endpoint tiers. This is the native replacement for LeadByte "deliveries"; it
+  // does NOT touch the existing LeadByteConnector/ApiConnector webhook records,
+  // which continue to serve production traffic unchanged.
+  // Caller model: OPERATOR writes; read by processLead (via snapshot loader) + Campaigns > Deliveries UI.
+  "name": "Delivery",
+  "type": "object",
+  "properties": {
+    "buyer_id": { "type": "string", "description": "Buyer that owns this delivery (exactly one). Required." },
+    "name": { "type": "string", "description": "Operator-facing name for the delivery" },
+    "vertical_id": { "type": "string", "description": "Optional vertical this delivery is scoped to" },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "active", "paused", "archived"],
+      "default": "draft",
+      "description": "Lifecycle. Only 'active' deliveries can back a routing member."
+    },
+    "notes": { "type": "string", "description": "Free-form operator notes" }
+  },
+  "required": ["buyer_id"]
+}

@@ -1,0 +1,165 @@
+{
+  "name": "ReviewThread",
+  "type": "object",
+  "properties": {
+    "page_key": {
+      "type": "string",
+      "description": "ProgressPage this comment is anchored to"
+    },
+    "subject_type": {
+      "type": "string",
+      "enum": [
+        "page",
+        "screenshot_region",
+        "status_pill",
+        "metric_card",
+        "lead_count",
+        "table_column",
+        "filter",
+        "form_field",
+        "modal",
+        "component",
+        "entity",
+        "field",
+        "backend_function",
+        "calculation",
+        "permission",
+        "workflow",
+        "documentation",
+        "migration_requirement"
+      ],
+      "description": "What exactly the comment is about. Drives how the prompt generator frames the fix."
+    },
+    "subject_ref": {
+      "type": "string",
+      "description": "Identifier of the subject: metric name, component path, entity name, function name, column key"
+    },
+    "subject_label": {
+      "type": "string",
+      "description": "Visible text or label of the thing being commented on, captured automatically"
+    },
+    "observed_value": {
+      "type": "string",
+      "description": "The value on screen when the comment was made, e.g. the lead count that looked wrong"
+    },
+    "body": {
+      "type": "string",
+      "description": "The comment itself"
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "P0",
+        "P1",
+        "P2",
+        "P3",
+        "P4"
+      ],
+      "default": "P3"
+    },
+    "finding_type": {
+      "type": "string",
+      "enum": [
+        "ui_inconsistency",
+        "ux_problem",
+        "incorrect_metric",
+        "data_inconsistency",
+        "backend_defect",
+        "missing_functionality",
+        "performance",
+        "permission",
+        "security",
+        "mobile",
+        "accessibility",
+        "missing_state",
+        "integration",
+        "migration_blocker",
+        "technical_debt",
+        "copy_terminology",
+        "user_request"
+      ],
+      "description": "Classification, carried through to any finding created from this comment"
+    },
+    "captured_context": {
+      "type": "string",
+      "description": "JSON blob: route, query params, filters, role, theme, viewport, commit, data source. Captured automatically at comment time."
+    },
+    "snapshot_id": {
+      "type": "string",
+      "description": "PageSnapshot this comment is anchored to, when the comment was drawn on a screenshot"
+    },
+    "region": {
+      "type": "string",
+      "description": "JSON {x, y, w, h} in natural image pixels, so the box can be redrawn on the snapshot later"
+    },
+    "crop_url": {
+      "type": "string",
+      "description": "Uploaded PNG of just the selected region. Small, and enough to see what was meant without opening the full capture."
+    },
+    "element_selector": {
+      "type": "string",
+      "description": "Best-effort CSS path of the element under the selection, resolved at draw time"
+    },
+    "element_audit_id": {
+      "type": "string",
+      "description": "data-audit-id of the element under the selection, when the component carries one"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "answered",
+        "converted",
+        "resolved",
+        "wont_fix"
+      ],
+      "default": "open"
+    },
+    "converted_finding_id": {
+      "type": "string",
+      "description": "AuditFinding created from this comment, when converted"
+    },
+    "converted_change_request_id": {
+      "type": "string",
+      "description": "ChangeRequest created from this comment, when converted"
+    },
+    "parent_thread_id": {
+      "type": "string",
+      "description": "Set on replies. Root comments leave this empty."
+    },
+    "author_email": {
+      "type": "string"
+    },
+    "author_role": {
+      "type": "string",
+      "description": "Progress role of the author at comment time"
+    }
+  },
+  "required": [
+    "page_key",
+    "subject_type",
+    "body"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

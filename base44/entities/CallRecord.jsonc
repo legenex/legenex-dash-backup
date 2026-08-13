@@ -1,0 +1,162 @@
+{
+  "name": "CallRecord",
+  "properties": {
+    "attribution_status": {
+      "default": "unattributed",
+      "description": "How the supplier on this call was established",
+      "enum": [
+        "unattributed",
+        "matched_lead",
+        "matched_feed"
+      ],
+      "type": "string"
+    },
+    "buyer_code": {
+      "description": "Buyer this call belongs to, held as buyer_code to match how Lead.buyer_id is stored",
+      "type": "string"
+    },
+    "buyer_name": {
+      "type": "string"
+    },
+    "call_at": {
+      "description": "When the call happened, from the sheet's date column",
+      "format": "date-time",
+      "type": "string"
+    },
+    "call_id": {
+      "description": "The call platform's own ID for this call, e.g. Ringba CallId. Primary de-dupe key when present.",
+      "type": "string"
+    },
+    "call_status": {
+      "description": "Commercial outcome of the call, the equivalent of Lead.final_status. Converted means the call qualified and pays. Rejected means the buyer declined it, normally with a disposition. Error means the row could not be processed. Pending means no outcome yet. Deliberately has NO default: an unset value lets the app derive an outcome from the qualified flag and disposition, whereas a default of Pending would stamp every new call as Pending and suppress that.",
+      "enum": [
+        "Converted",
+        "Rejected",
+        "Error",
+        "Pending"
+      ],
+      "type": "string"
+    },
+    "caller_id": {
+      "description": "Caller ID number when it differs from the primary number",
+      "type": "string"
+    },
+    "campaign_name": {
+      "description": "Buyer campaign the call was routed to, e.g. the Campaign column on the call sheet",
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    },
+    "consumer_state": {
+      "description": "State the consumer called from, which can differ from the incident state held in state",
+      "type": "string"
+    },
+    "custom_fields": {
+      "description": "JSON object of columns mapped by the operator that have no dedicated field here",
+      "type": "string"
+    },
+    "dedupe_key": {
+      "description": "Marker used to stop the same sheet row being ingested twice",
+      "type": "string"
+    },
+    "disposition": {
+      "description": "Main disposition from the buyer, e.g. Did not meet pricing parameters, Already Represented, Outside SOL",
+      "type": "string"
+    },
+    "dispositions": {
+      "description": "Full semicolon separated disposition list when the buyer returns more than one reason",
+      "type": "string"
+    },
+    "duration_seconds": {
+      "description": "Call length in seconds",
+      "type": "number"
+    },
+    "first_name": {
+      "type": "string"
+    },
+    "inquiry_status": {
+      "description": "The platform's own call state, e.g. Call Connected, Assigned Call, Open Call",
+      "type": "string"
+    },
+    "last_name": {
+      "type": "string"
+    },
+    "lead_id": {
+      "description": "Lead record this call was matched to, when the number belongs to a known lead",
+      "type": "string"
+    },
+    "media_source": {
+      "description": "Trackable media source reported by the call platform",
+      "type": "string"
+    },
+    "mobile": {
+      "description": "Digits only caller number, used to join calls to leads and to attribution feeds",
+      "type": "string"
+    },
+    "mobile_raw": {
+      "description": "The number exactly as the sheet held it",
+      "type": "string"
+    },
+    "qualified": {
+      "default": false,
+      "description": "Whether this call counts as qualified or converted, decided by the sheet's conversion rule",
+      "type": "boolean"
+    },
+    "qualified_raw": {
+      "description": "The raw cell value the qualified decision was made from, kept so the rule is auditable",
+      "type": "string"
+    },
+    "revenue": {
+      "default": 0,
+      "description": "What this call pays, e.g. partner commission",
+      "type": "number"
+    },
+    "sid": {
+      "description": "Supplier ID, normally filled by a Ringba attribution sheet matched on the number",
+      "type": "string"
+    },
+    "source_id": {
+      "description": "LeadSource record this call was read from",
+      "type": "string"
+    },
+    "source_name": {
+      "description": "Display name of the sheet or feed this call came from",
+      "type": "string"
+    },
+    "ssid": {
+      "description": "Supplier sub ID",
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "supplier_name": {
+      "description": "Supplier credited with the call, resolved from a matched lead or an attribution feed",
+      "type": "string"
+    },
+    "unique_inquiry": {
+      "default": false,
+      "description": "Whether the call platform counted this as a unique inquiry rather than a repeat contact",
+      "type": "boolean"
+    },
+    "vertical": {
+      "description": "Law type or vertical, e.g. MVA, WC, Premise",
+      "type": "string"
+    },
+    "vertical_detail": {
+      "description": "Narrow law type, e.g. Auto PI, Pedestrian, RideShare",
+      "type": "string"
+    },
+    "web_lead": {
+      "default": false,
+      "description": "Whether the call platform flagged this inquiry as originating from a web lead",
+      "type": "boolean"
+    },
+    "zip": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "type": "object"
+}

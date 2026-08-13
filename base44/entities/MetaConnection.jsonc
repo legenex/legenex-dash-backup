@@ -1,0 +1,98 @@
+{
+  "name": "MetaConnection",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Display label for this connection, for example the Business Manager name"
+    },
+    "platform": {
+      "type": "string",
+      "enum": [
+        "meta"
+      ],
+      "default": "meta"
+    },
+    "auth_type": {
+      "type": "string",
+      "enum": [
+        "oauth",
+        "system_user"
+      ],
+      "description": "oauth = Facebook Login long-lived user token (about 60 days). system_user = durable Business Manager system-user token."
+    },
+    "token": {
+      "type": "string",
+      "description": "Access token. Read server-side by functions; the UI only ever receives a masked tail."
+    },
+    "token_expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Expiry for oauth tokens. Null for system-user tokens, which do not expire."
+    },
+    "connected_account_id": {
+      "type": "string",
+      "description": "Meta user or system-user id from GET /me"
+    },
+    "connected_account_name": {
+      "type": "string",
+      "description": "Meta user or system-user name from GET /me"
+    },
+    "business_id": {
+      "type": "string",
+      "description": "Primary Business Manager id when known. Nullable."
+    },
+    "business_name": {
+      "type": "string",
+      "description": "Primary Business Manager name when known. Nullable."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "invalid",
+        "expired"
+      ],
+      "default": "active",
+      "description": "Set to invalid on Graph auth errors, expired when token_expires_at has passed."
+    },
+    "last_validated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_error": {
+      "type": "string",
+      "description": "Last Graph API auth error message. Empty when healthy."
+    },
+    "legacy_token_id": {
+      "type": "string",
+      "description": "Id of the legacy IntegrationConfig token this connection was migrated from. Used for migration idempotency."
+    }
+  },
+  "required": [
+    "name",
+    "auth_type"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

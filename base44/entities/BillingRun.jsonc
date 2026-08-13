@@ -1,0 +1,94 @@
+{
+  "name": "BillingRun",
+  "type": "object",
+  "properties": {
+    "scope": {
+      "type": "string",
+      "enum": [
+        "buyer",
+        "supplier"
+      ],
+      "description": "Whether this run bills a buyer or a supplier. Exactly one of buyer_id or supplier_id must be set, matching scope."
+    },
+    "buyer_id": {
+      "type": "string",
+      "description": "Reference to a Buyer record. Set when scope is buyer. Nullable."
+    },
+    "supplier_id": {
+      "type": "string",
+      "description": "Reference to a Supplier record. Set when scope is supplier. Nullable."
+    },
+    "period_start": {
+      "type": "string",
+      "format": "date",
+      "description": "Start of the billing period."
+    },
+    "period_end": {
+      "type": "string",
+      "format": "date",
+      "description": "End of the billing period."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "issued",
+        "paid",
+        "void"
+      ],
+      "default": "draft"
+    },
+    "total_leads": {
+      "type": "number",
+      "default": 0
+    },
+    "billable_leads": {
+      "type": "number",
+      "default": 0,
+      "description": "Total leads minus accepted returns."
+    },
+    "returns": {
+      "type": "number",
+      "default": 0
+    },
+    "gross": {
+      "type": "number",
+      "default": 0
+    },
+    "ipl_fees": {
+      "type": "number",
+      "default": 0
+    },
+    "net": {
+      "type": "number",
+      "default": 0
+    },
+    "invoice_id": {
+      "type": "string",
+      "description": "Reference to the existing Invoice record created from this run. Nullable."
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this run was generated. Nullable."
+    },
+    "generated_by": {
+      "type": "string",
+      "description": "User id who generated this run. Nullable."
+    }
+  },
+  "required": [
+    "scope",
+    "period_start",
+    "period_end"
+  ],
+  "unique": [
+    [
+      "scope",
+      "buyer_id",
+      "supplier_id",
+      "period_start",
+      "period_end"
+    ]
+  ]
+}

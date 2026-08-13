@@ -1,0 +1,112 @@
+{
+  "name": "PageSnapshot",
+  "type": "object",
+  "properties": {
+    "page_key": {
+      "type": "string",
+      "description": "ProgressPage this capture belongs to"
+    },
+    "route": {
+      "type": "string",
+      "description": "Route captured, including any query string"
+    },
+    "viewport": {
+      "type": "string",
+      "enum": [
+        "desktop",
+        "tablet",
+        "mobile"
+      ],
+      "description": "Which viewport bucket the capture was taken at"
+    },
+    "width": {
+      "type": "number",
+      "description": "Actual capture width in CSS pixels"
+    },
+    "height": {
+      "type": "number",
+      "description": "Actual capture height in CSS pixels"
+    },
+    "image_url": {
+      "type": "string",
+      "description": "Uploaded PNG. Empty when capture_status is failed."
+    },
+    "capture_status": {
+      "type": "string",
+      "enum": [
+        "ok",
+        "failed",
+        "partial"
+      ],
+      "default": "ok",
+      "description": "failed captures are kept so the gap is visible rather than looking like a page that was never reviewed"
+    },
+    "failure_reason": {
+      "type": "string",
+      "description": "Why the capture did not succeed"
+    },
+    "masked": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether personal data was redacted before rasterising. Unmasked captures of live lead data must never be retained."
+    },
+    "mask_count": {
+      "type": "number",
+      "description": "How many elements were redacted. Zero on a lead page is suspicious and worth checking."
+    },
+    "theme": {
+      "type": "string",
+      "description": "Theme active at capture time"
+    },
+    "role_used": {
+      "type": "string",
+      "description": "Role of the account that took the capture. A buyer-role capture would show buyer-scoped data."
+    },
+    "app_commit": {
+      "type": "string",
+      "description": "Manifest commit at capture time, so a snapshot can be tied to the code that produced it"
+    },
+    "captured_by": {
+      "type": "string"
+    },
+    "captured_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "superseded": {
+      "type": "boolean",
+      "default": false,
+      "description": "Set when a newer capture exists for the same page and viewport"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "page_key",
+    "route",
+    "viewport"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

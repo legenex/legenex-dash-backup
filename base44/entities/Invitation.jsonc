@@ -1,0 +1,66 @@
+{
+  "name": "Invitation",
+  "type": "object",
+  "properties": {
+    "email": {
+      "type": "string",
+      "description": "Email address the invitation was sent to"
+    },
+    "role": {
+      "type": "string",
+      "enum": [
+        "admin",
+        "user"
+      ],
+      "default": "user",
+      "description": "Platform role granted on acceptance"
+    },
+    "base_role": {
+      "type": "string",
+      "description": "Base role preset (owner, admin, manager, supplier, buyer)"
+    },
+    "permissions": {
+      "type": "string",
+      "description": "JSON string of the permission map to apply once the user logs in"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "accepted",
+        "cancelled"
+      ],
+      "default": "pending",
+      "description": "pending = invite sent, not yet logged in; accepted = user has a matching User record; cancelled = revoked"
+    },
+    "invited_by": {
+      "type": "string",
+      "description": "Email of the admin who sent the invitation"
+    }
+  },
+  "required": [
+    "email"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

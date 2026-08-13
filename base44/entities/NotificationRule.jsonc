@@ -1,0 +1,44 @@
+{
+  "name": "NotificationRule",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "condition_type": {
+      "type": "string",
+      "enum": [
+        "errors_same_stage",
+        "hlr_unreachable",
+        "leadbyte_non_success",
+        "sold_rate_below",
+        "api_error",
+        "capi_failure",
+        "lead_queued",
+        "missing_fields"
+      ]
+    },
+    "threshold_count": {
+      "type": "number"
+    },
+    "window_minutes": {
+      "type": "number"
+    },
+    "channels": {
+      "type": "string",
+      "description": "JSON array of channel types e.g. [\"email\",\"slack\"]"
+    },
+    "recipients": {
+      "type": "string",
+      "description": "JSON array of recipient addresses"
+    },
+    "enabled": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "name",
+    "condition_type"
+  ]
+}

@@ -1,0 +1,79 @@
+{
+  "name": "BuyerStateCpl",
+  "type": "object",
+  "properties": {
+    "buyer_id": {
+      "type": "string",
+      "description": "Reference to a Buyer record"
+    },
+    "vertical": {
+      "type": "string",
+      "description": "The vertical code this pricing applies to"
+    },
+    "state": {
+      "type": "string",
+      "description": "Two letter US state code, uppercase"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this buyer is currently accepting leads in this state"
+    },
+    "cpl": {
+      "type": "number",
+      "description": "The cost per lead this buyer pays in this state"
+    },
+    "ipl": {
+      "type": "number",
+      "description": "Computed as cpl multiplied by the buyer's ipl_fee_pct at write time"
+    },
+    "paused_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this state pricing was paused. Nullable."
+    },
+    "paused_reason": {
+      "type": "string",
+      "description": "Reason this state pricing was paused. Nullable."
+    },
+    "paused_by": {
+      "type": "string",
+      "description": "The user id who paused it. Nullable."
+    }
+  },
+  "required": [
+    "buyer_id",
+    "vertical",
+    "state",
+    "cpl"
+  ],
+  "unique": [
+    [
+      "buyer_id",
+      "vertical",
+      "state"
+    ]
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "name": "AuditLog",
+  "type": "object",
+  "properties": {
+    "lead_id": {
+      "type": "string",
+      "description": "Reference to Lead record"
+    },
+    "lead_match_key": {
+      "type": "string",
+      "description": "Normalized email or phone used for the backup lookup"
+    },
+    "recovered_cert_url": {
+      "type": "string",
+      "description": "The cert URL recovered from CertBackupStore, unchanged"
+    },
+    "original_session_timestamp": {
+      "type": "string",
+      "description": "Copied from the stored CertBackupStore row, never recomputed"
+    },
+    "cert_source": {
+      "type": "string",
+      "default": "backup_store"
+    },
+    "backfilled_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "lead_id",
+    "recovered_cert_url"
+  ]
+}

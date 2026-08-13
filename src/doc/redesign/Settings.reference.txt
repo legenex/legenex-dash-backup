@@ -1,0 +1,48 @@
+// SETTINGS STRUCTURAL REBUILD reference (Performance OS). REBUILD, not a restyle. Every panel gets the new
+// STRUCTURE, wired to real data, honest zeros, no mock rows, no em dashes. Preserve all existing queries, actions,
+// auth, and the permission matrix. Pipeline and portal scoping untouched. Tokens for both themes.
+//
+// SHARED SETTINGS SHELL: create src/components/settings/SettingsShell.jsx. Settings.jsx wraps the active panel in it,
+//   passing title, subtitle, and optional right-side actions.
+//   Header row: "Settings / <PageName>" (the page part lighter weight) + a small green LIVE pill, with a "Search
+//     settings" button and a Refresh button on the right. Subtitle per page below.
+//   Footer: a SETTINGS TELEMETRY bar: "SETTINGS TELEMETRY" + GATEWAY live + USERS N + INTEGRATIONS n connected +
+//     API KEYS N + ERRORS N + "refreshed Xs ago". Real values (User count, connected IntegrationConfig, ApiKey count,
+//     unresolved ErrorLog count). Load once in the shell.
+//   In src/pages/Settings.jsx, replace the single SectionHeader with SettingsShell, deriving the page title/subtitle
+//     from the active tab, and render the active panel inside it. Keep the ?tab= routing and PANELS map.
+//
+// SETTINGS RAIL (SettingsNav.jsx): keep the Account and Data groups and their items (Billing item stays "Billing and
+//   Plan"). Give the active item a 2px inset primary left border in addition to bg-primary/10 text-primary. Add a
+//   Gateway status card at the bottom (bg-card, border-border) with a PulseDot and "api.legenex.com - live" in green.
+//
+// ATOMS (src/components/settings/settingsUi.jsx): StatChip (uppercase micro-label, big tabular value, tone), Toggle
+//   (w-9 h-5, track primary when on else border-border, white knob translateX when on), Input (label + a bordered
+//   field h-10 showing value or placeholder, mono option, optional hint), Tag pill (token tints).
+//
+// COLOR -> TOKEN: #0A0E15 bg-background, #131924/#182030 bg-card, #243044 border-border, #EEF2F8 text-foreground,
+//   #8B95A8 text-muted-foreground, #5A6478 text-muted-foreground/70, #E5484D primary, #3DD68C status-sold,
+//   #E8A33D status-unsold. rail bg #0E131D bg-sidebar. MOTION: rise-in stagger, hover lift, PulseDot on the Gateway card.
+//
+// ============================ PANEL STRUCTURES (tab key -> component -> layout) ============================
+// profile      -> SettingsProfile. Subtitle "Your account details." Panel with Input atoms (name, email, role,
+//                 avatar) + a change-password action. Real current User.
+// general      -> SettingsGeneral. Subtitle "Workspace defaults." Panel(s) of AppSettings fields with Input atoms and a Save.
+// users        -> SettingsUsers. Subtitle "Team members and permissions." Panel with a Users table (Name, Email, Role,
+//                 Access, Joined, Actions) + the per-user permission matrix toggles; keep invite/edit/deactivate.
+// integrations -> SettingsIntegrations (already on the new design). Just wrap in the shell; do not change its cards.
+// data-sources -> SettingsDataSources (LeadSourcesPanel). Subtitle "Inbound lead sources." Source cards for Google
+//                 Sheets, Ringba, TrueCall (kind, supplier, campaign, key) with Sync now and provisionLeadSource.
+// fields       -> SettingsCustomFields. Subtitle "The lead field catalog." Panel with the field table (Label, Type,
+//                 Required, LB Key, Notes, Actions), Import / Export Fields, Detect from JSON, and New Field. Keep reorder.
+// field-mapping-> SettingsFieldMapping. Subtitle "Incoming key to field mapping." Panel with a Source Key -> Target Field table.
+// apikeys      -> SettingsApiKeys. Subtitle "Gateway and supplier keys." A Gateway API key card with Copy, plus the
+//                 ApiKey table (name, type master/supplier, expose_revenue, key) with create and revoke.
+// errors       -> ErrorLogs (embedded). Subtitle "Pipeline failures and reasons." Panel with the ErrorLog table (time,
+//                 function, message) + filters + Resolve All Visible.
+// knowledge    -> SettingsKnowledgeBase. Subtitle "Docs the AI assistant reads." Panel with the KnowledgeDoc list + Create + editor.
+// billing      -> SettingsBilling. Subtitle "Plan and billing." Panel with the current plan, Add card, and billing summary.
+//
+// Each panel content sits inside the Panel look (bg-card, border-border, rounded-xl, soft shadow); tables use the
+// uppercase micro-label headers, right-aligned numeric columns where relevant, row hover, and rise-in motion. Keep
+// every existing dialog, CRUD action, and permission gate.

@@ -1,0 +1,3636 @@
+{
+  "generated_at": "2026-07-30T23:35:05.725Z",
+  "generator": "scripts/generate-backend-summary.mjs",
+  "counts": {
+    "functions": 89,
+    "documented": 36,
+    "undocumented": 53,
+    "read_only": 37,
+    "no_auth_detected": 1,
+    "entities": 75,
+    "entities_without_rls": 47
+  },
+  "functions": [
+    {
+      "name": "adManagerInsights",
+      "file": "base44/functions/adManagerInsights/entry.ts",
+      "lines": 84,
+      "headline": "",
+      "detail": [],
+      "documented": false,
+      "reads": [],
+      "writes": [],
+      "read_only": true,
+      "uses_service_role": false,
+      "auth_style": "session_only",
+      "external_hosts": [
+        "api.openai.com"
+      ],
+      "red_surfaces": [
+        "credentials"
+      ]
+    },
+    {
+      "name": "allocateBuyerCode",
+      "file": "base44/functions/allocateBuyerCode/entry.ts",
+      "lines": 87,
+      "headline": "Allocates the next buyer_code for a given client_type.",
+      "detail": [
+        "Reads and increments a per-prefix Counter using the service role, then returns the code. Never creates the Buyer record. Access rules mirror operationsData exactly."
+      ],
+      "documented": true,
+      "reads": [
+        "Buyer",
+        "Counter",
+        "User"
+      ],
+      "writes": [
+        "Counter"
+      ],
+      "read_only": false,
+      "uses_service_role": true,
+      "auth_style": "operator_session",
+      "external_hosts": [],
+      "red_surfaces": []
+    },
+    {
+      "name": "auditRun",
+      "file": "base44/functions/auditRun/entry.ts",
+      "lines": 291,
+      "headline": "Runtime layer of the evaluation harness.",
+      "detail": [
+        "See Settings > Audits. auditRun. OPERATOR-ONLY, READ-ONLY evaluation harness (runtime layer).",
+        "Runs a set of runtime probes against the live app and records the result of every probe (passes included) as AuditFinding rows joined to one AuditRun. The row set is the log: a probe that silently stops running is distinguishable from a probe that passed only because every run states a verdict.",
+        "HARD INVARIANT: this function writes ONLY to AuditRun and AuditFinding. It NEVER creates, updates, or deletes any operational entity, and it NEVER writes distribution_mode, connector enabled states, Conversion Events, credentials, billing, Deliveries, or Leads. distribution_mode is READ, never written; the only sanctioned writer of that field is distributionSetMode. Every operational entity below is reached through read methods (list / filter) exclusively.",
+        "Authorization runs BEFORE any service-role read. Rejected for supplier/buyer/ portal accounts and callers without an operator permission, mirroring operationsData and distributionSimulate exactly."
+      ],
+      "documented": true,
+      "reads": [
+        "AppSettings",
+        "AuditFinding",
+        "AuditRun",
+        "Buyer",
+        "Campaign",
+        "Delivery",
+        "LeadByteConnector",
+        "RouteGroup",
+        "RouteMember",
+        "User"
+      ],
+      "writes": [
+        "AuditFinding",
+        "AuditRun"
+      ],
+      "read_only": false,
+      "uses_service_role": true,
+      "auth_style": "operator_session",
+      "external_hosts": [],
+      "red_surfaces": [
+        "processLead",
+        "leadbyte_connectors",
+        "distribution_mode",
+        "credentials"
+      ]
+    },
+    {
+      "name": "backfillLeadType",
+      "file": "base44/functions/backfillLeadType/entry.ts",
+      "lines": 142,
+      "headline": "Operator-only utility to backfill the lead_type field on leads that were imported or created without one.",
+      "detail": [
+        "lead_type lives inside the mapped_fields JSON string (the leads table and lead detail popup read it from there), so a plain updateMany cannot set it: each record needs its own JSON parsed, patched, and written back. This function does that server-side against live data, paging the whole table.",
+        "Per Nick's rule on 20 July 2026, lead_type derives from the supplier sid: sid LEADFLOW or LGNX -> \"Quiz\" (our own quiz funnels) anything else -> \"Affiliate\" (INBNDS and any future affiliate)",
+        "The operation is idempotent: a lead that already has a non-empty lead_type is never touched, so re-running is safe."
+      ],
+      "documented": true,
+      "reads": [
+        "Lead"
+      ],
+      "writes": [
+        "Lead"
+      ],
+      "read_only": false,
+      "uses_service_role": true,
+      "auth_style": "operator_session",
+      "external_hosts": [],
+      "red_surfaces": []
+    },
+    {
+      "name": "bulkDeleteLeads",
+      "file": "base44/functions/bulkDeleteLeads/entry.ts",
+      "lines": 83,
+      "headline": "Operator-gated bulk delete for Lead records.",
+      "detail": [
+        "The client cannot delete thousands of admin-RLS leads reliably in a per-record loop, so this deletes server side with the service role in chunks.",
+        "Accepts either: { ids: [\"..\", \"..\"] } delete these specific leads { all: true, filter: {..} } delete every lead matching the filter",
+        "Returns { deleted }."
+      ],
+      "documented": true,
+      "reads": [
+        "Lead",
+        "User"
+      ],
+      "writes": [
+        "Lead"
+      ],
+      "read_only": false,
+      "uses_service_role": true,
+      "auth_style": "operator_session",
+      "external_hosts": [],
+      "red_surfaces": []
+    },
+    {
+      "name": "buyerFeedbackWebhook",
+      "file": "base44/functions/buyerFeedbackWebhook/entry.ts",
+      "lines": 143,
+      "headline": "Public buyer feedback webhook (/functions/buyerFeedbackWebhook).",
+      "detail": [
+        "Buyers POST feedback here. We authenticate with a per-buyer feedback token, match the lead by phone or email, AI-map the buyer's raw disposition to our taxonomy, and persist a BuyerFeedback record (source = webhook)."
+      ],
+      "documented": true,
+      "reads": [
+        "Buyer",
+        "Lead"
+      ],
+      "writes": [
+        "BuyerFeedback",
+        "Lead"
+      ],
+      "read_only": false,
+      "uses_service_role": true,
+      "auth_style": "api_key",
+      "external_hosts": [
+        "api.openai.com"
+      ],
+      "red_surfaces": [
+        "credentials"
+      ]
+    },
+    {
+      "name": "callWebhook",
+      "file": "base44/functions/callWebhook/entry.ts",
+      "lines": 108,
+      "headline": "Inbound call webhook for Ringba and TrueCall.",
+      "detail": [
+        "Each call source has its own endpoint key (?key=...). Incoming call events are mapped from the call payload to our lead schema and ingested through processLead, so validation, dedup, CAPI and revenue all run there. Leads appear in the leads views with source = the call provider.",
+        "URL: /functions/callWebhook?key=<webhook_key> The key identifies which LeadSource (and therefore provider + mapping + supplier/campaign attribution) this event belongs to."
+      ],
+      "documented": true,
+      "reads": [
+        "ApiKey",
+        "LeadSource"
+      ],
+      "writes": [
+        "ErrorLog",
+        "LeadSource"
+      ],
+      "read_only": false,
+      "uses_service_role": true,
+      "auth_style": "api_key",
+      "external_hosts": [],
+      "red_surfaces": [
+        "processLead",
+        "credentials"
+      ]
+    },
+    {
+      "name": "campaignDeliveryTest",
+      "file": "base44/functions/campaignDeliveryTest/entry.ts",
+      "lines": 99,
+      "headline": "",
+      "detail": [],
+      "documented": false,
+      "reads": [
+        "AppSettings",
+        "Delivery",
+        "IntegrationConfig",
+        "SubDelivery",
+        "User"
+      ],
+      "writes": [
+        "DistributionAudit"
+      ],
+      "read_only": false,
+      "uses_service_role": true,
+      "auth_style": "session_only",
+      "external_hosts": [],
+      "red_surfaces": [
+        "distribution_mode",
+        "credentials"
+      ]
+    },
+    {
+      "name": "cancelInvitation",
+      "file": "base44/functions/cancelInvitation/entry.ts",
+      "lines": 19,
+      "headline": "",
+      "detail": [],
+      "documented": false,
+      "reads": [],
+      "writes": [
+        "Invitation"
+      ],
+      "read_only": false,
+      "uses_service_role": true,
+      "auth_style": "operator_session",
+      "external_hosts": [],
+      "red_surfaces": []
+    },
+    {
+      "name": "categorizeTransactions",
+      "file": "base44/functions/categorizeTransactions/entry.ts",
+      "lines": 114,
+      "headline": "",
+      "detail": [],
+      "documented": false,
+      "reads": [
+        "BankTransaction",
+        "IntegrationConfig"
+      ],
+      "writes": [
+        "BankTransaction"
+      ],
+      "read_only": false,
+      "uses_service_role": true,
+      "auth_style": "operator_session",
+      "external_hosts": [
+        "api.openai.com"
+      ],
+      "red_surfaces": [
+        "credentials"
+      ]
+    },
+    {
+      "name": "contract",
+      "file": "base44/functions/contract/entry.ts",
+      "lines": 271,
+      "headline": "Read-only, machine-readable intake contract per Campaign.",
+      "detail": [
+        "Lets external landers, quizzes, and AI intake builders discover exactly which fields to collect for a given campaign, without ever leaking revenue, buyers, delivery endpoints, connector config, filters, or private fields.",
+        "GET /functions/contract - no ?campaign => list of campaigns the key may read - ?campaign=<id or exact name> => the full contract object for that campaign",
+        "Auth: required X-API-KEY header, resolved against the ApiKey entity. master key => any campaign where contract_enabled is true supplier key => only campaigns whose supplier_ids contains that supplier id No/unknown/inactive key => 401."
+      ],
+      "documented": true,
+      "reads": [
+        "ApiKey",
+        "Campaign",
+        "CustomCalculation",
+        "CustomField"
+      ],
+      "writes": [
+        "ErrorLog"
+      ],
+      "read_only": false,
+      "uses_service_role": true,
+      "auth_style": "api_key",
+      "external_hosts": [],
+      "red_surfaces": [
+        "credentials",
+        "trustedform"
+      ]
+    },
+    {
+      "name": "dataBot",
+      "file": "base44/functions/dataBot/entry.ts",
+      "lines": 1065,
+      "headline": "DataBot: answers questions about the app's own data + a curated Knowledge Base.",
+      "detail": [
+        "Uses OpenAI (OPENAI_API_KEY secret).",
+        "ARCHITECTURE (rewritten 30 July 2026) ------------------------------------- The previous version pre-computed every dimension against every period and stringified the lot into a single prompt. That payload ran well past 100k characters, so the model was doing needle-in-a-haystack retrieval and hedged with \"the data does not specify\" even when the number was present. Adding more instruction text could not fix a retrieval problem.",
+        "This version is a two-pass query tool: 1. PLAN a small model call turns the question into a structured query spec (entity refs, group_by, period, top_n). No data in scope. 2. EXECUTE the spec runs deterministically here in TypeScript. Counting is never done by the model. 3. NARRATE a second model call sees the question plus a small result object (typically well under 4k characters) and writes the answer.",
+        "Entity resolution is a real index: every supplier and buyer is registered under all of its aliases (name, sid, ssid, buyer_code, buyer id) and matched on word boundaries, so \"Inbounds\" no longer fires on the word \"inbound\"."
+      ],
+      "documented": true,
+      "reads": [
+        "AdSpend",
+        "BankTransaction",
+        "BotConfig",
+        "Buyer",
+        "BuyerFeedback",
+        "ChatConversation",
+        "ChatMemory",
+        "KnowledgeDoc",
+        "Lead",
+        "ReturnRequest",
+        "Supplier"
+      ],
+      "writes": [
+        "ChatConversation",
+        "ChatMemory"
+      ],
+      "read_only": false,
+      "uses_service_role": true,
+      "auth_style": "operator_session",
+      "external_hosts": [
+        "api.openai.com"
+      ],
+      "red_surfaces": [
+        "processLead",
+        "leadbyte_connectors",
+        "conversion_events",
+        "distribution_mode",
+        "credentials",
+        "billing",
+        "buyer_pricing",
+        "trustedform",
+        "portal_scoping"
+      ]
+    },
+    {
+      "name": "dedupeLeads",
+      "file": "base44/functions/dedupeLeads/entry.ts",
+      "lines": 177,
+      "headline": "Find and optionally remove duplicate leads.",
+      "detail": [
+        "A double-run CSV import on 19 July 2026 wrote 40+ leads twice under a single import_batch_id, inflating every Sold count in the app. The importer now blocks on duplicates and asks, but the records already written need cleaning.",
+        "Two modes: { mode: 'scan' } (default) reports what it would do and changes nothing { mode: 'apply' } deletes the redundant copies",
+        "The OLDEST record in each group is always kept, because it is the one other records (deliveries, billing, events) were written against. Newer copies are merged into it first: any field the keeper is missing but a duplicate has is copied across, so removing the copy cannot lose data.",
+        "Operator-gated. Never exposed to portal users."
+      ],
+      "documented": true,
+      "reads": [
+        "Lead"
+      ],
+      "writes": [
+        "Lead"
+      ],
+      "read_only": false,
+      "uses_service_role": true,
+      "auth_style": "operator_session",
+      "external_hosts": [],
+      "red_surfaces": [
+        "trustedform"
+      ]
+    },
+    {
+      "name": "disconnectMetaConnection",
+      "file": "base44/functions/disconnectMetaConnection/entry.ts",
+      "lines": 45,
+      "headline": "",
+      "detail": [],
+      "documented": false,
+      "reads": [
+        "MetaConnection",
+        "SupplierAdAccount"
+      ],
+      "writes": [
+        "MetaConnection",
+        "SupplierAdAccount"
+      ],
+      "read_only": false,
+      "uses_service_role": true,
+      "auth_style": "operator_session",
+      "external_hosts": [],
+      "red_surfaces": []
+    },
+    {
+      "name": "distributionConfig",
+      "file": "base44/functions/distributionConfig/entry.ts",
+      "lines": 99,
+      "headline": "Caller model: OPERATOR-ONLY.",
+      "detail": [
+        "Route configuration lifecycle: create_draft, update_draft, validate, publish, pause, archive, rollback. Authorization runs BEFORE any service-role read/write via the shared isOperator predicate. Publish is fail-closed (server-side validation) and creates an IMMUTABLE RouteConfigVersion plus a DistributionAudit record. Published configs are never hard deleted (archive only, with a referential check)."
+      ],
+      "documented": true,
+      "reads": [
+        "Buyer",
+        "LeadByteConnector",
+        "RouteConfigVersion",
+        "RouteGroup",
+        "RouteMember",
+        "User"
+      ],
+      "writes": [
+        "DistributionAudit",
+        "RouteConfigVersion",
+        "RouteGroup"
+      ],
+      "read_only": false,
+      "uses_service_role": true,
+      "auth_style": "session_only",
+      "external_hosts": [],
+      "red_surfaces": [
+        "leadbyte_connectors"
+      ]
+    },
+    {
+      "name": "distributionInsights",
+      "file": "base44/functions/distributionInsights/entry.ts",
+      "lines": 52,
+      "headline": "",
+      "detail": [],
+      "documented": false,
+      "reads": [],
+      "writes": [],
+      "read_only": true,
+      "uses_service_role": false,
+      "auth_style": "session_only",
+      "external_hosts": [
+        "api.openai.com"
+      ],
+      "red_surfaces": [
+        "credentials"
+      ]
+    },
+    {
+      "name": "distributionSetMode",
+      "file": "base44/functions/distributionSetMode/entry.ts",
+      "lines": 40,
+      "headline": "Caller model: OPERATOR-ONLY.",
+      "detail": [
+        "Audited distribution_mode transition. This is the ONLY sanctioned way to change AppSettings.distribution_mode: it validates the transition, writes a DistributionAudit record (who/when/from/to/reason), then updates the setting. Authorization runs BEFORE any service-role access."
+      ],
+      "documented": true,
+      "reads": [
+        "AppSettings",
+        "User"
+      ],
+      "writes": [
+        "AppSettings",
+        "DistributionAudit"
+      ],
+      "read_only": false,
+      "uses_service_role": true,
+      "auth_style": "session_only",
+      "external_hosts": [],
+      "red_surfaces": [
+        "distribution_mode"
+      ]
+    },
+    {
+      "name": "distributionShadowReport",
+      "file": "base44/functions/distributionShadowReport/entry.ts",
+      "lines": 73,
+      "headline": "Caller model: OPERATOR-ONLY.",
+      "detail": [
+        "Read-only shadow-comparison report. Pairs recent legacy Lead outcomes with their RouteDecisionTrace records and returns the full discrepancy taxonomy. Authorization runs BEFORE any service-role read. Rejected if base_role is supplier or buyer, or if linked_buyer_id / linked_supplier_id is set (portal accounts), or without an operator permission. Never writes anything."
+      ],
+      "documented": true,
+      "reads": [
+        "Lead",
+        "RouteDecisionTrace",
+        "RouteMember",
+        "User"
+      ],
+      "writes": [],
+      "read_only": true,
+      "uses_service_role": true,
+      "auth_style": "operator_session",
+      "external_hosts": [],
+      "red_surfaces": []
+    },
+    {
+      "name": "distributionSimulate",
+      "file": "base44/functions/distributionSimulate/entry.ts",
+      "lines": 46,
+      "headline": "Caller model: OPERATOR-ONLY.",
+      "detail": [
+        "Route simulator against the REAL published config. Loads the actual snapshot through the same loader as production, runs the ONE canonical engine, and returns a redacted trace marked simulated. Performs ZERO writes and ZERO sends (reads only). Authorization runs BEFORE any service-role read. Rejected for supplier/buyer/portal accounts and callers without an operator permission."
+      ],
+      "documented": true,
+      "reads": [
+        "User"
+      ],
+      "writes": [],
+      "read_only": true,
+      "uses_service_role": true,
+      "auth_style": "operator_session",
+      "external_hosts": [],
+      "red_surfaces": []
+    },
+    {
+      "name": "generateBillingRun",
+      "file": "base44/functions/generateBillingRun/entry.ts",
+      "lines": 701,
+      "headline": "generateBillingRun",
+      "detail": [
+        "Computes a billing run for one counterparty (a buyer or a supplier) over one period, and optionally commits it as a BillingRun plus its BillingLineItem rows. This function never creates an Invoice, never charges anything, never touches Stripe or Xero, and never writes BuyerPayment / SupplierPayout / WalletTransaction records. Issuing is a separate later build.",
+        "Preview vs commit: - commit=false (default): compute everything, write nothing, return the result. - commit=true: write the BillingRun and its BillingLineItem rows, respecting idempotency (see the double-billing guard below).",
+        "Access rules are copied from operationsData exactly (operator only)."
+      ],
+      "documented": true,
+      "reads": [
+        "BillingRun",
+        "Buyer",
+        "Supplier",
+        "User"
+      ],
+      "writes": [
+        "BillingLineItem",
+        "BillingRun"
+      ],
+      "read_only": false,
+      "uses_service_role": true,
+      "auth_style": "operator_session",
+      "external_hosts": [],
+      "red_surfaces": [
+        "processLead",
+        "credentials",
+        "billing",
+        "buyer_pricing"
+      ]
+    },
+    {
+      "name": "getOnboardingContext",
+      "file": "base44/functions/getOnboardingContext/entry.ts",
+      "lines": 39,
+      "headline": "",
+      "detail": [],
+      "documented": false,
+      "reads": [
+        "Buyer",
+        "BuyerOnboarding"
+      ],
+      "writes": [],
+      "read_only": true,
+      "uses_service_role": true,
+      "auth_style": "route_token",
+      "external_hosts": [],
+      "red_surfaces": [
+        "credentials"
+      ]
+    },
+    {
+      "name": "health",
+      "file": "base44/functions/health/entry.ts",
+      "lines": 3,
+      "headline": "",
+      "detail": [],
+      "documented": false,
+      "reads": [],
+      "writes": [],
+      "read_only": true,
+      "uses_service_role": false,
+      "auth_style": "none_detected",
+      "external_hosts": [],
+      "red_surfaces": []
+    },
+    {
+      "name": "integrationStatus",
+      "file": "base44/functions/integrationStatus/entry.ts",
+      "lines": 47,
+      "headline": "",
+      "detail": [],
+      "documented": false,
+      "reads": [
+        "IntegrationConfig"
+      ],
+      "writes": [],
+      "read_only": true,
+      "uses_service_role": true,
+      "auth_style": "session_only",
+      "external_hosts": [],
+      "red_surfaces": []
+    },
+    {
+      "name": "leadbyteWebhook",
+      "file": "base44/functions/leadbyteWebhook/entry.ts",
+      "lines": 414,
+      "headline": "",
+      "detail": [],
+      "documented": false,
+      "reads": [
+        "InboundWebhookRoute",
+        "Lead",
+        "Supplier"
+      ],
+      "writes": [
+        "ErrorLog",
+        "InboundWebhookRoute",
+        "Lead"
+      ],
+      "read_only": false,
+      "uses_service_role": true,
+      "auth_style": "route_token",
+      "external_hosts": [],
+      "red_surfaces": [
+        "processLead",
+        "leadbyte_connectors",
+        "trustedform"
+      ]
+    },
+    {
+      "name": "leads",
+      "file": "base44/functions/leads/entry.ts",
+      "lines": 79,
+      "headline": "Public lead intake endpoint (/functions/leads) Delegates the ENTIRE lead-processing pipeline to processLead so there is a single source of truth.",
+      "detail": [
+        "processLead handles: API-key auth, HLR, custom calculations, TrustedForm gate, required-fields gate, LeadByte connector filters & field conditions (with DQ routing), revenue capture, Facebook CAPI + Deliveries firing on all triggers, duplicate handling, response mapping, and outbound webhooks.",
+        "This wrapper handles CORS and injects the supplier API key from headers into the payload (as _supplier_key) so processLead can find it."
+      ],
+      "documented": true,
+      "reads": [],
+      "writes": [],
+      "read_only": true,
+      "uses_service_role": true,
+      "auth_style": "api_key",
+      "external_hosts": [],
+      "red_surfaces": [
+        "processLead",
+        "trustedform"
+      ]
+    },
+    {
+      "name": "linkAdAccountToSupplier",
+      "file": "base44/functions/linkAdAccountToSupplier/entry.ts",
+      "lines": 99,
+      "headline": "",
+      "detail": [],
+      "documented": false,
+      "reads": [
+        "MetaConnection",
+        "Supplier",
+        "SupplierAdAccount"
+      ],
+      "writes": [
+        "SupplierAdAccount"
+      ],
+      "read_only": false,
+      "uses_service_role": true,
+      "auth_style": "operator_session",
+      "external_hosts": [],
+      "red_surfaces": []
+    },
+    {
+      "name": "listUsers",
+      "file": "base44/functions/listUsers/entry.ts",
+      "lines": 54,
+      "headline": "",
+      "detail": [],
+      "documented": false,
+      "reads": [
+        "Invitation",
+        "User"
+      ],
+      "writes": [],
+      "read_only": true,
+      "uses_service_role": true,
+      "auth_style": "operator_session",
+      "external_hosts": [],
+      "red_surfaces": []
+    },
+    {
+      "name": "manageSupplierAdAccount",
+      "file": "base44/functions/manageSupplierAdAccount/entry.ts",
+      "lines": 81,
+      "headline": "",
+      "detail": [],
+      "documented": false,
+      "reads": [
+        "AdSpend",
+        "Supplier",
+        "SupplierAdAccount"
+      ],
+      "writes": [
+        "AdSpend",
+        "SupplierAdAccount"
+      ],
+      "read_only": false,
+      "uses_service_role": true,
+      "auth_style": "operator_session",
+      "external_hosts": [],
+      "red_surfaces": []
+    },
+    {
+      "name": "mapMetaCampaigns",
+      "file": "base44/functions/mapMetaCampaigns/entry.ts",
+      "lines": 95,
+      "headline": "",
+      "detail": [],
+      "documented": false,
+      "reads": [
+        "AdSpendMapping",
+        "Supplier",
+        "SupplierAdAccount"
+      ],
+      "writes": [
+        "AdSpendMapping",
+        "SupplierAdAccount"
+      ],
+      "read_only": false,
+      "uses_service_role": true,
+      "auth_style": "operator_session",
+      "external_hosts": [],
+      "red_surfaces": []
+    },
+    {
+      "name": "metaAccountCampaigns",
+      "file": "base44/functions/metaAccountCampaigns/entry.ts",
+      "lines": 62,
+      "headline": "",
+      "detail": [],
+      "documented": false,
+      "reads": [
+        "MetaConnection"
+      ],
+      "writes": [],
+      "read_only": true,
+      "uses_service_role": true,
+      "auth_style": "operator_session",
+      "external_hosts": [],
+      "red_surfaces": []
+    },
+    {
+      "name": "metaAdAccountsOverview",
+      "file": "base44/functions/metaAdAccountsOverview/entry.ts",
+      "lines": 105,
+      "headline": "",
+      "detail": [],
+      "documented": false,
+      "reads": [
+        "AdSpendMapping",
+        "IntegrationConfig",
+        "MetaConnection",
+        "SupplierAdAccount"
+      ],
+      "writes": [],
+      "read_only": true,
+      "uses_service_role": true,
+      "auth_style": "operator_session",
+      "external_hosts": [],
+      "red_surfaces": []
+    },
+    {
+      "name": "metaAssets",
+      "file": "base44/functions/metaAssets/entry.ts",
+      "lines": 125,
+      "headline": "",
+      "detail": [],
+      "documented": false,
+      "reads": [
+        "IntegrationConfig",
+        "MetaConnection"
+      ],
+      "writes": [],
+      "read_only": true,
+      "uses_service_role": true,
+      "auth_style": "operator_session",
+      "external_hosts": [],
+      "red_surfaces": []
+    },
+    {
+      "name": "metaBusinesses",
+      "file": "base44/functions/metaBusinesses/entry.ts",
+      "lines": 110,
+      "headline": "",
+      "detail": [],
+      "documented": false,
+      "reads": [
+        "MetaConnection"
+      ],
+      "writes": [],
+      "read_only": true,
+      "uses_service_role": true,
+      "auth_style": "operator_session",
+      "external_hosts": [
+        "graph.facebook.com"
+      ],
+      "red_surfaces": []
+    },
+    {
+      "name": "metaCampaignMappings",
+      "file": "base44/functions/metaCampaignMappings/entry.ts",
+      "lines": 101,
+      "headline": "",
+      "detail": [],
+      "documented": false,
+      "reads": [
+        "AdSpendMapping",
+        "IntegrationConfig",
+        "SupplierAdAccount"
+      ],
+      "writes": [
+        "AdSpendMapping",
+        "IntegrationConfig",
+        "SupplierAdAccount"
+      ],
+      "read_only": false,
+      "uses_service_role": true,
+      "auth_style": "operator_session",
+      "external_hosts": [],
+      "red_surfaces": []
+    },
+    {
+      "name": "metaConnectionStatus",
+      "file": "base44/functions/metaConnectionStatus/entry.ts",
+      "lines": 143,
+      "headline": "",
+      "detail": [],
+      "documented": false,
+      "reads": [
+        "AdSpend",
+        "IntegrationConfig",
+        "MetaConnection",
+        "SupplierAdAccount"
+      ],
+      "writes": [],
+      "read_only": true,
+      "uses_service_role": true,
+      "auth_style": "operator_session",
+      "external_hosts": [],
+      "red_surfaces": [
+        "credentials"
+      ]
+    },
+    {
+      "name": "metaLeadFormMappings",
+      "file": "base44/functions/metaLeadFormMappings/entry.ts",
+      "lines": 107,
+      "headline": "",
+      "detail": [],
+      "documented": false,
+      "reads": [
+        "Campaign",
+        "MetaLeadFormMapping",
+        "Supplier"
+      ],
+      "writes": [
+        "MetaLeadFormMapping"
+      ],
+      "read_only": false,
+      "uses_service_role": true,
+      "auth_style": "operator_session",
+      "external_hosts": [],
+      "red_surfaces": []
+    },
+    {
+      "name": "metaLeadForms",
+      "file": "base44/functions/metaLeadForms/entry.ts",
+      "lines": 106,
+      "headline": "",
+      "detail": [],
+      "documented": false,
+      "reads": [
+        "MetaConnection"
+      ],
+      "writes": [],
+      "read_only": true,
+      "uses_service_role": true,
+      "auth_style": "operator_session",
+      "external_hosts": [],
+      "red_surfaces": []
+    },
+    {
+      "name": "metaOauthCallback",
+      "file": "base44/functions/metaOauthCallback/entry.ts",
+      "lines": 142,
+      "headline": "",
+      "detail": [],
+      "documented": false,
+      "reads": [
+        "IntegrationConfig",
+        "MetaConnection"
+      ],
+      "writes": [
+        "IntegrationConfig",
+        "MetaConnection"
+      ],
+      "read_only": false,
+      "uses_service_role": true,
+      "auth_style": "route_token",
+      "external_hosts": [
+        "graph.facebook.com"
+      ],
+      "red_surfaces": [
+        "credentials"
+      ]
+    },
+    {
+      "name": "metaOauthStart",
+      "file": "base44/functions/metaOauthStart/entry.ts",
+      "lines": 103,
+      "headline": "",
+      "detail": [],
+      "documented": false,
+      "reads": [
+        "IntegrationConfig"
+      ],
+      "writes": [
+        "IntegrationConfig"
+      ],
+      "read_only": false,
+      "uses_service_role": true,
+      "auth_style": "operator_session",
+      "external_hosts": [],
+      "red_surfaces": [
+        "credentials"
+      ]
+    },
+    {
+      "name": "metaSyncHistory",
+      "file": "base44/functions/metaSyncHistory/entry.ts",
+      "lines": 55,
+      "headline": "",
+      "detail": [],
+      "documented": false,
+      "reads": [
+        "MetaSyncRun"
+      ],
+      "writes": [],
+      "read_only": true,
+      "uses_service_role": true,
+      "auth_style": "operator_session",
+      "external_hosts": [],
+      "red_surfaces": []
+    },
+    {
+      "name": "migrateMetaConnector",
+      "file": "base44/functions/migrateMetaConnector/entry.ts",
+      "lines": 178,
+      "headline": "",
+      "detail": [],
+      "documented": false,
+      "reads": [
+        "AdSpend",
+        "AdSpendMapping",
+        "IntegrationConfig",
+        "MetaConnection",
+        "Supplier",
+        "SupplierAdAccount"
+      ],
+      "writes": [
+        "AdSpend",
+        "MetaConnection",
+        "SupplierAdAccount"
+      ],
+      "read_only": false,
+      "uses_service_role": true,
+      "auth_style": "operator_session",
+      "external_hosts": [],
+      "red_surfaces": []
+    },
+    {
+      "name": "mintOnboardingLink",
+      "file": "base44/functions/mintOnboardingLink/entry.ts",
+      "lines": 80,
+      "headline": "Mint a per-buyer onboarding link record and token when a buyer is created.",
+      "detail": [
+        "Operator only. This endpoint never sends email, never modifies the Buyer, returns JSON only, and never logs secrets.",
+        "Access rules match operatorData/entry.ts: - Must be an authenticated Base44 session. - Rejected if base_role is supplier or buyer, or if linked_buyer_id / linked_supplier_id is set (those are portal accounts, not operators). - Must have at least one operator permission set true, or role admin."
+      ],
+      "documented": true,
+      "reads": [
+        "Buyer",
+        "BuyerOnboarding",
+        "User"
+      ],
+      "writes": [
+        "BuyerOnboarding"
+      ],
+      "read_only": false,
+      "uses_service_role": true,
+      "auth_style": "operator_session",
+      "external_hosts": [],
+      "red_surfaces": []
+    },
+    {
+      "name": "nightlyStateStatusRecompute",
+      "file": "base44/functions/nightlyStateStatusRecompute/entry.ts",
+      "lines": 38,
+      "headline": "Nightly safety net that repairs drift between StateStatus and the underlying Buyer and BuyerStateCpl data.",
+      "detail": [
+        "It calls the existing recomputeStateStatus once per night with emit_events: false. That flag is essential here: the nightly repair upserts StateStatus exactly as normal but writes no StateChangeEvent rows, so it can reconcile drift without generating a wave of supplier digests. This job must never send notifications for changes it merely reconciled.",
+        "Scheduled once daily in the early morning of the app timezone (America/Regina). Returns the recompute summary. recomputeStateStatus is not modified; this job only invokes it."
+      ],
+      "documented": true,
+      "reads": [],
+      "writes": [],
+      "read_only": true,
+      "uses_service_role": true,
+      "auth_style": "operator_session",
+      "external_hosts": [],
+      "red_surfaces": [
+        "buyer_pricing"
+      ]
+    },
+    {
+      "name": "notifyStateChange",
+      "file": "base44/functions/notifyStateChange/entry.ts",
+      "lines": 227,
+      "headline": "",
+      "detail": [],
+      "documented": false,
+      "reads": [
+        "IntegrationConfig"
+      ],
+      "writes": [
+        "StateChangeEvent"
+      ],
+      "read_only": false,
+      "uses_service_role": true,
+      "auth_style": "operator_session",
+      "external_hosts": [
+        "slack.com"
+      ],
+      "red_surfaces": []
+    },
+    {
+      "name": "onboardBuyer",
+      "file": "base44/functions/onboardBuyer/entry.ts",
+      "lines": 899,
+      "headline": "Operator-only buyer onboarding orchestrator (/functions/onboardBuyer).",
+      "detail": [
+        "Drives a BuyerOnboarding record through the full ordered list of steps: validate, create_buyer, allocate_code, xero_contact, stripe_customer, deposit_invoice, xero_invoice, payment_link, leadbyte_buyer, dispo_scope, onboarding_email, crm_contact, schedule_intro_email.",
+        "Each step is idempotent: a step holding an external_id (or already marked complete or skipped) is never re run, so a retry never calls a remote system twice. On a failure the step records the error, status becomes blocked and current_step is set to the failed step, and the run stops.",
+        "Provider credentials are read from the same storage the existing sync functions use (IntegrationConfig for Xero and Stripe, the default LeadByte connector header for the LeadByte key). Secrets are never written into the steps array, an error message, or a log line.",
+        "The buyer is always created in draft and is never made active here."
+      ],
+      "documented": true,
+      "reads": [
+        "Buyer",
+        "BuyerOnboarding",
+        "IntegrationConfig",
+        "LeadByteConnector",
+        "OnboardingEmailTemplate",
+        "User"
+      ],
+      "writes": [
+        "Buyer",
+        "BuyerOnboarding"
+      ],
+      "read_only": false,
+      "uses_service_role": true,
+      "auth_style": "operator_session",
+      "external_hosts": [
+        "api.rebrandly.com",
+        "api.stripe.com",
+        "api.xero.com",
+        "services.leadconnectorhq.com"
+      ],
+      "red_surfaces": [
+        "leadbyte_connectors",
+        "credentials",
+        "billing",
+        "buyer_pricing"
+      ]
+    },
+    {
+      "name": "operationsData",
+      "file": "base44/functions/operationsData/entry.ts",
+      "lines": 264,
+      "headline": "Server-side aggregation endpoint for the Operations Dashboard.",
+      "detail": [
+        "Never returns raw Lead rows: all counts are computed here via the service role.",
+        "Access rules mirror operatorData exactly: - Must be an authenticated Base44 session. - Rejected if base_role is supplier or buyer, or if linked_buyer_id / linked_supplier_id is set (those are portal accounts, not operators). - Must have at least one operator permission set true (or be an admin).",
+        "Read-only: this endpoint never creates, updates, or deletes anything."
+      ],
+      "documented": true,
+      "reads": [
+        "Lead",
+        "User"
+      ],
+      "writes": [],
+      "read_only": true,
+      "uses_service_role": true,
+      "auth_style": "operator_session",
+      "external_hosts": [],
+      "red_surfaces": [
+        "buyer_pricing"
+      ]
+    },
+    {
+      "name": "operatorData",
+      "file": "base44/functions/operatorData/entry.ts",
+      "lines": 69,
+      "headline": "Read-only Lead data endpoint for operator users.",
+      "detail": [
+        "Lead has admin-only RLS, so platform role \"user\" (base_role manager) gets empty results from client-side Lead reads. This serves those reads via the service role, gated to operators.",
+        "Access rules: - Must be an authenticated Base44 session. - Rejected if base_role is supplier or buyer, or if linked_buyer_id / linked_supplier_id is set (those are portal accounts, not operators). - Must have at least one operator permission set true.",
+        "Read-only: this endpoint never creates, updates, or deletes anything."
+      ],
+      "documented": true,
+      "reads": [
+        "Lead",
+        "User"
+      ],
+      "writes": [],
+      "read_only": true,
+      "uses_service_role": true,
+      "auth_style": "operator_session",
+      "external_hosts": [],
+      "red_surfaces": []
+    },
+    {
+      "name": "overviewBriefing",
+      "file": "base44/functions/overviewBriefing/entry.ts",
+      "lines": 44,
+      "headline": "",
+      "detail": [],
+      "documented": false,
+      "reads": [],
+      "writes": [],
+      "read_only": true,
+      "uses_service_role": false,
+      "auth_style": "session_only",
+      "external_hosts": [
+        "api.openai.com"
+      ],
+      "red_surfaces": [
+        "credentials"
+      ]
+    },
+    {
+      "name": "portalAction",
+      "file": "base44/functions/portalAction/entry.ts",
+      "lines": 84,
+      "headline": "Authenticated buyer-portal write endpoint.",
+      "detail": [
+        "Handles two actions, both strictly scoped to the caller's buyer_id: - request_return: create a ReturnRequest for one of the buyer's own leads. - add_feedback: create a manual BuyerFeedback record for one of the buyer's leads."
+      ],
+      "documented": true,
+      "reads": [
+        "Buyer",
+        "Lead"
+      ],
+      "writes": [
+        "BuyerFeedback",
+        "Lead",
+        "ReturnRequest"
+      ],
+      "read_only": false,
+      "uses_service_role": true,
+      "auth_style": "operator_session",
+      "external_hosts": [],
+      "red_surfaces": []
+    },
+    {
+      "name": "portalData",
+      "file": "base44/functions/portalData/entry.ts",
+      "lines": 77,
+      "headline": "Caller model: BUYER-SCOPED.",
+      "detail": [
+        "Authenticated buyer-portal data endpoint. Returns everything the portal needs, strictly scoped to a single buyer_id. Uses the service role to read Lead (admin-RLS) but never returns another buyer's data, raw payloads, routing traces, or internal cost/margin. Deny-by-default allowlist.",
+        "Scoping rules: - A buyer-role user is scoped to their own user.linked_buyer_id. - An operator (admin) may pass ?buyer_id= to PREVIEW a buyer's portal. Non-admin callers cannot override their linked buyer."
+      ],
+      "documented": true,
+      "reads": [
+        "Buyer",
+        "BuyerFeedback",
+        "Lead",
+        "ReturnRequest"
+      ],
+      "writes": [],
+      "read_only": true,
+      "uses_service_role": true,
+      "auth_style": "operator_session",
+      "external_hosts": [],
+      "red_surfaces": [
+        "portal_scoping"
+      ]
+    },
+    {
+      "name": "processLead",
+      "file": "base44/functions/processLead/entry.ts",
+      "lines": 2349,
+      "headline": "",
+      "detail": [],
+      "documented": false,
+      "reads": [
+        "ApiConnector",
+        "ApiKey",
+        "AppSettings",
+        "Campaign",
+        "Counter",
+        "CustomCalculation",
+        "CustomField",
+        "EmailValidationSettings",
+        "HlrSettings",
+        "Lead",
+        "LeadByteConnector",
+        "NotificationRule",
+        "ResponseMapping",
+        "Supplier",
+        "Webhook"
+      ],
+      "writes": [
+        "ApiKey",
+        "Counter",
+        "CustomField",
+        "ErrorLog",
+        "Lead",
+        "NotificationEvent",
+        "RouteDecisionTrace"
+      ],
+      "read_only": false,
+      "uses_service_role": true,
+      "auth_style": "api_key",
+      "external_hosts": [
+        "dns.google"
+      ],
+      "red_surfaces": [
+        "processLead",
+        "leadbyte_connectors",
+        "distribution_mode",
+        "credentials",
+        "trustedform"
+      ]
+    },
+    {
+      "name": "progressPrompt",
+      "file": "base44/functions/progressPrompt/entry.ts",
+      "lines": 305,
+      "headline": "Prompt Studio generator.",
+      "detail": [
+        "Turns a ChangeRequest plus its findings, Nick's own comments, and the real dependency graph into an implementation prompt for a coding agent or a human.",
+        "Three things this deliberately does NOT do: 1. It never dispatches. The output is a PromptDraft in status draft. Sending it anywhere is a human action taken outside this function. 2. It never invents evidence. Everything in the assembled context comes from records; the model writes the brief, it does not supply the facts. 3. It never decides whether a surface is RED. That is a deterministic code check below, because an LLM getting it wrong once is one time too many.",
+        "Access: operator session, admin role or progress_write. Writes: PromptDraft only."
+      ],
+      "documented": true,
+      "reads": [
+        "ChangeRequest",
+        "ProgressPage",
+        "PromptDraft",
+        "ReviewThread",
+        "User",
+        "VerificationRecord"
+      ],
+      "writes": [
+        "ChangeRequest",
+        "PromptDraft"
+      ],
+      "read_only": false,
+      "uses_service_role": true,
+      "auth_style": "operator_session",
+      "external_hosts": [
+        "api.openai.com"
+      ],
+      "red_surfaces": [
+        "processLead",
+        "leadbyte_connectors",
+        "conversion_events",
+        "distribution_mode",
+        "credentials",
+        "billing",
+        "buyer_pricing",
+        "trustedform",
+        "portal_scoping"
+      ]
+    },
+    {
+      "name": "progressReadiness",
+      "file": "base44/functions/progressReadiness/entry.ts",
+      "lines": 238,
+      "headline": "Recalculates readiness across every ProgressPage, capability and release gate, then writes the day's ProgressSnapshot.",
+      "detail": [
+        "This is the only writer of readiness_score, verification_status and ProgressSnapshot. Nothing in the UI may set those by hand, which is what keeps the number honest: a page becomes verified because evidence exists, not because somebody ticked a box.",
+        "Idempotent. Running it twice on the same day updates the same snapshot row.",
+        "Access: operator session, admin role or progress_admin / progress_write. Writes: ProgressPage (computed fields only), ReleaseGate status for automatic gates, ProgressSnapshot. Never touches operational records."
+      ],
+      "documented": true,
+      "reads": [
+        "ProgressSnapshot",
+        "User"
+      ],
+      "writes": [
+        "ProgressPage",
+        "ProgressSnapshot",
+        "ReleaseGate"
+      ],
+      "read_only": false,
+      "uses_service_role": true,
+      "auth_style": "operator_session",
+      "external_hosts": [],
+      "red_surfaces": []
+    },
+    {
+      "name": "progressSync",
+      "file": "base44/functions/progressSync/entry.ts",
+      "lines": 298,
+      "headline": "Synchronises the generated page inventory into ProgressPage records.",
+      "detail": [
+        "The manifest is machine owned and comes from scripts/generate-page-inventory.mjs, which reads the real router, nav and permission sources. This function copies the GENERATED fields onto records and leaves every HUMAN field alone. Running it twice in a row changes nothing, which is the point: adding a route must not cost anyone their notes, owners, criticality or lifecycle judgements.",
+        "Access: operator session, admin role or the progress_admin permission. Writes: ProgressPage only. Never touches operational records."
+      ],
+      "documented": true,
+      "reads": [
+        "User"
+      ],
+      "writes": [
+        "ProgressPage"
+      ],
+      "read_only": false,
+      "uses_service_role": true,
+      "auth_style": "operator_session",
+      "external_hosts": [],
+      "red_surfaces": []
+    },
+    {
+      "name": "provisionLeadSource",
+      "file": "base44/functions/provisionLeadSource/entry.ts",
+      "lines": 60,
+      "headline": "Provision the credentials a LeadSource needs to ingest through processLead: - ensures a supplier ApiKey exists (creates one linked to the chosen supplier) - generates a webhook_key for call sources Called from the Data Sources UI when saving a source.",
+      "detail": [
+        "Payload: { source_id }"
+      ],
+      "documented": true,
+      "reads": [
+        "LeadSource",
+        "Supplier"
+      ],
+      "writes": [
+        "ApiKey",
+        "LeadSource"
+      ],
+      "read_only": false,
+      "uses_service_role": true,
+      "auth_style": "operator_session",
+      "external_hosts": [],
+      "red_surfaces": [
+        "processLead",
+        "credentials"
+      ]
+    },
+    {
+      "name": "purgeSeedLeads",
+      "file": "base44/functions/purgeSeedLeads/entry.ts",
+      "lines": 164,
+      "headline": "Temporary operator-only utility to count, export, and delete the batch of synthetic seed Lead records inserted on 15 July 2026.",
+      "detail": [
+        "A record is a seed lead only if BOTH are true: - created_date is earlier than 2026-07-15T13:00:00 - leadbyte_lead_id is null or undefined Both conditions are required. This is deliberately conservative."
+      ],
+      "documented": true,
+      "reads": [
+        "Lead"
+      ],
+      "writes": [
+        "Lead"
+      ],
+      "read_only": false,
+      "uses_service_role": true,
+      "auth_style": "operator_session",
+      "external_hosts": [],
+      "red_surfaces": []
+    },
+    {
+      "name": "recomputeStateStatus",
+      "file": "base44/functions/recomputeStateStatus/entry.ts",
+      "lines": 249,
+      "headline": "",
+      "detail": [],
+      "documented": false,
+      "reads": [],
+      "writes": [
+        "StateChangeEvent",
+        "StateStatus"
+      ],
+      "read_only": false,
+      "uses_service_role": true,
+      "auth_style": "operator_session",
+      "external_hosts": [],
+      "red_surfaces": [
+        "buyer_pricing"
+      ]
+    },
+    {
+      "name": "reconInsights",
+      "file": "base44/functions/reconInsights/entry.ts",
+      "lines": 45,
+      "headline": "",
+      "detail": [],
+      "documented": false,
+      "reads": [],
+      "writes": [],
+      "read_only": true,
+      "uses_service_role": false,
+      "auth_style": "operator_session",
+      "external_hosts": [
+        "api.openai.com"
+      ],
+      "red_surfaces": [
+        "credentials"
+      ]
+    },
+    {
+      "name": "recordInvitation",
+      "file": "base44/functions/recordInvitation/entry.ts",
+      "lines": 31,
+      "headline": "",
+      "detail": [],
+      "documented": false,
+      "reads": [
+        "Invitation"
+      ],
+      "writes": [
+        "Invitation"
+      ],
+      "read_only": false,
+      "uses_service_role": true,
+      "auth_style": "operator_session",
+      "external_hosts": [],
+      "red_surfaces": []
+    },
+    {
+      "name": "recoverTrustedForm",
+      "file": "base44/functions/recoverTrustedForm/entry.ts",
+      "lines": 185,
+      "headline": "",
+      "detail": [],
+      "documented": false,
+      "reads": [
+        "CertBackupStore",
+        "Lead"
+      ],
+      "writes": [
+        "AuditLog",
+        "Lead"
+      ],
+      "read_only": false,
+      "uses_service_role": true,
+      "auth_style": "operator_session",
+      "external_hosts": [],
+      "red_surfaces": [
+        "processLead",
+        "trustedform"
+      ]
+    },
+    {
+      "name": "registerMetaAdAccounts",
+      "file": "base44/functions/registerMetaAdAccounts/entry.ts",
+      "lines": 86,
+      "headline": "",
+      "detail": [],
+      "documented": false,
+      "reads": [
+        "MetaConnection",
+        "SupplierAdAccount"
+      ],
+      "writes": [
+        "SupplierAdAccount"
+      ],
+      "read_only": false,
+      "uses_service_role": true,
+      "auth_style": "operator_session",
+      "external_hosts": [],
+      "red_surfaces": []
+    },
+    {
+      "name": "renameField",
+      "file": "base44/functions/renameField/entry.ts",
+      "lines": 151,
+      "headline": "",
+      "detail": [],
+      "documented": false,
+      "reads": [
+        "ApiConnector",
+        "CustomCalculation",
+        "FieldMapping",
+        "LeadByteConnector"
+      ],
+      "writes": [
+        "ApiConnector",
+        "CustomCalculation",
+        "CustomField",
+        "FieldMapping",
+        "LeadByteConnector"
+      ],
+      "read_only": false,
+      "uses_service_role": true,
+      "auth_style": "operator_session",
+      "external_hosts": [],
+      "red_surfaces": [
+        "leadbyte_connectors"
+      ]
+    },
+    {
+      "name": "saveMetaAppCredentials",
+      "file": "base44/functions/saveMetaAppCredentials/entry.ts",
+      "lines": 53,
+      "headline": "",
+      "detail": [],
+      "documented": false,
+      "reads": [
+        "IntegrationConfig"
+      ],
+      "writes": [
+        "IntegrationConfig"
+      ],
+      "read_only": false,
+      "uses_service_role": true,
+      "auth_style": "operator_session",
+      "external_hosts": [],
+      "red_surfaces": [
+        "credentials"
+      ]
+    },
+    {
+      "name": "saveMetaConnection",
+      "file": "base44/functions/saveMetaConnection/entry.ts",
+      "lines": 79,
+      "headline": "",
+      "detail": [],
+      "documented": false,
+      "reads": [],
+      "writes": [
+        "MetaConnection"
+      ],
+      "read_only": false,
+      "uses_service_role": true,
+      "auth_style": "operator_session",
+      "external_hosts": [
+        "graph.facebook.com"
+      ],
+      "red_surfaces": []
+    },
+    {
+      "name": "sendGmail",
+      "file": "base44/functions/sendGmail/entry.ts",
+      "lines": 64,
+      "headline": "",
+      "detail": [],
+      "documented": false,
+      "reads": [],
+      "writes": [],
+      "read_only": true,
+      "uses_service_role": true,
+      "auth_style": "session_only",
+      "external_hosts": [
+        "gmail.googleapis.com"
+      ],
+      "red_surfaces": []
+    },
+    {
+      "name": "sendOnboardingLink",
+      "file": "base44/functions/sendOnboardingLink/entry.ts",
+      "lines": 97,
+      "headline": "Email a per-buyer onboarding link to the buyer contact.",
+      "detail": [
+        "Operator only. Returns JSON only and never logs secrets.",
+        "Access rules match mintOnboardingLink/entry.ts: - Must be an authenticated Base44 session. - Rejected if base_role is supplier or buyer, or if linked_buyer_id / linked_supplier_id is set (those are portal accounts, not operators). - Must have at least one operator permission set true, or role admin."
+      ],
+      "documented": true,
+      "reads": [
+        "Buyer",
+        "BuyerOnboarding",
+        "OnboardingEmailTemplate",
+        "User"
+      ],
+      "writes": [
+        "BuyerOnboarding"
+      ],
+      "read_only": false,
+      "uses_service_role": true,
+      "auth_style": "operator_session",
+      "external_hosts": [],
+      "red_surfaces": []
+    },
+    {
+      "name": "sendPayloadTest",
+      "file": "base44/functions/sendPayloadTest/entry.ts",
+      "lines": 123,
+      "headline": "",
+      "detail": [],
+      "documented": false,
+      "reads": [
+        "User"
+      ],
+      "writes": [],
+      "read_only": true,
+      "uses_service_role": true,
+      "auth_style": "operator_session",
+      "external_hosts": [],
+      "red_surfaces": []
+    },
+    {
+      "name": "sendScheduledIntroEmails",
+      "file": "base44/functions/sendScheduledIntroEmails/entry.ts",
+      "lines": 218,
+      "headline": "Scheduled sender for the buyer intro email from James.",
+      "detail": [
+        "onboardBuyer resolves a send time and stores it on BuyerOnboarding.intro_email_scheduled_for. This job runs every 15 minutes, finds records whose scheduled time is now or in the past that have not yet been sent, and sends the intro email through the connected Gmail account.",
+        "Sent state is tracked inside the existing steps array (the schema is fixed in this build) as a step with key intro_email_sent. A record whose steps already contain intro_email_sent complete is skipped so a second run never sends the intro email twice. On failure the step records the error and attempts, leaving intro_email_scheduled_for set so the next run retries; after 5 failures the step is marked failed so it is visible rather than looping forever.",
+        "Credentials are never hardcoded and never written into a log, an error, or a stored record. The Gmail access token comes from the connected Gmail account."
+      ],
+      "documented": true,
+      "reads": [
+        "Buyer",
+        "BuyerOnboarding"
+      ],
+      "writes": [
+        "BuyerOnboarding"
+      ],
+      "read_only": false,
+      "uses_service_role": true,
+      "auth_style": "operator_session",
+      "external_hosts": [
+        "gmail.googleapis.com"
+      ],
+      "red_surfaces": [
+        "credentials"
+      ]
+    },
+    {
+      "name": "sendSlackTest",
+      "file": "base44/functions/sendSlackTest/entry.ts",
+      "lines": 51,
+      "headline": "",
+      "detail": [],
+      "documented": false,
+      "reads": [
+        "IntegrationConfig"
+      ],
+      "writes": [],
+      "read_only": true,
+      "uses_service_role": true,
+      "auth_style": "session_only",
+      "external_hosts": [
+        "slack.com"
+      ],
+      "red_surfaces": []
+    },
+    {
+      "name": "sendWhatsapp",
+      "file": "base44/functions/sendWhatsapp/entry.ts",
+      "lines": 51,
+      "headline": "",
+      "detail": [],
+      "documented": false,
+      "reads": [
+        "IntegrationConfig"
+      ],
+      "writes": [],
+      "read_only": true,
+      "uses_service_role": true,
+      "auth_style": "session_only",
+      "external_hosts": [
+        "graph.facebook.com"
+      ],
+      "red_surfaces": [
+        "credentials"
+      ]
+    },
+    {
+      "name": "spec",
+      "file": "base44/functions/spec/entry.ts",
+      "lines": 224,
+      "headline": "Public posting-spec endpoint (/functions/spec) Returns the integration spec a supplier needs to post leads and get them accepted & sold: endpoint, headers, required + optional fields, examples.",
+      "detail": [
+        "Keyed by the supplier's sid + a token derived from their API key, so an external supplier can open it without logging into the operator app.",
+        "The spec is generated from the SAME system required fields + the supplier's mapping that processLead enforces, so it always reflects what is needed to accept and sell a lead."
+      ],
+      "documented": true,
+      "reads": [
+        "ApiKey",
+        "AppSettings",
+        "Buyer",
+        "Campaign",
+        "CustomField",
+        "Supplier",
+        "Vertical"
+      ],
+      "writes": [],
+      "read_only": true,
+      "uses_service_role": true,
+      "auth_style": "api_key",
+      "external_hosts": [],
+      "red_surfaces": [
+        "processLead",
+        "credentials",
+        "trustedform"
+      ]
+    },
+    {
+      "name": "submitBuyerOnboarding",
+      "file": "base44/functions/submitBuyerOnboarding/entry.ts",
+      "lines": 253,
+      "headline": "Public buyer onboarding intake (/functions/submitBuyerOnboarding).",
+      "detail": [
+        "Unauthenticated, like buyerFeedbackWebhook. It validates the submission, rate limits by IP, dedupes on company_name + email within ten minutes, and writes exactly one BuyerOnboarding record with the service role.",
+        "This function ONLY records the submission. It does not create a Buyer, does not allocate a buyer_code, and never contacts Stripe, Xero, LeadByte, GHL or Rebrandly, and sends no email."
+      ],
+      "documented": true,
+      "reads": [
+        "Buyer",
+        "BuyerOnboarding",
+        "OnboardingEmailTemplate"
+      ],
+      "writes": [
+        "BuyerOnboarding"
+      ],
+      "read_only": false,
+      "uses_service_role": true,
+      "auth_style": "route_token",
+      "external_hosts": [
+        "gmail.googleapis.com"
+      ],
+      "red_surfaces": []
+    },
+    {
+      "name": "supplierPortalData",
+      "file": "base44/functions/supplierPortalData/entry.ts",
+      "lines": 156,
+      "headline": "Caller model: SUPPLIER-SCOPED.",
+      "detail": [
+        "Authenticated supplier-portal data endpoint. Returns everything the supplier portal needs, strictly scoped to a single Supplier record. Uses the service role to read Lead (admin-RLS) but never returns another supplier's data, another supplier's leads, buyer identities, buyer revenue or internal cost, raw payloads, routing traces, or the raw API key (prefix + metadata only). Deny-by-default field allowlist.",
+        "Scoping rules: - A supplier-role user is scoped to their own user.linked_supplier_id. - An operator (admin) may pass ?supplier_id= to PREVIEW a supplier's portal. Non-admin callers cannot override their linked supplier."
+      ],
+      "documented": true,
+      "reads": [
+        "AdSpend",
+        "AdSpendMapping",
+        "ApiKey",
+        "Lead",
+        "ReturnRequest",
+        "Supplier"
+      ],
+      "writes": [],
+      "read_only": true,
+      "uses_service_role": true,
+      "auth_style": "operator_session",
+      "external_hosts": [],
+      "red_surfaces": [
+        "credentials",
+        "portal_scoping"
+      ]
+    },
+    {
+      "name": "syncGoogleSheets",
+      "file": "base44/functions/syncGoogleSheets/entry.ts",
+      "lines": 183,
+      "headline": "Pull rows from a Google Sheet, map columns to our lead schema, de-dupe, and ingest each new row through the processLead pipeline (validation, dedup, CAPI, revenue all run there).",
+      "detail": [
+        "Can be called from the Sync Now button or a schedule.",
+        "Payload: { source_id } to sync one source, or {} to sync all enabled sheet sources."
+      ],
+      "documented": true,
+      "reads": [
+        "ApiKey",
+        "LeadSource"
+      ],
+      "writes": [
+        "ErrorLog",
+        "LeadSource"
+      ],
+      "read_only": false,
+      "uses_service_role": true,
+      "auth_style": "api_key",
+      "external_hosts": [],
+      "red_surfaces": [
+        "processLead",
+        "credentials"
+      ]
+    },
+    {
+      "name": "syncMercury",
+      "file": "base44/functions/syncMercury/entry.ts",
+      "lines": 96,
+      "headline": "",
+      "detail": [],
+      "documented": false,
+      "reads": [
+        "BankTransaction",
+        "IntegrationConfig"
+      ],
+      "writes": [
+        "BankTransaction",
+        "IntegrationConfig"
+      ],
+      "read_only": false,
+      "uses_service_role": true,
+      "auth_style": "operator_session",
+      "external_hosts": [
+        "api.mercury.com"
+      ],
+      "red_surfaces": []
+    },
+    {
+      "name": "syncMetaSpend",
+      "file": "base44/functions/syncMetaSpend/entry.ts",
+      "lines": 504,
+      "headline": "",
+      "detail": [],
+      "documented": false,
+      "reads": [
+        "AdSpend",
+        "AdSpendMapping",
+        "IntegrationConfig",
+        "MetaConnection",
+        "SupplierAdAccount"
+      ],
+      "writes": [
+        "AdSpend",
+        "MetaConnection",
+        "MetaSyncRun",
+        "SupplierAdAccount"
+      ],
+      "read_only": false,
+      "uses_service_role": true,
+      "auth_style": "operator_session",
+      "external_hosts": [],
+      "red_surfaces": []
+    },
+    {
+      "name": "syncStripe",
+      "file": "base44/functions/syncStripe/entry.ts",
+      "lines": 95,
+      "headline": "",
+      "detail": [],
+      "documented": false,
+      "reads": [
+        "BankTransaction",
+        "IntegrationConfig"
+      ],
+      "writes": [
+        "BankTransaction",
+        "IntegrationConfig"
+      ],
+      "read_only": false,
+      "uses_service_role": true,
+      "auth_style": "operator_session",
+      "external_hosts": [
+        "api.stripe.com"
+      ],
+      "red_surfaces": [
+        "credentials"
+      ]
+    },
+    {
+      "name": "syncXero",
+      "file": "base44/functions/syncXero/entry.ts",
+      "lines": 81,
+      "headline": "",
+      "detail": [],
+      "documented": false,
+      "reads": [
+        "IntegrationConfig"
+      ],
+      "writes": [
+        "IntegrationConfig"
+      ],
+      "read_only": false,
+      "uses_service_role": true,
+      "auth_style": "operator_session",
+      "external_hosts": [
+        "api.xero.com"
+      ],
+      "red_surfaces": [
+        "credentials"
+      ]
+    },
+    {
+      "name": "testCapiConnector",
+      "file": "base44/functions/testCapiConnector/entry.ts",
+      "lines": 340,
+      "headline": "",
+      "detail": [],
+      "documented": false,
+      "reads": [
+        "ApiConnector"
+      ],
+      "writes": [],
+      "read_only": true,
+      "uses_service_role": true,
+      "auth_style": "session_only",
+      "external_hosts": [],
+      "red_surfaces": [
+        "conversion_events"
+      ]
+    },
+    {
+      "name": "testEmail",
+      "file": "base44/functions/testEmail/entry.ts",
+      "lines": 72,
+      "headline": "",
+      "detail": [],
+      "documented": false,
+      "reads": [],
+      "writes": [],
+      "read_only": true,
+      "uses_service_role": false,
+      "auth_style": "session_only",
+      "external_hosts": [
+        "dns.google"
+      ],
+      "red_surfaces": []
+    },
+    {
+      "name": "testHlr",
+      "file": "base44/functions/testHlr/entry.ts",
+      "lines": 42,
+      "headline": "",
+      "detail": [],
+      "documented": false,
+      "reads": [
+        "HlrSettings"
+      ],
+      "writes": [],
+      "read_only": true,
+      "uses_service_role": true,
+      "auth_style": "session_only",
+      "external_hosts": [],
+      "red_surfaces": [
+        "processLead"
+      ]
+    },
+    {
+      "name": "testLeadByte",
+      "file": "base44/functions/testLeadByte/entry.ts",
+      "lines": 68,
+      "headline": "",
+      "detail": [],
+      "documented": false,
+      "reads": [
+        "LeadByteConnector",
+        "User"
+      ],
+      "writes": [],
+      "read_only": true,
+      "uses_service_role": true,
+      "auth_style": "operator_session",
+      "external_hosts": [],
+      "red_surfaces": [
+        "leadbyte_connectors",
+        "credentials"
+      ]
+    },
+    {
+      "name": "testLeadByteConnector",
+      "file": "base44/functions/testLeadByteConnector/entry.ts",
+      "lines": 240,
+      "headline": "── Shared payload resolver (mirrors processLead exactly) ────────────────── Same canonical aliases + transforms as the live pipeline, so a Send Test Lead resolves tokens identically to a real lead send.",
+      "detail": [],
+      "documented": true,
+      "reads": [
+        "LeadByteConnector",
+        "User"
+      ],
+      "writes": [],
+      "read_only": true,
+      "uses_service_role": true,
+      "auth_style": "operator_session",
+      "external_hosts": [],
+      "red_surfaces": [
+        "processLead",
+        "leadbyte_connectors",
+        "credentials",
+        "trustedform"
+      ]
+    },
+    {
+      "name": "testMetaConnection",
+      "file": "base44/functions/testMetaConnection/entry.ts",
+      "lines": 86,
+      "headline": "",
+      "detail": [],
+      "documented": false,
+      "reads": [
+        "MetaConnection"
+      ],
+      "writes": [
+        "MetaConnection"
+      ],
+      "read_only": false,
+      "uses_service_role": true,
+      "auth_style": "operator_session",
+      "external_hosts": [
+        "graph.facebook.com"
+      ],
+      "red_surfaces": []
+    },
+    {
+      "name": "validate",
+      "file": "base44/functions/validate/entry.ts",
+      "lines": 84,
+      "headline": "Validation-only endpoint (/functions/validate) A thin delegator modeled on the leads function.",
+      "detail": [
+        "It sets _dry_run: true on the payload and delegates to processLead, which validates the payload and returns immediately with zero side effects (no Lead, no counter, no HLR, no CAPI, no LeadByte, no Delivery, and no ApiKey request_count increment).",
+        "This wrapper handles CORS and injects the supplier API key from headers into the payload (as _supplier_key) so processLead can authenticate."
+      ],
+      "documented": true,
+      "reads": [],
+      "writes": [],
+      "read_only": true,
+      "uses_service_role": true,
+      "auth_style": "api_key",
+      "external_hosts": [],
+      "red_surfaces": [
+        "processLead",
+        "credentials"
+      ]
+    },
+    {
+      "name": "validateMetaToken",
+      "file": "base44/functions/validateMetaToken/entry.ts",
+      "lines": 59,
+      "headline": "",
+      "detail": [],
+      "documented": false,
+      "reads": [
+        "IntegrationConfig"
+      ],
+      "writes": [],
+      "read_only": true,
+      "uses_service_role": true,
+      "auth_style": "operator_session",
+      "external_hosts": [],
+      "red_surfaces": []
+    },
+    {
+      "name": "walkthroughGuide",
+      "file": "base44/functions/walkthroughGuide/entry.ts",
+      "lines": 52,
+      "headline": "",
+      "detail": [],
+      "documented": false,
+      "reads": [],
+      "writes": [],
+      "read_only": true,
+      "uses_service_role": false,
+      "auth_style": "session_only",
+      "external_hosts": [
+        "api.openai.com"
+      ],
+      "red_surfaces": [
+        "credentials"
+      ]
+    },
+    {
+      "name": "webhook",
+      "file": "base44/functions/webhook/entry.ts",
+      "lines": 498,
+      "headline": "Generic inbound lead webhook.",
+      "detail": [
+        "POST https://api.legenex.com/functions/webhook?key=<api_key>",
+        "Replaces the per-route token model in leadbyteWebhook. One key (master, or a supplier-scoped key) authenticates every sender, and the sender does not have to be LeadByte: anything that can POST JSON works.",
+        "WHAT IT DOES - Authenticates on ?key= against ApiKey. Master keys accept any supplier; a supplier-scoped key pins the lead to that supplier. - Resolves the supplier from the key, falling back to `sid` in the payload. - Reads the status from `lead_status` in the payload (dynamic). A route may pin a status instead, but nothing is required to. - Matches an existing lead on lead id, then email, then mobile. - No match: CREATES the lead. Not every lead reaches this system through processLead; affiliates post straight into their own platform, so this is the first this system hears of them. - Match: UPDATES revenue, buyer, status and any field the stored lead is missing.",
+        "RESELL AFTER RETURN A lead can go Sold -> Returned -> Sold with a different buyer. `buyer_returned` is sticky: once true it stays true even when the lead is resold, so the lead counts once as Sold (its current status) and once as Returned (the flag). Resetting the flag on resale would erase the return from every report."
+      ],
+      "documented": true,
+      "reads": [
+        "ApiKey",
+        "Buyer",
+        "InboundWebhookRoute",
+        "Lead",
+        "Supplier"
+      ],
+      "writes": [
+        "ApiKey",
+        "Buyer",
+        "InboundWebhookRoute",
+        "Lead",
+        "Supplier"
+      ],
+      "read_only": false,
+      "uses_service_role": true,
+      "auth_style": "api_key",
+      "external_hosts": [],
+      "red_surfaces": [
+        "processLead",
+        "leadbyte_connectors",
+        "credentials",
+        "trustedform"
+      ]
+    },
+    {
+      "name": "whatsNew",
+      "file": "base44/functions/whatsNew/entry.ts",
+      "lines": 61,
+      "headline": "",
+      "detail": [],
+      "documented": false,
+      "reads": [],
+      "writes": [],
+      "read_only": true,
+      "uses_service_role": false,
+      "auth_style": "session_only",
+      "external_hosts": [
+        "api.openai.com"
+      ],
+      "red_surfaces": [
+        "credentials"
+      ]
+    }
+  ],
+  "entities": [
+    {
+      "name": "AdCreativeMeta",
+      "file": "base44/entities/AdCreativeMeta.jsonc",
+      "field_count": 11,
+      "required": [
+        "ad_id"
+      ],
+      "documented_fields": 6,
+      "undocumented_fields": 5,
+      "has_rls": true,
+      "rls_operations": [
+        "create",
+        "delete",
+        "read",
+        "update"
+      ],
+      "highlights": [
+        "ad_id: Meta ad id. Join key to AdSpend rows where level = ad.",
+        "ad_name: Meta ad name at time of tagging, for display when spend rows are outside the window.",
+        "concept: Creative concept, for example ER Waiting Room.",
+        "creator: Creator or production source, for example a UGC creator name or Studio."
+      ]
+    },
+    {
+      "name": "AdSpend",
+      "file": "base44/entities/AdSpend.jsonc",
+      "field_count": 25,
+      "required": [
+        "date",
+        "spend"
+      ],
+      "documented_fields": 8,
+      "undocumented_fields": 17,
+      "has_rls": false,
+      "rls_operations": [],
+      "highlights": [
+        "currency: Ad account currency code the spend value is denominated in",
+        "date: Spend date in the ad account's timezone",
+        "mapping_id: Reference to AdSpendMapping",
+        "supplier_ad_account_id: Reference to the SupplierAdAccount association this row was imported through."
+      ]
+    },
+    {
+      "name": "AdSpendMapping",
+      "file": "base44/entities/AdSpendMapping.jsonc",
+      "field_count": 13,
+      "required": [
+        "platform"
+      ],
+      "documented_fields": 6,
+      "undocumented_fields": 7,
+      "has_rls": false,
+      "rls_operations": [],
+      "highlights": [
+        "ad_account_id: Meta ad account id (act_XXXX)",
+        "meta_campaign_id: Optional specific Meta campaign id when match_level is campaign/adset",
+        "vertical: Vertical code this spend maps to",
+        "brand: Brand code / name this spend maps to"
+      ]
+    },
+    {
+      "name": "ApiConnector",
+      "file": "base44/entities/ApiConnector.jsonc",
+      "field_count": 32,
+      "required": [
+        "name"
+      ],
+      "documented_fields": 21,
+      "undocumented_fields": 11,
+      "has_rls": false,
+      "rls_operations": [],
+      "highlights": [
+        "platform: Conversion platform this connector belongs to. Tabs in the Conversion Events UI are scoped by this value. Existing records without a platform default to facebook (for facebook_capi) or other.",
+        "filter_verticals: JSON array of vertical codes to match against the lead's vertical field. Empty array = match all",
+        "filter_brands: JSON array of brand names to match. Empty array = match all",
+        "filter_suppliers: JSON array of supplier names or SIDs to match. Empty array = match all"
+      ]
+    },
+    {
+      "name": "ApiKey",
+      "file": "base44/entities/ApiKey.jsonc",
+      "field_count": 12,
+      "required": [
+        "name",
+        "key",
+        "key_prefix"
+      ],
+      "documented_fields": 9,
+      "undocumented_fields": 3,
+      "has_rls": false,
+      "rls_operations": [],
+      "highlights": [
+        "name: Friendly label for this key",
+        "type: master keys have no linked supplier; supplier keys link to exactly one supplier",
+        "supplier_name: Supplier display name (denormalized for fast lookup)",
+        "supplier_id: Reference to Supplier record (optional for master keys)"
+      ]
+    },
+    {
+      "name": "AppSettings",
+      "file": "base44/entities/AppSettings.jsonc",
+      "field_count": 10,
+      "required": [],
+      "documented_fields": 6,
+      "undocumented_fields": 4,
+      "has_rls": false,
+      "rls_operations": [],
+      "highlights": [
+        "adaptive_fields_enabled: When true, new inbound keys are auto-cataloged as CustomFields",
+        "adaptive_fields_ignore_list: JSON array of field names (case-insensitive) that must never be cataloged or forwarded",
+        "require_trustedform_cert: When true, leads without a valid TrustedForm cert URL are queued before reaching LeadByte",
+        "fb_api_version: Facebook Graph API version used for CAPI calls"
+      ]
+    },
+    {
+      "name": "AuditFinding",
+      "file": "base44/entities/AuditFinding.jsonc",
+      "field_count": 36,
+      "required": [
+        "run_id",
+        "check_id",
+        "layer",
+        "verdict"
+      ],
+      "documented_fields": 31,
+      "undocumented_fields": 5,
+      "has_rls": false,
+      "rls_operations": [],
+      "highlights": [
+        "run_id: AuditRun this finding belongs to",
+        "check_id: Stable slug, e.g. design.tokens.raw_color or portal.scoping.buyer_isolation",
+        "layer: Which layer produced the finding",
+        "source: Mechanism that produced it"
+      ]
+    },
+    {
+      "name": "AuditLog",
+      "file": "base44/entities/AuditLog.jsonc",
+      "field_count": 6,
+      "required": [
+        "lead_id",
+        "recovered_cert_url"
+      ],
+      "documented_fields": 4,
+      "undocumented_fields": 2,
+      "has_rls": false,
+      "rls_operations": [],
+      "highlights": [
+        "lead_id: Reference to Lead record",
+        "lead_match_key: Normalized email or phone used for the backup lookup",
+        "recovered_cert_url: The cert URL recovered from CertBackupStore, unchanged",
+        "original_session_timestamp: Copied from the stored CertBackupStore row, never recomputed"
+      ]
+    },
+    {
+      "name": "AuditRun",
+      "file": "base44/entities/AuditRun.jsonc",
+      "field_count": 20,
+      "required": [
+        "run_id",
+        "status",
+        "started_at"
+      ],
+      "documented_fields": 12,
+      "undocumented_fields": 8,
+      "has_rls": false,
+      "rls_operations": [],
+      "highlights": [
+        "run_id: Stable id for this run; every AuditFinding carries it",
+        "layers: JSON array of layers executed, e.g. [\"static\",\"runtime\"]",
+        "trigger: What started the run",
+        "write_mode: Locked to read_only. The harness never mutates operational records."
+      ]
+    },
+    {
+      "name": "BankTransaction",
+      "file": "base44/entities/BankTransaction.jsonc",
+      "field_count": 11,
+      "required": [
+        "date",
+        "amount"
+      ],
+      "documented_fields": 2,
+      "undocumented_fields": 9,
+      "has_rls": false,
+      "rls_operations": [],
+      "highlights": [
+        "external_id: Provider transaction id for dedupe",
+        "amount: Positive = money in, negative = money out"
+      ]
+    },
+    {
+      "name": "BenchmarkCriterion",
+      "file": "base44/entities/BenchmarkCriterion.jsonc",
+      "field_count": 13,
+      "required": [
+        "capability",
+        "area",
+        "legenex_verdict"
+      ],
+      "documented_fields": 12,
+      "undocumented_fields": 1,
+      "has_rls": false,
+      "rls_operations": [],
+      "highlights": [
+        "capability: Short name, e.g. Ping-post auction with buyer bid response",
+        "area: Functional area of the platform",
+        "definition: What the capability means in concrete behavioural terms",
+        "competitor_reference: Platforms known to do this well, e.g. LeadByte, Phonexa, LeadConduit"
+      ]
+    },
+    {
+      "name": "BillingLineItem",
+      "file": "base44/entities/BillingLineItem.jsonc",
+      "field_count": 11,
+      "required": [
+        "billing_run_id"
+      ],
+      "documented_fields": 7,
+      "undocumented_fields": 4,
+      "has_rls": false,
+      "rls_operations": [],
+      "highlights": [
+        "billing_run_id: Reference to a BillingRun record.",
+        "vertical: Vertical code for this line. Nullable.",
+        "state: Two letter US state code for this line. Nullable.",
+        "campaign_id: Reference to a Campaign record. Nullable."
+      ]
+    },
+    {
+      "name": "BillingRun",
+      "file": "base44/entities/BillingRun.jsonc",
+      "field_count": 15,
+      "required": [
+        "scope",
+        "period_start",
+        "period_end"
+      ],
+      "documented_fields": 9,
+      "undocumented_fields": 6,
+      "has_rls": false,
+      "rls_operations": [],
+      "highlights": [
+        "scope: Whether this run bills a buyer or a supplier. Exactly one of buyer_id or supplier_id must be set, matching scope.",
+        "buyer_id: Reference to a Buyer record. Set when scope is buyer. Nullable.",
+        "supplier_id: Reference to a Supplier record. Set when scope is supplier. Nullable.",
+        "period_start: Start of the billing period."
+      ]
+    },
+    {
+      "name": "BotConfig",
+      "file": "base44/entities/BotConfig.jsonc",
+      "field_count": 14,
+      "required": [
+        "bot_key"
+      ],
+      "documented_fields": 11,
+      "undocumented_fields": 3,
+      "has_rls": true,
+      "rls_operations": [
+        "create",
+        "read",
+        "update",
+        "delete"
+      ],
+      "highlights": [
+        "bot_key: Which bot this config is for",
+        "name: Display name",
+        "tagline: Short description shown under the bot name",
+        "avatar_url: Avatar image URL. Nullable."
+      ]
+    },
+    {
+      "name": "Brand",
+      "file": "base44/entities/Brand.jsonc",
+      "field_count": 8,
+      "required": [
+        "brand_name",
+        "brand_code"
+      ],
+      "documented_fields": 7,
+      "undocumented_fields": 1,
+      "has_rls": false,
+      "rls_operations": [],
+      "highlights": [
+        "brand_name: Display name of the brand",
+        "brand_code: Short code e.g. CAC = Check A Case, CMC = Check My Claim",
+        "website_url: Brand website URL",
+        "optin_url: Default optin/landing page URL for this brand"
+      ]
+    },
+    {
+      "name": "Buyer",
+      "file": "base44/entities/Buyer.jsonc",
+      "field_count": 61,
+      "required": [
+        "company_name"
+      ],
+      "documented_fields": 54,
+      "undocumented_fields": 7,
+      "has_rls": false,
+      "rls_operations": [],
+      "highlights": [
+        "company_name: Buyer / destination company name",
+        "contact_name: Primary contact person name. Required (with email) before the partner portal can be enabled and an invite sent.",
+        "buyer_type: Type of buyer / destination",
+        "client_type: Client classification. Nullable, no default. Null means unclassified. Drives the buyer_code prefix (Law Firm LF, Aggregator AG, Reseller RS, Network NW)."
+      ]
+    },
+    {
+      "name": "BuyerCplRule",
+      "file": "base44/entities/BuyerCplRule.jsonc",
+      "field_count": 8,
+      "required": [
+        "buyer_id",
+        "cpl"
+      ],
+      "documented_fields": 7,
+      "undocumented_fields": 1,
+      "has_rls": true,
+      "rls_operations": [
+        "create",
+        "read",
+        "update",
+        "delete"
+      ],
+      "highlights": [
+        "buyer_id: Reference to the Buyer record this rule belongs to",
+        "name: Optional label for the rule",
+        "vertical: Optional vertical code the rule applies to",
+        "campaign_id: Optional reference to a Campaign record the rule applies to"
+      ]
+    },
+    {
+      "name": "BuyerFeedback",
+      "file": "base44/entities/BuyerFeedback.jsonc",
+      "field_count": 10,
+      "required": [
+        "buyer_id",
+        "disposition"
+      ],
+      "documented_fields": 9,
+      "undocumented_fields": 1,
+      "has_rls": false,
+      "rls_operations": [],
+      "highlights": [
+        "lead_id: Reference to the Lead record this feedback is about (nullable if no lead matched)",
+        "buyer_id: Reference to the Buyer record that submitted this feedback",
+        "matched_by: How the lead was matched: phone, email, or manual (added in portal)",
+        "disposition: Mapped disposition from our taxonomy (e.g. Converted, Wrong Number)"
+      ]
+    },
+    {
+      "name": "BuyerOnboarding",
+      "file": "base44/entities/BuyerOnboarding.jsonc",
+      "field_count": 9,
+      "required": [
+        "company_name"
+      ],
+      "documented_fields": 9,
+      "undocumented_fields": 0,
+      "has_rls": true,
+      "rls_operations": [
+        "create",
+        "read",
+        "update",
+        "delete"
+      ],
+      "highlights": [
+        "buyer_id: Reference to a Buyer record. Null until a Buyer is created from the submission. Nullable.",
+        "company_name: Company name captured on the submission before a Buyer exists.",
+        "status: Onboarding lifecycle status.",
+        "form_payload: JSON object holding the complete raw submission, including free text answers not promoted to Buyer fields, such as prior lead generation experience, that experience described, and additional requirements."
+      ]
+    },
+    {
+      "name": "BuyerPayment",
+      "file": "base44/entities/BuyerPayment.jsonc",
+      "field_count": 7,
+      "required": [
+        "buyer_name",
+        "amount"
+      ],
+      "documented_fields": 1,
+      "undocumented_fields": 6,
+      "has_rls": false,
+      "rls_operations": [],
+      "highlights": [
+        "invoice_id: Optional reference to the Invoice this payment settles"
+      ]
+    },
+    {
+      "name": "BuyerStateCpl",
+      "file": "base44/entities/BuyerStateCpl.jsonc",
+      "field_count": 9,
+      "required": [
+        "buyer_id",
+        "vertical",
+        "state",
+        "cpl"
+      ],
+      "documented_fields": 9,
+      "undocumented_fields": 0,
+      "has_rls": true,
+      "rls_operations": [
+        "create",
+        "read",
+        "update",
+        "delete"
+      ],
+      "highlights": [
+        "buyer_id: Reference to a Buyer record",
+        "vertical: The vertical code this pricing applies to",
+        "state: Two letter US state code, uppercase",
+        "active: Whether this buyer is currently accepting leads in this state"
+      ]
+    },
+    {
+      "name": "Campaign",
+      "file": "base44/entities/Campaign.jsonc",
+      "field_count": 8,
+      "required": [
+        "name"
+      ],
+      "documented_fields": 6,
+      "undocumented_fields": 2,
+      "has_rls": false,
+      "rls_operations": [],
+      "highlights": [
+        "name: Campaign display name. A campaign IS a vertical: the campaign name defines the vertical.",
+        "vertical: Vertical code this campaign belongs to. A campaign is a vertical, so this mirrors the campaign identity.",
+        "brand: Brand code / name this campaign is associated with. Nullable.",
+        "send_mode: How sources send leads into this campaign: Ping Post, Direct Post, or Both. Not a forced either/or."
+      ]
+    },
+    {
+      "name": "CertBackupStore",
+      "file": "base44/entities/CertBackupStore.jsonc",
+      "field_count": 8,
+      "required": [
+        "lead_match_key",
+        "trustedform_url"
+      ],
+      "documented_fields": 4,
+      "undocumented_fields": 4,
+      "has_rls": false,
+      "rls_operations": [],
+      "highlights": [
+        "lead_match_key: Normalized email (lowercase, trimmed) or phone (digits only) for lookup",
+        "trustedform_url: Exact cert string as captured at the LeadShook page, never modified",
+        "original_session_timestamp: Captured client-side the moment xxTrustedFormCertUrl populated; copied verbatim, never server-generated",
+        "captured_at: Server receive time, separate from session timestamp"
+      ]
+    },
+    {
+      "name": "ChangeRequest",
+      "file": "base44/entities/ChangeRequest.jsonc",
+      "field_count": 25,
+      "required": [
+        "reference",
+        "title",
+        "status"
+      ],
+      "documented_fields": 16,
+      "undocumented_fields": 9,
+      "has_rls": true,
+      "rls_operations": [
+        "create",
+        "read",
+        "update",
+        "delete"
+      ],
+      "highlights": [
+        "reference: Human reference, e.g. CR-014. Unique.",
+        "page_key: Primary ProgressPage this work targets",
+        "additional_page_keys: JSON array of other pages affected",
+        "capability_key: MigrationRequirement key when the work is migration driven rather than page driven"
+      ]
+    },
+    {
+      "name": "ChatConversation",
+      "file": "base44/entities/ChatConversation.jsonc",
+      "field_count": 7,
+      "required": [
+        "user_id",
+        "mode"
+      ],
+      "documented_fields": 5,
+      "undocumented_fields": 2,
+      "has_rls": true,
+      "rls_operations": [
+        "create",
+        "read",
+        "update",
+        "delete"
+      ],
+      "highlights": [
+        "user_id: User who owns this conversation",
+        "mode: Which bot this conversation is with",
+        "title: Auto-generated title from the first user message",
+        "messages: JSON array of {role, content, type, timestamp} messages"
+      ]
+    },
+    {
+      "name": "ChatMemory",
+      "file": "base44/entities/ChatMemory.jsonc",
+      "field_count": 7,
+      "required": [
+        "user_id",
+        "fact"
+      ],
+      "documented_fields": 7,
+      "undocumented_fields": 0,
+      "has_rls": true,
+      "rls_operations": [
+        "create",
+        "read",
+        "update",
+        "delete"
+      ],
+      "highlights": [
+        "user_id: User this memory belongs to",
+        "fact: A concise learned fact or preference extracted from conversation, e.g. 'User prefers revenue figures net of IPL fees' or 'User's top buyer is LeadFlow'",
+        "category: What kind of memory this is",
+        "source_conversation_id: Conversation this memory was learned from. Nullable."
+      ]
+    },
+    {
+      "name": "ContractVersion",
+      "file": "base44/entities/ContractVersion.jsonc",
+      "field_count": 8,
+      "required": [
+        "campaign_id",
+        "version",
+        "contract_json"
+      ],
+      "documented_fields": 8,
+      "undocumented_fields": 0,
+      "has_rls": false,
+      "rls_operations": [],
+      "highlights": [
+        "campaign_id: Campaign record id this snapshot belongs to.",
+        "campaign_name: Denormalized campaign name at time of publish.",
+        "change_summary: Human readable note on what changed from the previous version.",
+        "content_hash: SHA256 of contract_json. Used as the ETag on /functions/contract."
+      ]
+    },
+    {
+      "name": "Counter",
+      "file": "base44/entities/Counter.jsonc",
+      "field_count": 3,
+      "required": [
+        "name",
+        "value"
+      ],
+      "documented_fields": 3,
+      "undocumented_fields": 0,
+      "has_rls": false,
+      "rls_operations": [],
+      "highlights": [
+        "name: Unique name identifying the counter sequence (e.g. lead_id)",
+        "value: Current value of the counter",
+        "updated_at: When the counter was last incremented"
+      ]
+    },
+    {
+      "name": "CustomCalculation",
+      "file": "base44/entities/CustomCalculation.jsonc",
+      "field_count": 8,
+      "required": [
+        "output_token",
+        "transform_type"
+      ],
+      "documented_fields": 4,
+      "undocumented_fields": 4,
+      "has_rls": false,
+      "rls_operations": [],
+      "highlights": [
+        "output_token: e.g. accident_date",
+        "vertical: Vertical code this calculation applies to. Empty means it applies to all verticals.",
+        "input_field: Token name of the input field",
+        "config: JSON string of transform config (buckets, map, script)"
+      ]
+    },
+    {
+      "name": "CustomField",
+      "file": "base44/entities/CustomField.jsonc",
+      "field_count": 12,
+      "required": [
+        "field_name"
+      ],
+      "documented_fields": 3,
+      "undocumented_fields": 9,
+      "has_rls": false,
+      "rls_operations": [],
+      "highlights": [
+        "options: JSON array of dropdown values (for system/dropdown fields e.g. lead_status). Drives the trigger options shown on Destinations and Conversion Events.",
+        "required: If true, missing this field queues the lead at the gate. System fields are never gated (they are system-populated).",
+        "system_role: Marker for system-populated fields. processLead locates the email_valid / phone_verified field by this role to resolve the configured field_name (editable label/name on the Custom Fields page)."
+      ]
+    },
+    {
+      "name": "Disposition",
+      "file": "base44/entities/Disposition.jsonc",
+      "field_count": 3,
+      "required": [
+        "value"
+      ],
+      "documented_fields": 2,
+      "undocumented_fields": 1,
+      "has_rls": false,
+      "rls_operations": [],
+      "highlights": [
+        "value: Canonical disposition name in our taxonomy",
+        "description: Short description of what this disposition means"
+      ]
+    },
+    {
+      "name": "EmailValidationSettings",
+      "file": "base44/entities/EmailValidationSettings.jsonc",
+      "field_count": 4,
+      "required": [],
+      "documented_fields": 4,
+      "undocumented_fields": 0,
+      "has_rls": false,
+      "rls_operations": [],
+      "highlights": [
+        "enabled: When true, inbound emails are validated (format + DNS MX) and the result is written to the email_valid system field for forwarding.",
+        "filter_suppliers: JSON array of supplier names or SIDs to validate email for. Empty = all suppliers.",
+        "filter_supplier_types: JSON array of supplier types (Internal, External, Calls). Empty = all.",
+        "filter_routes: JSON array of lead_route keys (standard, direct, data, event, queue) to validate email on. Empty = standard, direct, data."
+      ]
+    },
+    {
+      "name": "ErrorLog",
+      "file": "base44/entities/ErrorLog.jsonc",
+      "field_count": 7,
+      "required": [
+        "stage",
+        "severity",
+        "message"
+      ],
+      "documented_fields": 2,
+      "undocumented_fields": 5,
+      "has_rls": false,
+      "rls_operations": [],
+      "highlights": [
+        "lead_id: Reference to Lead record, nullable",
+        "detail: JSON string with full error details"
+      ]
+    },
+    {
+      "name": "FieldMapping",
+      "file": "base44/entities/FieldMapping.jsonc",
+      "field_count": 2,
+      "required": [
+        "source_field",
+        "target_field"
+      ],
+      "documented_fields": 2,
+      "undocumented_fields": 0,
+      "has_rls": false,
+      "rls_operations": [],
+      "highlights": [
+        "source_field: Inbound payload key",
+        "target_field: Normalized lead field the source key maps to"
+      ]
+    },
+    {
+      "name": "HlrSettings",
+      "file": "base44/entities/HlrSettings.jsonc",
+      "field_count": 13,
+      "required": [
+        "provider_name",
+        "endpoint_url"
+      ],
+      "documented_fields": 6,
+      "undocumented_fields": 7,
+      "has_rls": false,
+      "rls_operations": [],
+      "highlights": [
+        "request_field_map: JSON: {\"mobile\":\"phone\",\"first_name\":\"firstname\",\"last_name\":\"lastname\"}",
+        "passthrough_fields: JSON array of HLR response fields to pass through",
+        "phone_verified_fallback: Static value sent as phone_verified when there is no HLR result and no inbound phone_verified value, so LeadByte always receives a non-empty phone_verified.",
+        "filter_suppliers: JSON array of supplier names or SIDs to run HLR for. Empty = all suppliers."
+      ]
+    },
+    {
+      "name": "ImportTemplate",
+      "file": "base44/entities/ImportTemplate.jsonc",
+      "field_count": 3,
+      "required": [
+        "name",
+        "target"
+      ],
+      "documented_fields": 3,
+      "undocumented_fields": 0,
+      "has_rls": false,
+      "rls_operations": [],
+      "highlights": [
+        "name: Template display name, usually the source",
+        "target: Which entity this template imports into: Lead or BankTransaction",
+        "mapping: JSON object mapping source CSV column -> target field name"
+      ]
+    },
+    {
+      "name": "InboundWebhookRoute",
+      "file": "base44/entities/InboundWebhookRoute.jsonc",
+      "field_count": 14,
+      "required": [
+        "name"
+      ],
+      "documented_fields": 14,
+      "undocumented_fields": 0,
+      "has_rls": true,
+      "rls_operations": [
+        "create",
+        "delete",
+        "read",
+        "update"
+      ],
+      "highlights": [
+        "api_key_id: ApiKey record id this webhook is presented with. Auth is by key, so several webhooks may share one key.",
+        "api_key_name: ApiKey friendly name, denormalized for display",
+        "enabled: Whether this webhook accepts inbound requests",
+        "error_count: Total processing errors on this webhook"
+      ]
+    },
+    {
+      "name": "IntegrationConfig",
+      "file": "base44/entities/IntegrationConfig.jsonc",
+      "field_count": 2,
+      "required": [
+        "name"
+      ],
+      "documented_fields": 2,
+      "undocumented_fields": 0,
+      "has_rls": false,
+      "rls_operations": [],
+      "highlights": [
+        "name: Integration key e.g. whatsapp",
+        "config: JSON string of credentials/settings for this integration"
+      ]
+    },
+    {
+      "name": "Invitation",
+      "file": "base44/entities/Invitation.jsonc",
+      "field_count": 6,
+      "required": [
+        "email"
+      ],
+      "documented_fields": 6,
+      "undocumented_fields": 0,
+      "has_rls": true,
+      "rls_operations": [
+        "create",
+        "read",
+        "update",
+        "delete"
+      ],
+      "highlights": [
+        "email: Email address the invitation was sent to",
+        "role: Platform role granted on acceptance",
+        "base_role: Base role preset (owner, admin, manager, supplier, buyer)",
+        "permissions: JSON string of the permission map to apply once the user logs in"
+      ]
+    },
+    {
+      "name": "Invoice",
+      "file": "base44/entities/Invoice.jsonc",
+      "field_count": 8,
+      "required": [
+        "buyer_id",
+        "amount"
+      ],
+      "documented_fields": 1,
+      "undocumented_fields": 7,
+      "has_rls": false,
+      "rls_operations": [],
+      "highlights": [
+        "buyer_id: Reference to Buyer record"
+      ]
+    },
+    {
+      "name": "KnowledgeDoc",
+      "file": "base44/entities/KnowledgeDoc.jsonc",
+      "field_count": 8,
+      "required": [
+        "title"
+      ],
+      "documented_fields": 7,
+      "undocumented_fields": 1,
+      "has_rls": false,
+      "rls_operations": [],
+      "highlights": [
+        "title: Display title of the knowledge item",
+        "kind: doc = reference document, note = free-form note, glossary = term/definition, template = disposition/feedback template",
+        "term: For glossary items: the term being defined",
+        "content: Body text / definition / template content that the bots read as context"
+      ]
+    },
+    {
+      "name": "Lead",
+      "file": "base44/entities/Lead.jsonc",
+      "field_count": 50,
+      "required": [
+        "supplier_name",
+        "final_status"
+      ],
+      "documented_fields": 39,
+      "undocumented_fields": 11,
+      "has_rls": true,
+      "rls_operations": [
+        "create",
+        "read",
+        "update",
+        "delete"
+      ],
+      "highlights": [
+        "supplier_name: Name of the supplier who sent this lead",
+        "supplier_key_id: Reference to ApiKey record",
+        "buyer_id: Reference to the Buyer record this lead was delivered to (set on sold delivery or by feedback matching)",
+        "buyer_feedback: Latest buyer feedback disposition (from our taxonomy) for this lead, used by reporting"
+      ]
+    },
+    {
+      "name": "LeadByteConnector",
+      "file": "base44/entities/LeadByteConnector.jsonc",
+      "field_count": 18,
+      "required": [
+        "api_name",
+        "target_url"
+      ],
+      "documented_fields": 12,
+      "undocumented_fields": 6,
+      "has_rls": false,
+      "rls_operations": [],
+      "highlights": [
+        "kind: Delivery type: Leadbyte, BigQuery, Data, or Generic HTTP",
+        "headers: JSON array of {key, value} header rows",
+        "payload_template: JSON template string with {{token}} placeholders",
+        "forwarding_mode: Legacy,  kept for compatibility. Routing now controlled by lead_route field."
+      ]
+    },
+    {
+      "name": "LeadSource",
+      "file": "base44/entities/LeadSource.jsonc",
+      "field_count": 16,
+      "required": [
+        "name",
+        "kind"
+      ],
+      "documented_fields": 14,
+      "undocumented_fields": 2,
+      "has_rls": false,
+      "rls_operations": [],
+      "highlights": [
+        "name: Display name of this lead source",
+        "kind: Source type: Google Sheets pull, or Ringba/TrueCall inbound call webhook",
+        "supplier_name: Supplier this source's leads are attributed to",
+        "campaign_id: Campaign this source's leads are attributed to"
+      ]
+    },
+    {
+      "name": "MetaConnection",
+      "file": "base44/entities/MetaConnection.jsonc",
+      "field_count": 13,
+      "required": [
+        "name",
+        "auth_type"
+      ],
+      "documented_fields": 11,
+      "undocumented_fields": 2,
+      "has_rls": true,
+      "rls_operations": [
+        "create",
+        "read",
+        "update",
+        "delete"
+      ],
+      "highlights": [
+        "name: Display label for this connection, for example the Business Manager name",
+        "auth_type: oauth = Facebook Login long-lived user token (about 60 days). system_user = durable Business Manager system-user token.",
+        "token: Access token. Read server-side by functions; the UI only ever receives a masked tail.",
+        "token_expires_at: Expiry for oauth tokens. Null for system-user tokens, which do not expire."
+      ]
+    },
+    {
+      "name": "MetaLeadFormMapping",
+      "file": "base44/entities/MetaLeadFormMapping.jsonc",
+      "field_count": 18,
+      "required": [
+        "connection_id",
+        "page_id",
+        "form_id"
+      ],
+      "documented_fields": 14,
+      "undocumented_fields": 4,
+      "has_rls": true,
+      "rls_operations": [
+        "create",
+        "delete",
+        "read",
+        "update"
+      ],
+      "highlights": [
+        "brand: Brand snapshot from the chosen Legenex campaign.",
+        "campaign_id: Reference to the Legenex Campaign this form's leads belong to.",
+        "campaign_name: Denormalized campaign name for display.",
+        "connection_id: Reference to the MetaConnection whose token can read this form."
+      ]
+    },
+    {
+      "name": "MetaSyncRun",
+      "file": "base44/entities/MetaSyncRun.jsonc",
+      "field_count": 19,
+      "required": [
+        "ad_account_id",
+        "status"
+      ],
+      "documented_fields": 7,
+      "undocumented_fields": 12,
+      "has_rls": true,
+      "rls_operations": [
+        "create",
+        "read",
+        "update",
+        "delete"
+      ],
+      "highlights": [
+        "supplier_ad_account_id: Reference to the SupplierAdAccount this run synced.",
+        "trigger: What started the run.",
+        "status: success = account synced cleanly. error = account failed. partial = account level ok but campaign/ad level had issues.",
+        "account_rows: Account-level daily spend rows written."
+      ]
+    },
+    {
+      "name": "MigrationRequirement",
+      "file": "base44/entities/MigrationRequirement.jsonc",
+      "field_count": 23,
+      "required": [
+        "capability_key",
+        "group_key",
+        "capability"
+      ],
+      "documented_fields": 16,
+      "undocumented_fields": 7,
+      "has_rls": true,
+      "rls_operations": [
+        "create",
+        "read",
+        "update",
+        "delete"
+      ],
+      "highlights": [
+        "capability_key: Stable slug, e.g. routing.ping_post or ingestion.duplicate_detection",
+        "group_key: The ten LeadByte parity capability groups",
+        "capability: Short name of the capability",
+        "definition: What the capability means in concrete behavioural terms"
+      ]
+    },
+    {
+      "name": "NotificationEvent",
+      "file": "base44/entities/NotificationEvent.jsonc",
+      "field_count": 5,
+      "required": [
+        "rule_id",
+        "summary"
+      ],
+      "documented_fields": 1,
+      "undocumented_fields": 4,
+      "has_rls": false,
+      "rls_operations": [],
+      "highlights": [
+        "rule_id: Reference to NotificationRule"
+      ]
+    },
+    {
+      "name": "NotificationRule",
+      "file": "base44/entities/NotificationRule.jsonc",
+      "field_count": 7,
+      "required": [
+        "name",
+        "condition_type"
+      ],
+      "documented_fields": 2,
+      "undocumented_fields": 5,
+      "has_rls": false,
+      "rls_operations": [],
+      "highlights": [
+        "channels: JSON array of channel types e.g. [\"email\",\"slack\"]",
+        "recipients: JSON array of recipient addresses"
+      ]
+    },
+    {
+      "name": "OnboardingEmailTemplate",
+      "file": "base44/entities/OnboardingEmailTemplate.jsonc",
+      "field_count": 5,
+      "required": [
+        "event"
+      ],
+      "documented_fields": 5,
+      "undocumented_fields": 0,
+      "has_rls": true,
+      "rls_operations": [
+        "create",
+        "delete",
+        "read",
+        "update"
+      ],
+      "highlights": [
+        "body: Plain text email body. Merge fields: {{company_name}}, {{contact_name}}, {{buyer_code}}, {{vertical}}, {{link}} for invite only, {{failed_step}} for blocked only.",
+        "enabled: When false this email is not sent.",
+        "event: Onboarding lifecycle event this template fires on. One row per event.",
+        "recipients: JSON array of internal recipient emails. Used for the blocked alert. Client-facing events derive the recipient from the buyer contact."
+      ]
+    },
+    {
+      "name": "PageSnapshot",
+      "file": "base44/entities/PageSnapshot.jsonc",
+      "field_count": 17,
+      "required": [
+        "page_key",
+        "route",
+        "viewport"
+      ],
+      "documented_fields": 14,
+      "undocumented_fields": 3,
+      "has_rls": true,
+      "rls_operations": [
+        "create",
+        "read",
+        "update",
+        "delete"
+      ],
+      "highlights": [
+        "page_key: ProgressPage this capture belongs to",
+        "route: Route captured, including any query string",
+        "viewport: Which viewport bucket the capture was taken at",
+        "width: Actual capture width in CSS pixels"
+      ]
+    },
+    {
+      "name": "PayloadTest",
+      "file": "base44/entities/PayloadTest.jsonc",
+      "field_count": 4,
+      "required": [
+        "name",
+        "payload_template"
+      ],
+      "documented_fields": 4,
+      "undocumented_fields": 0,
+      "has_rls": false,
+      "rls_operations": [],
+      "highlights": [
+        "name: Friendly name for this saved payload test",
+        "target_url: Buyer endpoint URL to POST the generated payload to",
+        "payload_template: JSON template with [token] placeholders (the Payload Builder)",
+        "test_data: Raw sample data (JSON or key=value) that AI uses to populate the payload"
+      ]
+    },
+    {
+      "name": "ProgressPage",
+      "file": "base44/entities/ProgressPage.jsonc",
+      "field_count": 50,
+      "required": [
+        "page_key",
+        "route",
+        "title",
+        "section_key"
+      ],
+      "documented_fields": 42,
+      "undocumented_fields": 8,
+      "has_rls": true,
+      "rls_operations": [
+        "create",
+        "read",
+        "update",
+        "delete"
+      ],
+      "highlights": [
+        "page_key: Stable key from scripts/generate-page-inventory.mjs. Unique. Never hand edited.",
+        "section_key: Section slug, e.g. leads, operations, lead-distribution",
+        "section_label: Human label of the section, e.g. Lead Distribution",
+        "title: Page title as shown in the Application Review tree"
+      ]
+    },
+    {
+      "name": "ProgressSnapshot",
+      "file": "base44/entities/ProgressSnapshot.jsonc",
+      "field_count": 22,
+      "required": [
+        "snapshot_date"
+      ],
+      "documented_fields": 10,
+      "undocumented_fields": 12,
+      "has_rls": true,
+      "rls_operations": [
+        "create",
+        "read",
+        "update",
+        "delete"
+      ],
+      "highlights": [
+        "snapshot_date: Day key in America/Regina. One snapshot per day, upserted so re-running is idempotent.",
+        "platform_readiness: Weighted readiness across all counted surfaces, 0 to 100",
+        "migration_readiness: Weighted readiness across cutover-required capabilities only, 0 to 100",
+        "page_completion: Percent of counted pages at implemented_unverified or better"
+      ]
+    },
+    {
+      "name": "PromptDraft",
+      "file": "base44/entities/PromptDraft.jsonc",
+      "field_count": 15,
+      "required": [
+        "change_request_id",
+        "body",
+        "status"
+      ],
+      "documented_fields": 11,
+      "undocumented_fields": 4,
+      "has_rls": true,
+      "rls_operations": [
+        "create",
+        "read",
+        "update",
+        "delete"
+      ],
+      "highlights": [
+        "reference: Human reference, e.g. PR-014-2",
+        "change_request_id: ChangeRequest this prompt implements",
+        "target: Who the prompt is written for. Changes tone, tool references and constraints.",
+        "body: The generated implementation prompt. Editable."
+      ]
+    },
+    {
+      "name": "ReferenceKey",
+      "file": "base44/entities/ReferenceKey.jsonc",
+      "field_count": 5,
+      "required": [
+        "field_name",
+        "values"
+      ],
+      "documented_fields": 4,
+      "undocumented_fields": 1,
+      "has_rls": false,
+      "rls_operations": [],
+      "highlights": [
+        "field_name: Token name e.g. injury_type",
+        "label: Display label e.g. Injury Type",
+        "values: JSON array of possible values for this field",
+        "note: Optional note e.g. Primary input field"
+      ]
+    },
+    {
+      "name": "ReleaseGate",
+      "file": "base44/entities/ReleaseGate.jsonc",
+      "field_count": 15,
+      "required": [
+        "gate_key",
+        "title",
+        "status"
+      ],
+      "documented_fields": 7,
+      "undocumented_fields": 8,
+      "has_rls": true,
+      "rls_operations": [
+        "create",
+        "read",
+        "update",
+        "delete"
+      ],
+      "highlights": [
+        "gate_key: Stable slug, e.g. no_open_p0, delivery_logs_complete, rollback_tested",
+        "description: What passing actually requires, in objective terms",
+        "blocking: A failing blocking gate caps the recommendation at not ready regardless of the numeric average",
+        "evaluation_mode: automatic gates are computed by progressReadiness from records, manual gates need a human to attest"
+      ]
+    },
+    {
+      "name": "Report",
+      "file": "base44/entities/Report.jsonc",
+      "field_count": 8,
+      "required": [
+        "name"
+      ],
+      "documented_fields": 7,
+      "undocumented_fields": 1,
+      "has_rls": false,
+      "rls_operations": [],
+      "highlights": [
+        "name: Report display name",
+        "group: Which sidebar group this report belongs to",
+        "base_page: Which built-in report layout this is based on (performance_overview, daily, campaign, pnl, ad, buyer, supplier)",
+        "pinned_filters: JSON object of pinned filter values e.g. {\"buyer_id\":\"AG1\"}"
+      ]
+    },
+    {
+      "name": "ResponseMapping",
+      "file": "base44/entities/ResponseMapping.jsonc",
+      "field_count": 7,
+      "required": [
+        "lb_status",
+        "response_label",
+        "final_status"
+      ],
+      "documented_fields": 3,
+      "undocumented_fields": 4,
+      "has_rls": false,
+      "rls_operations": [],
+      "highlights": [
+        "field_path: Dot path into LeadByte response e.g. records[0].status",
+        "lb_status: Value to compare against, or * for fallback",
+        "response_label: Label returned to supplier in Response field"
+      ]
+    },
+    {
+      "name": "ReturnRequest",
+      "file": "base44/entities/ReturnRequest.jsonc",
+      "field_count": 7,
+      "required": [
+        "buyer_id",
+        "reason"
+      ],
+      "documented_fields": 4,
+      "undocumented_fields": 3,
+      "has_rls": false,
+      "rls_operations": [],
+      "highlights": [
+        "lead_id: Reference to the Lead record being returned",
+        "buyer_id: Reference to the Buyer record requesting the return",
+        "reason: Buyer's reason for the return request",
+        "resolver_notes: Operator notes when approving or rejecting"
+      ]
+    },
+    {
+      "name": "ReviewThread",
+      "file": "base44/entities/ReviewThread.jsonc",
+      "field_count": 20,
+      "required": [
+        "page_key",
+        "subject_type",
+        "body"
+      ],
+      "documented_fields": 17,
+      "undocumented_fields": 3,
+      "has_rls": true,
+      "rls_operations": [
+        "create",
+        "read",
+        "update",
+        "delete"
+      ],
+      "highlights": [
+        "page_key: ProgressPage this comment is anchored to",
+        "subject_type: What exactly the comment is about. Drives how the prompt generator frames the fix.",
+        "subject_ref: Identifier of the subject: metric name, component path, entity name, function name, column key",
+        "subject_label: Visible text or label of the thing being commented on, captured automatically"
+      ]
+    },
+    {
+      "name": "RouteMember",
+      "file": "base44/entities/RouteMember.jsonc",
+      "field_count": 26,
+      "required": [
+        "route_group_id",
+        "buyer_id"
+      ],
+      "documented_fields": 24,
+      "undocumented_fields": 2,
+      "has_rls": false,
+      "rls_operations": [],
+      "highlights": [
+        "route_group_id: RouteGroup this member belongs to",
+        "buyer_id: Buyer that owns this destination",
+        "sub_delivery_id: CANONICAL destination pointer: the SubDelivery this member delivers to. Must resolve to an active SubDelivery whose parent Delivery is active and belongs to this member's buyer, else the member is CONFIG_INVALID and ineligible.",
+        "destination_id: DEPRECATED (compatibility only): legacy LeadByteConnector/ApiConnector id. Superseded by sub_delivery_id as the canonical destination. Retained additively for existing records; do not use for new members."
+      ]
+    },
+    {
+      "name": "StateChangeEvent",
+      "file": "base44/entities/StateChangeEvent.jsonc",
+      "field_count": 12,
+      "required": [
+        "vertical",
+        "state",
+        "direction"
+      ],
+      "documented_fields": 12,
+      "undocumented_fields": 0,
+      "has_rls": true,
+      "rls_operations": [
+        "create",
+        "read",
+        "update",
+        "delete"
+      ],
+      "highlights": [
+        "vertical: The vertical code",
+        "state: Two letter US state code, uppercase",
+        "direction: Direction of this state change",
+        "old_client_type: Previous effective client type. Nullable."
+      ]
+    },
+    {
+      "name": "StateStatus",
+      "file": "base44/entities/StateStatus.jsonc",
+      "field_count": 9,
+      "required": [
+        "vertical",
+        "state"
+      ],
+      "documented_fields": 6,
+      "undocumented_fields": 3,
+      "has_rls": true,
+      "rls_operations": [
+        "create",
+        "read",
+        "update",
+        "delete"
+      ],
+      "highlights": [
+        "vertical: The vertical code",
+        "state: Two letter US state code, uppercase",
+        "active: True when at least one active buyer covers this state",
+        "effective_client_type: The winning coverage tier for this state. Nullable."
+      ]
+    },
+    {
+      "name": "Supplier",
+      "file": "base44/entities/Supplier.jsonc",
+      "field_count": 25,
+      "required": [
+        "name",
+        "supplier_type"
+      ],
+      "documented_fields": 18,
+      "undocumented_fields": 7,
+      "has_rls": false,
+      "rls_operations": [],
+      "highlights": [
+        "sid: Supplier SID used as {{sid}} token",
+        "supplier_type: Supplier type used for ApiConnector filter matching",
+        "status: Supplier lifecycle status",
+        "is_call_source: True when this supplier delivers inbound calls rather than form leads"
+      ]
+    },
+    {
+      "name": "SupplierAdAccount",
+      "file": "base44/entities/SupplierAdAccount.jsonc",
+      "field_count": 18,
+      "required": [
+        "connection_id",
+        "ad_account_id"
+      ],
+      "documented_fields": 15,
+      "undocumented_fields": 3,
+      "has_rls": true,
+      "rls_operations": [
+        "read",
+        "create",
+        "update",
+        "delete"
+      ],
+      "highlights": [
+        "ad_account_id: Meta ad account node id (act_XXXX)",
+        "backfill_days: How many days of history the first sync imports when no backfill_since date is set. Capped at 1100.",
+        "backfill_done: Set true after the first successful sync.",
+        "backfill_since: Optional absolute start date (YYYY-MM-DD) for the first import. Takes precedence over backfill_days when set."
+      ]
+    },
+    {
+      "name": "SupplierPayout",
+      "file": "base44/entities/SupplierPayout.jsonc",
+      "field_count": 8,
+      "required": [
+        "supplier_name",
+        "amount"
+      ],
+      "documented_fields": 0,
+      "undocumented_fields": 8,
+      "has_rls": false,
+      "rls_operations": [],
+      "highlights": []
+    },
+    {
+      "name": "SupplierSource",
+      "file": "base44/entities/SupplierSource.jsonc",
+      "field_count": 9,
+      "required": [
+        "supplier_id",
+        "pricing_model"
+      ],
+      "documented_fields": 8,
+      "undocumented_fields": 1,
+      "has_rls": true,
+      "rls_operations": [
+        "create",
+        "read",
+        "update",
+        "delete"
+      ],
+      "highlights": [
+        "supplier_id: Reference to a Supplier record",
+        "source_code: Optional supplier SubID (SSID) for this source, formed as sid-brand, for example LGNX-DS or LGNX-CMC. When present it is the primary match key for inbound leads: the payload ssid wins over any brand fallback. A supplier with a single source does not need one.",
+        "brand: Optional supplier_brand this source resolves for. Used as the fallback match when an inbound lead carries no ssid: the source whose brand equals the lead's supplier_brand is selected. Lets one supplier hold sources on different brands, for example LGNX holding CMC and Dont Settle.",
+        "pricing_model: Pricing model for this source. none means this source carries no CPL of its own (used by Internal supplier sources whose cost comes from mapped ad accounts, and by any source that should fall back to the lead's supplier_payout)."
+      ]
+    },
+    {
+      "name": "SupplierStateCoverage",
+      "file": "base44/entities/SupplierStateCoverage.jsonc",
+      "field_count": 8,
+      "required": [
+        "supplier_id",
+        "vertical",
+        "state"
+      ],
+      "documented_fields": 8,
+      "undocumented_fields": 0,
+      "has_rls": true,
+      "rls_operations": [
+        "create",
+        "read",
+        "update",
+        "delete"
+      ],
+      "highlights": [
+        "supplier_id: Reference to a Supplier record",
+        "vertical: The vertical code this coverage applies to, for example MVA or WC",
+        "state: Two letter US state code, uppercase",
+        "active: Whether this supplier is currently live in this state for this vertical"
+      ]
+    },
+    {
+      "name": "User",
+      "file": "base44/entities/User.jsonc",
+      "field_count": 6,
+      "required": [
+        "role"
+      ],
+      "documented_fields": 6,
+      "undocumented_fields": 0,
+      "has_rls": false,
+      "rls_operations": [],
+      "highlights": [
+        "role: Platform role of the user in the app",
+        "base_role: Granular app role preset that pre-fills the permission checklist",
+        "permissions: JSON object map of permission key -> true for every section/page/function this user can access",
+        "linked_buyer_id: For buyer-role users: the id of the Buyer record their portal is scoped to"
+      ]
+    },
+    {
+      "name": "VerificationRecord",
+      "file": "base44/entities/VerificationRecord.jsonc",
+      "field_count": 11,
+      "required": [
+        "subject_type",
+        "subject_key",
+        "check",
+        "result"
+      ],
+      "documented_fields": 7,
+      "undocumented_fields": 4,
+      "has_rls": true,
+      "rls_operations": [
+        "create",
+        "read",
+        "update",
+        "delete"
+      ],
+      "highlights": [
+        "subject_key: page_key, change request reference, capability_key or gate_key",
+        "check: The nine plus evidence types a surface can be verified against. A page is only verified when its required checks pass.",
+        "result: needs_env means unverifiable from the current environment, never treated as a pass",
+        "evidence: Command output, record ids, reconciliation numbers, or what the reviewer actually did"
+      ]
+    },
+    {
+      "name": "Vertical",
+      "file": "base44/entities/Vertical.jsonc",
+      "field_count": 5,
+      "required": [
+        "name",
+        "code"
+      ],
+      "documented_fields": 2,
+      "undocumented_fields": 3,
+      "has_rls": false,
+      "rls_operations": [],
+      "highlights": [
+        "name: Vertical display name e.g. Motor Vehicle Accident, Workers Comp, Debt",
+        "code: Short code matching the inbound payload 'vertical' field value used to route leads into delivery buckets"
+      ]
+    },
+    {
+      "name": "WalletTransaction",
+      "file": "base44/entities/WalletTransaction.jsonc",
+      "field_count": 7,
+      "required": [
+        "buyer_id",
+        "type",
+        "amount"
+      ],
+      "documented_fields": 3,
+      "undocumented_fields": 4,
+      "has_rls": false,
+      "rls_operations": [],
+      "highlights": [
+        "buyer_id: Reference to Buyer record",
+        "idempotency_key: Additive. Dedupe key so a debit/credit applies at most once (native ledger)",
+        "status: Additive. applied = balance moved; rejected = insufficient/over-limit, no balance change"
+      ]
+    },
+    {
+      "name": "Webhook",
+      "file": "base44/entities/Webhook.jsonc",
+      "field_count": 6,
+      "required": [
+        "name",
+        "url"
+      ],
+      "documented_fields": 2,
+      "undocumented_fields": 4,
+      "has_rls": false,
+      "rls_operations": [],
+      "highlights": [
+        "events: JSON array of event names e.g. [\"lead.sold\",\"lead.unsold\"]",
+        "headers: JSON object of custom headers"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,119 @@
+{
+  "name": "VerificationRecord",
+  "type": "object",
+  "properties": {
+    "subject_type": {
+      "type": "string",
+      "enum": [
+        "page",
+        "change_request",
+        "migration_requirement",
+        "release_gate"
+      ]
+    },
+    "subject_key": {
+      "type": "string",
+      "description": "page_key, change request reference, capability_key or gate_key"
+    },
+    "check": {
+      "type": "string",
+      "enum": [
+        "automated_tests",
+        "production_build",
+        "design_token_gate",
+        "engine_parity_gate",
+        "visual_review",
+        "functional_acceptance",
+        "data_reconciliation",
+        "permission_test",
+        "error_state_test",
+        "mobile_test",
+        "reviewer_approval"
+      ],
+      "description": "The nine plus evidence types a surface can be verified against. A page is only verified when its required checks pass."
+    },
+    "result": {
+      "type": "string",
+      "enum": [
+        "pass",
+        "fail",
+        "partial",
+        "not_applicable",
+        "needs_env"
+      ],
+      "description": "needs_env means unverifiable from the current environment, never treated as a pass"
+    },
+    "evidence": {
+      "type": "string",
+      "description": "Command output, record ids, reconciliation numbers, or what the reviewer actually did"
+    },
+    "evidence_type": {
+      "type": "string",
+      "enum": [
+        "code",
+        "runtime",
+        "screenshot",
+        "data",
+        "test",
+        "user_feedback",
+        "inference",
+        "unknown"
+      ],
+      "default": "unknown"
+    },
+    "verified_by": {
+      "type": "string",
+      "description": "Who attested. A developer marking their own work complete is not reviewer_approval."
+    },
+    "verifier_role": {
+      "type": "string",
+      "enum": [
+        "owner",
+        "administrator",
+        "developer",
+        "reviewer",
+        "automation"
+      ]
+    },
+    "app_commit": {
+      "type": "string",
+      "description": "Commit the verification was performed against. A later commit to the same surface invalidates it."
+    },
+    "superseded": {
+      "type": "boolean",
+      "default": false,
+      "description": "Set when a code change to the subject invalidates this record"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "subject_type",
+    "subject_key",
+    "check",
+    "result"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

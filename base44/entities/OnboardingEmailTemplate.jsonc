@@ -1,0 +1,58 @@
+{
+  "name": "OnboardingEmailTemplate",
+  "properties": {
+    "body": {
+      "description": "Plain text email body. Merge fields: {{company_name}}, {{contact_name}}, {{buyer_code}}, {{vertical}}, {{link}} for invite only, {{failed_step}} for blocked only.",
+      "type": "string"
+    },
+    "enabled": {
+      "default": true,
+      "description": "When false this email is not sent.",
+      "type": "boolean"
+    },
+    "event": {
+      "description": "Onboarding lifecycle event this template fires on. One row per event.",
+      "enum": [
+        "invite",
+        "submitted",
+        "complete",
+        "blocked"
+      ],
+      "type": "string"
+    },
+    "recipients": {
+      "description": "JSON array of internal recipient emails. Used for the blocked alert. Client-facing events derive the recipient from the buyer contact.",
+      "type": "string"
+    },
+    "subject": {
+      "description": "Email subject. Supports merge fields like {{company_name}}.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "event"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  },
+  "type": "object"
+}

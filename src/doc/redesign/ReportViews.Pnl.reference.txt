@@ -1,0 +1,45 @@
+// Report views, P&L. Create src/components/reports/views/PnlReport.jsx and route active === 'std:pnl' to it
+// in Reports.jsx (extend the existing daily/campaign routing; keep PerformanceCanvas for performance_overview + custom).
+// Add a BankTransaction query in Reports.jsx: fetchAll((limit, skip) => base44.entities.BankTransaction.list('-date', limit, skip)), pass as bankTx to PnlReport.
+// Use shared atoms from '@/components/reports/reportViewAtoms' (ReportKpi, AINote). ALL values REAL, honest zeros,
+// no fabricated numbers, no mock/seed data. No em dashes. Tokens for surfaces/text; tone accents inline hex.
+
+// Props: { leads, adSpend, bankTx, filters }.
+// const f = applyFilters(leads, filters); const m = computeMetrics(f, adSpend);   // from '@/lib/reportMetrics'
+// Money helper: money() from reportMetrics.
+// P&L line values (accrual):
+//   Booked Revenue      = m.booked_revenue                          (kind 'in', green)
+//   Returns & Short-Pays= -(m.booked_revenue - m.net_revenue)       (kind 'out', red, indented)
+//   Net Revenue         = m.net_revenue                             (kind 'total')
+//   Supplier Lead Cost  = -(m.cost)                                 (kind 'out')
+//   Ad Spend            = -(m.ad_spend)                             (kind 'out')
+//   Gross Profit        = m.net_revenue - m.cost - m.ad_spend       (kind 'total')
+//   Tech & Tools        = -(sum bankTx.amount where category === 'tech', abs)     (kind 'out')
+//   Other Operating     = -(sum bankTx.amount where category in ['other','media','personal'], abs)  (kind 'out')
+//   Net Profit          = Gross Profit - techTotal - otherTotal     (kind 'net', green)
+// Accrual vs Cash panel:
+//   Booked (accrual) = m.booked_revenue
+//   Verified (bank)  = sum bankTx.amount where category === 'revenue' (bank-verified cash in)
+//   Gap              = Booked - Verified   (red)
+//   note: "P&L is accrual-based. Cash truth requires the Mercury bank feed."
+// KPI tiles (ReportKpi):
+//   Net Revenue    -> money(m.net_revenue); hint "after returns".
+//   Gross Margin   -> grossProfit/m.net_revenue as pct, or "-" when net_revenue is 0; hint "no revenue basis" when zero.
+//   Net Profit     -> money(netProfit); hint `bank-verified: ${money(verified)}`.
+//   Cash Conversion-> verified/m.booked_revenue as pct, or "-" when no bank data; tone 'risk' when bankTx is empty; hint "bank feed offline" when empty.
+
+const PnlReport = ({ leads, adSpend, bankTx, filters }) => (
+  <div className="space-y-5">
+    <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
+      {/* four ReportKpi tiles as specified */}
+    </div>
+    <div className="grid grid-cols-1 xl:grid-cols-[1.4fr_1fr] gap-4">
+      {/* LEFT: Profit & Loss Statement panel (bg-card, border-border). Header "Profit & Loss Statement" + Tag "accrual - this period".
+          Each line: left = icon (TrendingUp green for 'in', ArrowDown red for 'out', Scale for totals) + label (indent 'out' lines,
+          bold totals); right = a thin bar + money value (green for in/net, red for out, foreground for totals). */}
+      <div className="rounded-xl border border-border bg-card shadow-[0_12px_32px_-16px_rgba(0,0,0,0.35)]" />
+      {/* RIGHT: stacked -> Accrual vs Cash panel (Booked/Verified/Gap rows + the note), then an AINote with a factual read. */}
+      <div className="space-y-4" />
+    </div>
+  </div>
+);

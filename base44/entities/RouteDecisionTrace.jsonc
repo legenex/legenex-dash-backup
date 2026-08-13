@@ -1,0 +1,23 @@
+{
+  // Additive (lead distribution platform). Explainability/audit trace of a routing decision.
+  // Unrestricted trace is never exposed to portals; index (lead_id).
+  // Caller model: processLead writes, operator reads; simulator writes a non-persisted trace.
+  "name": "RouteDecisionTrace",
+  "type": "object",
+  "properties": {
+    "lead_id": { "type": "string", "description": "Lead the decision was made for" },
+    "idempotency_key": { "type": "string", "description": "Idempotency key of the processing run" },
+    "distribution_mode": { "type": "string", "description": "Distribution method used (priority/weighted/auction/etc.)" },
+    "evaluated_candidates": { "type": "string", "description": "JSON: [{member_id, eligible, reason_code, price}]" },
+    "winner_member_id": { "type": "string", "description": "RouteMember that won the decision" },
+    "winning_group_id": { "type": "string", "description": "RouteGroup that produced the winner" },
+    "price": { "type": "number", "description": "Final price of the winning decision" },
+    "cap_reservation_id": { "type": "string", "description": "CapReservation created for the winner" },
+    "balance_decision": { "type": "string", "description": "Wallet/balance outcome for the decision" },
+    "connector_id": { "type": "string", "description": "Connector used for delivery" },
+    "result": { "type": "string", "description": "Overall outcome of the routing decision" },
+    "fallthrough_path": { "type": "string", "description": "JSON array of group ids" },
+    "created_at": { "type": "string", "format": "date-time" }
+  },
+  "required": ["lead_id"]
+}

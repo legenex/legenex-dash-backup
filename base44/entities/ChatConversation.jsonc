@@ -1,0 +1,56 @@
+{
+  "name": "ChatConversation",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "User who owns this conversation"
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "data",
+        "build"
+      ],
+      "default": "data",
+      "description": "Which bot this conversation is with"
+    },
+    "title": {
+      "type": "string",
+      "description": "Auto-generated title from the first user message"
+    },
+    "messages": {
+      "type": "string",
+      "description": "JSON array of {role, content, type, timestamp} messages"
+    },
+    "message_count": {
+      "type": "number",
+      "default": 0
+    },
+    "last_message_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true,
+      "description": "False when archived by the user"
+    }
+  },
+  "required": [
+    "user_id",
+    "mode"
+  ],
+  "rls": {
+    "create": true,
+    "read": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    }
+  }
+}

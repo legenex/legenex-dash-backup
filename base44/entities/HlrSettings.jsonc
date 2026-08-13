@@ -1,0 +1,71 @@
+{
+  "name": "HlrSettings",
+  "type": "object",
+  "properties": {
+    "provider_name": {
+      "type": "string"
+    },
+    "endpoint_url": {
+      "type": "string"
+    },
+    "enabled": {
+      "type": "boolean",
+      "default": true
+    },
+    "timeout_ms": {
+      "type": "number",
+      "default": 8000
+    },
+    "fail_mode": {
+      "type": "string",
+      "enum": [
+        "fail_open",
+        "fail_closed",
+        "forward_blank"
+      ],
+      "default": "fail_open"
+    },
+    "request_field_map": {
+      "type": "string",
+      "description": "JSON: {\"mobile\":\"phone\",\"first_name\":\"firstname\",\"last_name\":\"lastname\"}"
+    },
+    "passthrough_fields": {
+      "type": "string",
+      "description": "JSON array of HLR response fields to pass through"
+    },
+    "min_summary_score": {
+      "type": "number",
+      "default": 0
+    },
+    "phone_verified_source": {
+      "type": "string",
+      "enum": [
+        "lh_hlr_response",
+        "summary_score",
+        "boolean"
+      ],
+      "default": "lh_hlr_response"
+    },
+    "phone_verified_fallback": {
+      "type": "string",
+      "default": "Not Verified",
+      "description": "Static value sent as phone_verified when there is no HLR result and no inbound phone_verified value, so LeadByte always receives a non-empty phone_verified."
+    },
+    "filter_suppliers": {
+      "type": "string",
+      "description": "JSON array of supplier names or SIDs to run HLR for. Empty = all suppliers."
+    },
+    "filter_supplier_types": {
+      "type": "string",
+      "description": "JSON array of supplier types (Internal, External, Calls) to run HLR for. Empty = all."
+    },
+    "filter_routes": {
+      "type": "string",
+      "description": "JSON array of lead_route keys (standard, direct, data, event, queue) to run HLR on. Empty = standard, direct, data."
+    }
+  },
+  "required": [
+    "provider_name",
+    "endpoint_url"
+  ]
+}

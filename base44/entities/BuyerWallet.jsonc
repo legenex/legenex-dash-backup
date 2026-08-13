@@ -1,0 +1,16 @@
+{
+  // Additive (lead distribution platform). Versioned buyer balance for
+  // concurrency-safe debit/credit via optimistic-lock compare-and-swap
+  // (updateMany on {id, version} -> {balance, version+1}). The WalletTransaction
+  // entity remains the append-only ledger; this row holds the authoritative
+  // current balance and its version. Caller model: processLead / billing worker
+  // (service role) only. One row per buyer (reconciled to the lowest id on race).
+  "name": "BuyerWallet",
+  "type": "object",
+  "properties": {
+    "buyer_id": { "type": "string", "description": "Reference to the Buyer record" },
+    "balance": { "type": "number", "default": 0, "description": "Authoritative current wallet balance" },
+    "version": { "type": "number", "default": 0, "description": "CAS version, incremented on every balance change" }
+  },
+  "required": ["buyer_id"]
+}

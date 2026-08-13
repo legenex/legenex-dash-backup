@@ -1,0 +1,80 @@
+{
+  "description": "Operator-tagged metadata for a Meta ad creative. Joined to AdSpend ad-level rows by ad_id. Hook, concept and creator are not exposed by the Meta API, so they are tagged here and drive the Creative Analyzer rollups.",
+  "name": "AdCreativeMeta",
+  "properties": {
+    "active": {
+      "default": true,
+      "type": "boolean"
+    },
+    "ad_account_id": {
+      "type": "string"
+    },
+    "ad_id": {
+      "description": "Meta ad id. Join key to AdSpend rows where level = ad.",
+      "type": "string"
+    },
+    "ad_name": {
+      "description": "Meta ad name at time of tagging, for display when spend rows are outside the window.",
+      "type": "string"
+    },
+    "concept": {
+      "description": "Creative concept, for example ER Waiting Room.",
+      "type": "string"
+    },
+    "creative_type": {
+      "default": "video",
+      "enum": [
+        "video",
+        "image",
+        "carousel",
+        "other"
+      ],
+      "type": "string"
+    },
+    "creator": {
+      "description": "Creator or production source, for example a UGC creator name or Studio.",
+      "type": "string"
+    },
+    "hook": {
+      "description": "Opening hook line used in the creative.",
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "platform": {
+      "default": "meta",
+      "type": "string"
+    },
+    "utm_content": {
+      "description": "Optional utm_content value this ad passes to the funnel, used to join verified lead outcomes back to the creative.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "ad_id"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  },
+  "type": "object"
+}

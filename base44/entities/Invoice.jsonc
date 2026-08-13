@@ -1,0 +1,46 @@
+{
+  "name": "Invoice",
+  "type": "object",
+  "properties": {
+    "buyer_id": {
+      "type": "string",
+      "description": "Reference to Buyer record"
+    },
+    "invoice_number": {
+      "type": "string"
+    },
+    "amount": {
+      "type": "number"
+    },
+    "lead_count": {
+      "type": "number",
+      "default": 0
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "sent",
+        "paid",
+        "overdue",
+        "void"
+      ],
+      "default": "draft"
+    },
+    "period_start": {
+      "type": "string",
+      "format": "date"
+    },
+    "period_end": {
+      "type": "string",
+      "format": "date"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "buyer_id",
+    "amount"
+  ]
+}

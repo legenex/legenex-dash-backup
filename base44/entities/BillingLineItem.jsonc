@@ -1,0 +1,53 @@
+{
+  "name": "BillingLineItem",
+  "type": "object",
+  "properties": {
+    "billing_run_id": {
+      "type": "string",
+      "description": "Reference to a BillingRun record."
+    },
+    "vertical": {
+      "type": "string",
+      "description": "Vertical code for this line. Nullable."
+    },
+    "state": {
+      "type": "string",
+      "description": "Two letter US state code for this line. Nullable."
+    },
+    "campaign_id": {
+      "type": "string",
+      "description": "Reference to a Campaign record. Nullable."
+    },
+    "supplier_id": {
+      "type": "string",
+      "description": "Present on buyer runs to show which supplier the leads came from. Nullable."
+    },
+    "source_code": {
+      "type": "string",
+      "description": "Present on supplier runs to attribute a line to a SupplierSource. Nullable."
+    },
+    "lead_count": {
+      "type": "number",
+      "default": 0
+    },
+    "returns": {
+      "type": "number",
+      "default": 0
+    },
+    "unit_price": {
+      "type": "number",
+      "default": 0
+    },
+    "amount": {
+      "type": "number",
+      "default": 0
+    },
+    "description": {
+      "type": "string",
+      "description": "Human readable description of this line. Nullable."
+    }
+  },
+  "required": [
+    "billing_run_id"
+  ]
+}

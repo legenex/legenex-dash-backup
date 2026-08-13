@@ -1,0 +1,65 @@
+{
+  "name": "BuyerCplRule",
+  "type": "object",
+  "properties": {
+    "buyer_id": {
+      "type": "string",
+      "description": "Reference to the Buyer record this rule belongs to"
+    },
+    "name": {
+      "type": "string",
+      "description": "Optional label for the rule"
+    },
+    "vertical": {
+      "type": "string",
+      "description": "Optional vertical code the rule applies to"
+    },
+    "campaign_id": {
+      "type": "string",
+      "description": "Optional reference to a Campaign record the rule applies to"
+    },
+    "conditions": {
+      "type": "string",
+      "description": "JSON array of {field, operator, value} conditions using the exact same shape and operators as LeadByteConnector field conditions, so the Buyers CPL editor can reuse the existing field condition builder component"
+    },
+    "cpl": {
+      "type": "number",
+      "description": "The price paid when the conditions match"
+    },
+    "priority": {
+      "type": "number",
+      "default": 0,
+      "description": "Evaluation order when multiple rules match, higher priority wins"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "buyer_id",
+    "cpl"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

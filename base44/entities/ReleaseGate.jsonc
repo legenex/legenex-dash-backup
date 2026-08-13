@@ -1,0 +1,120 @@
+{
+  "name": "ReleaseGate",
+  "type": "object",
+  "properties": {
+    "gate_key": {
+      "type": "string",
+      "description": "Stable slug, e.g. no_open_p0, delivery_logs_complete, rollback_tested"
+    },
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string",
+      "description": "What passing actually requires, in objective terms"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "correctness",
+        "data_integrity",
+        "security",
+        "reliability",
+        "reporting",
+        "operations",
+        "sign_off"
+      ]
+    },
+    "blocking": {
+      "type": "boolean",
+      "default": true,
+      "description": "A failing blocking gate caps the recommendation at not ready regardless of the numeric average"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "not_started",
+        "in_progress",
+        "passing",
+        "failing",
+        "waived"
+      ],
+      "default": "not_started"
+    },
+    "evaluation_mode": {
+      "type": "string",
+      "enum": [
+        "automatic",
+        "manual"
+      ],
+      "default": "manual",
+      "description": "automatic gates are computed by progressReadiness from records, manual gates need a human to attest"
+    },
+    "auto_rule": {
+      "type": "string",
+      "description": "Rule id used when evaluation_mode is automatic, e.g. no_open_findings_at_severity:P0"
+    },
+    "evidence": {
+      "type": "string",
+      "description": "What proves the current status"
+    },
+    "evidence_source": {
+      "type": "string",
+      "enum": [
+        "code",
+        "runtime",
+        "data",
+        "test",
+        "screenshot",
+        "human_attestation",
+        "none"
+      ],
+      "default": "none"
+    },
+    "owner": {
+      "type": "string"
+    },
+    "waiver_reason": {
+      "type": "string",
+      "description": "Required when status is waived. A waived blocking gate is reported as a waiver, never as a pass."
+    },
+    "waived_by": {
+      "type": "string"
+    },
+    "last_evaluated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "sort_order": {
+      "type": "number",
+      "default": 100
+    }
+  },
+  "required": [
+    "gate_key",
+    "title",
+    "status"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

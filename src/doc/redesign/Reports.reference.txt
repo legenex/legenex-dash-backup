@@ -1,0 +1,154 @@
+// Reports redesign reference: styling for the report canvas (cards, tables, chart, filter bar).
+// Restyle these to match, keeping ALL logic: src/components/reports/PerformanceCanvas.jsx (and its card/widget
+// renderers), src/components/reports/ReportFilterBar.jsx, and src/components/reports/ReportSidebar.jsx.
+// Keep the drag/drop canvas, add-card/add-widget, saved Report entity CRUD, pinned filters, and export intact.
+// Token mapping (same as other redesigns): panel gradient -> bg-card, #243044 -> border-border,
+// #EEF2F8 -> text-foreground, #8B95A8 -> text-muted-foreground, #5A6478 -> text-muted-foreground/70,
+// #E5484D -> primary, #3DD68C -> status-sold. Numeric cells right-aligned + font-mono. Render REAL data with
+// honest zero states. No mock/seed data. No em dashes.
+
+// ---- MetricCard (KPI tile: uppercase micro-label, big tabular value, hint, thin progress bar; red/green tone) ----
+const MetricCard = ({ m, big = false }) => {
+  const tone = m.risk ? C.red : m.good ? C.green : null;
+  return (
+    <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} whileHover={{ y: -2 }}
+      className={`rounded-lg border ${big ? "p-4" : "px-3.5 py-3"}`}
+      style={{ borderColor: tone ? `${tone}44` : C.borderSoft, background: "rgba(10,14,21,0.45)" }}>
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-[9.5px] font-semibold tracking-[0.1em] uppercase truncate" style={{ color: C.mut }}>{m.label}</span>
+        {m.pinned ? <Pin size={10} style={{ color: C.dim }} /> : tone && <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: tone }} />}
+      </div>
+      <div className={`${big ? "text-[26px]" : "text-[19px]"} font-bold tabular-nums mt-1`} style={{ color: C.text }}>{m.value}</div>
+      {m.hint && <div className="text-[10.5px] mt-0.5" style={{ color: C.dim }}>{m.hint}</div>}
+      <div className="h-0.5 rounded-full mt-2" style={{ background: C.borderSoft }}>
+        <div className="h-full rounded-full" style={{ background: tone || C.red, width: "4%", opacity: 0.7 }} />
+      </div>
+    </motion.div>
+  );
+};
+
+// ---- THead / TRow (report tables; first column left, all numeric columns right-aligned + font-mono) ----
+const THead = ({ cols, template, first = 1 }) => (
+  <div className="grid gap-2 px-4 py-2.5 border-b text-[9.5px] font-semibold tracking-[0.1em] uppercase"
+    style={{ gridTemplateColumns: template, borderColor: C.borderSoft, color: C.dim, background: "rgba(10,14,21,0.4)" }}>
+    {cols.map((c, i) => (<span key={c} className={i < first ? "" : "text-right"}>{c}</span>))}
+  </div>
+);
+const TRow = ({ template, cells, i = 0, firstBold = true }) => (
+  <motion.div variants={rise} initial="hidden" animate="show" custom={i}
+    className="grid gap-2 px-4 py-2.5 border-b items-center hover:bg-white/[0.02]"
+    style={{ gridTemplateColumns: template, borderColor: C.borderSoft }}>
+    {cells.map((c, j) => (
+      <span key={j} className={`text-[12px] ${j === 0 ? (firstBold ? "font-semibold" : "") : "text-right font-mono tabular-nums"}`}
+        style={{ color: j === 0 ? C.text : typeof c === "object" ? c.color : C.dim }}>
+        {typeof c === "object" ? c.v : c}
+      </span>
+    ))}
+  </motion.div>
+);
+
+// ---- SectionHead (panel header: icon + title left, actions right) ----
+const SectionHead = ({ title, right, icon: Icon }) => (
+  <div className="flex items-center justify-between px-5 pt-4 pb-2.5">
+    <div className="flex items-center gap-2">
+      {Icon && <Icon size={14} style={{ color: C.mut }} />}
+      <h3 className="text-[13px] font-semibold" style={{ color: C.text }}>{title}</h3>
+    </div>
+    {right}
+  </div>
+);
+
+// ---- FilterBar (maps to ReportFilterBar: a Panel row of date range + filter dropdowns + Add Filter) ----
+const FilterBar = () => (
+  <Panel className="flex flex-wrap items-center gap-2 px-4 py-3">
+    <Filter size={13} style={{ color: C.dim }} />
+    <div className="flex items-center gap-2 px-3 h-8 rounded-lg border text-[11.5px]" style={{ borderColor: C.border, background: "rgba(10,14,21,0.5)", color: C.dim }}>date range</div>
+    {["Campaign: All", "Vertical: All", "Supplier: All", "Buyer: All", "Brand: All"].map((f) => (
+      <button key={f} className="flex items-center gap-1.5 px-3 h-8 rounded-lg border text-[11.5px] font-medium" style={{ borderColor: C.border, background: "rgba(10,14,21,0.5)", color: C.mut }}>
+        {f} <ChevronDown size={11} style={{ color: C.dim }} />
+      </button>
+    ))}
+    <button className="flex items-center gap-1 px-3 h-8 rounded-lg text-[11.5px] font-medium" style={{ color: "#F2777B" }}><Plus size={12} /> Add Filter</button>
+  </Panel>
+);
+
+// ---- MetricsBoard (pinned metric cards + group toggle chips + the active group's cards; shimmer sweep on the Panel) ----
+const MetricsBoard = () => {
+  const [active, setActive] = useState("revenue");
+  const pinned = METRICS.filter((m) => m.pinned);
+  const visible = useMemo(() => METRICS.filter((m) => m.group === active && !m.pinned), [active]);
+  const counts = useMemo(() => Object.fromEntries(GROUPS.map((g) => [g.id, METRICS.filter((m) => m.group === g.id && !m.pinned).length])), []);
+  return (
+    <Panel className="overflow-hidden">
+      <motion.div className="absolute top-0 bottom-0 w-[140px] pointer-events-none" style={{ background: `linear-gradient(90deg, transparent, ${C.red}08 50%, transparent)` }}
+        animate={{ left: ["-15%", "110%"] }} transition={{ duration: 8, repeat: Infinity, ease: "linear" }} />
+      <div className="relative">
+        <div className="flex items-center justify-between px-5 pt-4">
+          <div className="flex items-center gap-2"><Pin size={13} style={{ color: C.mut }} /><h3 className="text-[13px] font-semibold" style={{ color: C.text }}>Pinned metrics</h3></div>
+          <button className="flex items-center gap-1 text-[11px] font-medium" style={{ color: C.dim }}><Plus size={11} /> Add Card</button>
+        </div>
+        <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 px-5 pt-3 pb-4">
+          {pinned.map((m) => (<MetricCard key={m.label} m={m} big />))}
+        </div>
+        <div className="flex flex-wrap items-center gap-2 px-5 py-3 border-t" style={{ borderColor: C.borderSoft }}>
+          {GROUPS.map((g) => {
+            const on = g.id === active;
+            return (
+              <button key={g.id} onClick={() => setActive(g.id)} className="flex items-center gap-2 px-3 h-8 rounded-lg border text-[12px] font-medium"
+                style={on ? { borderColor: `${g.tone}55`, background: `${g.tone}14`, color: C.text } : { borderColor: C.borderSoft, color: C.mut }}>
+                <g.icon size={13} style={{ color: on ? g.tone : C.dim }} />{g.label}
+                <span className="px-1.5 py-px rounded text-[10px] tabular-nums" style={{ background: on ? `${g.tone}22` : C.borderSoft, color: on ? g.tone : C.dim }}>{counts[g.id]}</span>
+              </button>
+            );
+          })}
+        </div>
+        <div className="px-5 pb-5 pt-3 border-t" style={{ borderColor: C.borderSoft }}>
+          <div key={active} className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-8 gap-3">
+            {visible.map((m) => (<MetricCard key={m.label} m={m} />))}
+          </div>
+        </div>
+      </div>
+    </Panel>
+  );
+};
+
+// ---- RevenueChart (Revenue vs Spend vs Profit ComposedChart over a faint grid) ----
+const RevenueChart = ({ title = "Revenue vs Spend vs Profit" }) => (
+  <Panel>
+    <SectionHead icon={LineChart} title={title} right={<Tag>14 days</Tag>} />
+    <div className="relative h-[220px] px-2 pb-3">
+      <div className="absolute inset-x-5 inset-y-0 pointer-events-none opacity-40"
+        style={{ backgroundImage: `linear-gradient(${C.border}2E 1px, transparent 1px), linear-gradient(90deg, ${C.border}2E 1px, transparent 1px)`, backgroundSize: "48px 44px" }} />
+      <ResponsiveContainer width="100%" height="100%">
+        <ComposedChart data={chartData} margin={{ top: 12, right: 16, bottom: 0, left: 0 }}>
+          <defs><linearGradient id="revFill3" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={C.red} stopOpacity="0.25" /><stop offset="100%" stopColor={C.red} stopOpacity="0" /></linearGradient></defs>
+          <CartesianGrid stroke={`${C.border}40`} vertical={false} />
+          <XAxis dataKey="day" tick={{ fill: C.dim, fontSize: 10.5 }} axisLine={{ stroke: C.borderSoft }} tickLine={false} />
+          <YAxis tick={{ fill: C.dim, fontSize: 10.5 }} axisLine={false} tickLine={false} width={40} tickFormatter={(v) => `$${v}`} />
+          <Tooltip contentStyle={{ background: C.panel2, border: `1px solid ${C.border}`, borderRadius: 10, fontSize: 12, color: C.text }} />
+          <Area type="monotone" dataKey="revenue" stroke={C.red} strokeWidth={1.5} fill="url(#revFill3)" name="Revenue" />
+          <Line type="monotone" dataKey="profit" stroke={C.green} strokeWidth={1.5} dot={false} name="Profit" />
+          <Line type="monotone" dataKey="spend" stroke="#8B95A8" strokeWidth={1.2} strokeDasharray="5 4" dot={false} name="Spend" />
+        </ComposedChart>
+      </ResponsiveContainer>
+    </div>
+  </Panel>
+);
+
+// ---- OverviewReport (a report view: MetricsBoard + RevenueChart + paired dimension tables) ----
+const OverviewReport = () => (
+  <div className="space-y-5">
+    <MetricsBoard />
+    <RevenueChart />
+    <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+      <Panel>
+        <SectionHead title="Top Campaigns" right={<Btn icon={Download}>Export</Btn>} />
+        <THead cols={["Campaign","Leads","Sold","Conv %","Revenue","Cost","CPL","Profit"]} template="1.4fr repeat(7, 1fr)" />
+      </Panel>
+      <Panel>
+        <SectionHead title="Suppliers Performance" right={<Btn icon={Download}>Export</Btn>} />
+        <THead cols={["Supplier","Leads","Sold","Conv %","Revenue","Cost","CPL","Profit"]} template="1.4fr repeat(7, 1fr)" />
+      </Panel>
+    </div>
+  </div>
+);

@@ -1,0 +1,306 @@
+{
+  "name": "Buyer",
+  "type": "object",
+  "properties": {
+    "company_name": {
+      "type": "string",
+      "description": "Buyer / destination company name"
+    },
+    "email": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "location": {
+      "type": "string"
+    },
+    "contact_name": {
+      "type": "string",
+      "description": "Primary contact person name. Required (with email) before the partner portal can be enabled and an invite sent."
+    },
+    "buyer_type": {
+      "type": "string",
+      "enum": [
+        "",
+        "Direct",
+        "Aggregator",
+        "Network"
+      ],
+      "default": "",
+      "description": "Type of buyer / destination"
+    },
+    "client_type": {
+      "type": "string",
+      "enum": [
+        "Law Firm",
+        "Aggregator",
+        "Reseller",
+        "Network",
+        "Test"
+      ],
+      "description": "Client classification. Nullable, no default. Null means unclassified. Drives the buyer_code prefix (Law Firm LF, Aggregator AG, Reseller RS, Network NW)."
+    },
+    "buyer_code": {
+      "type": "string",
+      "description": "Unique buyer code: client_type prefix plus an incrementing number allocated from the Counter entity, one counter per prefix (e.g. LF1, AG1, NW2). Only allocated when client_type is set."
+    },
+    "vertical": {
+      "type": "string",
+      "description": "Primary vertical code. This single value drives coverage, pricing and routing logic. The verticals array is additive display/assignment metadata and does not replace this."
+    },
+    "verticals": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "All vertical codes this buyer is connected to. Additive to the primary vertical field, which remains the driver of coverage/pricing/routing logic. Used for display and multi-campaign assignment."
+    },
+    "portal_enabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "When true, this buyer can log into the partner portal"
+    },
+    "billing_mode": {
+      "type": "string",
+      "enum": [
+        "lead_count",
+        "wallet"
+      ],
+      "default": "lead_count",
+      "description": "Lead Count mode (post-pay invoicing) vs Wallet mode (pre-paid balance)"
+    },
+    "billing_type": {
+      "type": "string",
+      "enum": [
+        "prepay",
+        "net_7",
+        "net_15",
+        "net_30"
+      ],
+      "default": "prepay",
+      "description": "Operator billing arrangement for this buyer: Prepay, Net 7, Net 15, or Net 30."
+    },
+    "verify_required": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether verification is required for this buyer"
+    },
+    "ipl_fee_pct": {
+      "type": "number",
+      "default": 1.0,
+      "description": "Multiplier applied to CPL to produce IPL. 0.875 means the buyer is billed 87.5 percent of CPL."
+    },
+    "credit_limit": {
+      "type": "number",
+      "description": "Optional credit limit for this buyer. Nullable."
+    },
+    "billing_model": {
+      "type": "string",
+      "description": "Billing model description e.g. Net 30, Prepaid"
+    },
+    "billing_email": {
+      "type": "string"
+    },
+    "balance": {
+      "type": "number",
+      "default": 0,
+      "description": "Current wallet balance"
+    },
+    "min_balance": {
+      "type": "number",
+      "default": 0,
+      "description": "Minimum balance threshold before auto-recharge / pause"
+    },
+    "auto_recharge": {
+      "type": "boolean",
+      "default": false
+    },
+    "auto_recharge_amount": {
+      "type": "number",
+      "default": 0
+    },
+    "card_last4": {
+      "type": "string",
+      "description": "Last 4 digits of the connected card, if any"
+    },
+    "stripe_customer_id": {
+      "type": "string",
+      "description": "Stripe customer id. Nullable."
+    },
+    "xero_contact_id": {
+      "type": "string",
+      "description": "Xero contact id. Nullable."
+    },
+    "leadbyte_bid": {
+      "type": "string",
+      "description": "LeadByte buyer id. Nullable. Defaults to the buyer_code value when a code is allocated."
+    },
+    "payment_link_url": {
+      "type": "string",
+      "description": "Payment link URL for this buyer. Nullable."
+    },
+    "payment_provider": {
+      "type": "string",
+      "enum": [
+        "xero_link",
+        "stripe_card"
+      ],
+      "default": "xero_link",
+      "description": "How this buyer pays. Most buyers pay through a Xero invoice link with fees included (xero_link). Some pay by card through Stripe (stripe_card)."
+    },
+    "payment_reference": {
+      "type": "string",
+      "description": "The stored provider side reference used to bill this buyer again later without re collecting details. For xero_link this is the Xero contact reference, for stripe_card this is the Stripe customer or payment method reference. Nullable."
+    },
+    "prepay_balance": {
+      "type": "number",
+      "default": 0,
+      "description": "Only meaningful when billing_type is prepay. The remaining value of the deposit the buyer has paid."
+    },
+    "prepay_leads_remaining": {
+      "type": "number",
+      "default": 0,
+      "description": "Leads still owed against the current deposit."
+    },
+    "taxpayer_form_url": {
+      "type": "string",
+      "description": "Link to the signed taxpayer identification form collected at onboarding. Nullable."
+    },
+    "onboarded_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the buyer completed onboarding. Nullable."
+    },
+    "notes": {
+      "type": "string"
+    },
+    "suppression_lists": {
+      "type": "string",
+      "description": "JSON array of suppression list names / references"
+    },
+    "coverage": {
+      "type": "string",
+      "description": "JSON object describing coverage by state / zip / county"
+    },
+    "campaign_ids": {
+      "type": "string",
+      "description": "JSON array of Campaign record ids assigned to this buyer"
+    },
+    "auto_created": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when auto-created from a LeadByte sold response"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "launching",
+        "active",
+        "paused",
+        "terminated"
+      ],
+      "default": "draft",
+      "description": "Buyer lifecycle status. Kept in sync with the active boolean at the data layer: status active derives active true, while draft, launching, paused, or terminated derive active false. The live pipeline reads the active boolean."
+    },
+    "active": {
+      "type": "boolean",
+      "default": false,
+      "description": "Derived from status: true only when status equals active, false for draft, launching, paused, or terminated. The live pipeline reads this boolean. Must be recomputed on every write."
+    },
+    "delivery_method": {
+      "type": "string",
+      "enum": [
+        "api_post",
+        "email",
+        "both"
+      ],
+      "description": "How leads are delivered to this buyer. Nullable."
+    },
+    "api_docs_url": {
+      "type": "string",
+      "description": "Link to the buyer's API posting documentation. Nullable."
+    },
+    "api_docs_file_url": {
+      "type": "string",
+      "description": "Uploaded API posting documentation file url. Nullable."
+    },
+    "buyer_api_key": {
+      "type": "string",
+      "description": "The key this buyer's own CRM requires when we post leads to it. This is a credential and must never be exposed to portal users. Nullable."
+    },
+    "unique_identifier": {
+      "type": "string",
+      "description": "A campaign id, supplier id or source key the buyer uses to tie leads back to us. Nullable."
+    },
+    "lead_notification_emails": {
+      "type": "string",
+      "description": "JSON array of email addresses for lead delivery notifications. Nullable."
+    },
+    "disposition_method": {
+      "type": "string",
+      "description": "JSON array with any of live_google_sheet, api, leadbyte_portal, csv, real_time_portal. Nullable."
+    },
+    "qualification_criteria": {
+      "type": "string",
+      "description": "Buyer specific qualification requirements, for example treatment within 14 days. Nullable."
+    },
+    "tcpa_inbound_phone": {
+      "type": "string",
+      "description": "TCPA inbound phone. Nullable."
+    },
+    "tcpa_outbound_phones": {
+      "type": "string",
+      "description": "JSON array of TCPA outbound phone numbers. Nullable."
+    },
+    "tcpa_inbound_email": {
+      "type": "string",
+      "description": "TCPA inbound email. Nullable."
+    },
+    "tcpa_outbound_email": {
+      "type": "string",
+      "description": "TCPA outbound email. Nullable."
+    },
+    "tcpa_reply_to_email": {
+      "type": "string",
+      "description": "TCPA reply to email. Nullable."
+    },
+    "secondary_contact_name": {
+      "type": "string",
+      "description": "Secondary contact name. Nullable."
+    },
+    "secondary_contact_email": {
+      "type": "string",
+      "description": "Secondary contact email. Nullable."
+    },
+    "secondary_contact_phone": {
+      "type": "string",
+      "description": "Secondary contact phone. Nullable."
+    },
+    "secondary_contact_role": {
+      "type": "string",
+      "description": "Secondary contact role. Nullable."
+    },
+    "billing_address": {
+      "type": "string",
+      "description": "Billing address. Nullable."
+    },
+    "accounts_contact_name": {
+      "type": "string",
+      "description": "Accounts contact name. Nullable."
+    },
+    "accounts_email": {
+      "type": "string",
+      "description": "Accounts email. Nullable."
+    },
+    "initial_batch_size": {
+      "type": "number",
+      "description": "Lead count for the first deposit invoice. Nullable."
+    }
+  },
+  "required": [
+    "company_name"
+  ]
+}

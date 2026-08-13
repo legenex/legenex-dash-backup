@@ -1,0 +1,78 @@
+{
+  "name": "BuyerOnboarding",
+  "type": "object",
+  "properties": {
+    "buyer_id": {
+      "type": "string",
+      "description": "Reference to a Buyer record. Null until a Buyer is created from the submission. Nullable."
+    },
+    "company_name": {
+      "type": "string",
+      "description": "Company name captured on the submission before a Buyer exists."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "submitted",
+        "in_progress",
+        "blocked",
+        "complete",
+        "cancelled"
+      ],
+      "default": "submitted",
+      "description": "Onboarding lifecycle status."
+    },
+    "form_payload": {
+      "type": "string",
+      "description": "JSON object holding the complete raw submission, including free text answers not promoted to Buyer fields, such as prior lead generation experience, that experience described, and additional requirements."
+    },
+    "steps": {
+      "type": "string",
+      "description": "JSON array of step objects. Each step has key, status (pending, running, complete, failed, skipped), attempts, error, external_id and completed_at. The external_id records what was already created on the remote system so a retry is safe."
+    },
+    "current_step": {
+      "type": "string",
+      "description": "Key of the step currently being processed. Nullable."
+    },
+    "intro_email_scheduled_for": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the intro email is scheduled to send. Nullable."
+    },
+    "submitted_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the submission was received. Nullable."
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When onboarding completed. Nullable."
+    }
+  },
+  "required": [
+    "company_name"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

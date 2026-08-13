@@ -1,0 +1,101 @@
+{
+  "summary": {
+    "run_id": "run_static_20260725110307",
+    "generated_at": "2026-07-25T11:03:22.068Z",
+    "layer": "static",
+    "total": 6,
+    "pass": 2,
+    "fail": 3,
+    "warn": 1,
+    "needs_env": 0
+  },
+  "findings": [
+    {
+      "layer": "static",
+      "source": "script",
+      "severity": "medium",
+      "category": "design_system",
+      "surface": "src/components/shared/PortalEnablementCard.jsx:67",
+      "expected": "Semantic tokens only (DESIGN-SYSTEM.md)",
+      "observed": "src/components/shared/PortalEnablementCard.jsx:67:56  raw-hsl-rgb  border-[hsl(",
+      "evidence_path": "src/components/shared/PortalEnablementCard.jsx:67:56  raw-hsl-rgb  border-[hsl(",
+      "value_score": null,
+      "effort_score": 1,
+      "check_id": "design.tokens.raw_color",
+      "verdict": "fail"
+    },
+    {
+      "layer": "static",
+      "source": "script",
+      "severity": "info",
+      "category": "correctness",
+      "surface": "scripts/check-engine-parity.mjs",
+      "expected": "Every backend engine copy byte-identical to canonical source",
+      "observed": "parity check OK: backend engine matches canonical source; no hand-written mirror.",
+      "evidence_path": "",
+      "value_score": null,
+      "effort_score": null,
+      "check_id": "engine.parity",
+      "verdict": "pass"
+    },
+    {
+      "layer": "static",
+      "source": "script",
+      "severity": "high",
+      "category": "correctness",
+      "surface": "src/components/distribution/DistributionNav.test.jsx",
+      "expected": "Full suite green",
+      "observed": "3 failed of 257",
+      "evidence_path": "src/components/distribution/DistributionNav.test.jsx",
+      "value_score": null,
+      "effort_score": 2,
+      "check_id": "tests.suite",
+      "verdict": "fail"
+    },
+    {
+      "layer": "static",
+      "source": "script",
+      "severity": "low",
+      "category": "documentation",
+      "surface": "ContractVersion, SupplierStateCoverage",
+      "expected": "Every entity referenced somewhere in code",
+      "observed": "2 unreferenced: ContractVersion, SupplierStateCoverage",
+      "evidence_path": "",
+      "value_score": null,
+      "effort_score": 1,
+      "check_id": "entity.orphaned",
+      "verdict": "warn",
+      "detail": "Additive-only schema: unwired, not removable. Confirm intended or wire."
+    },
+    {
+      "layer": "static",
+      "source": "script",
+      "severity": "info",
+      "category": "security",
+      "surface": "base44/functions",
+      "expected": "Every service-role function enforces a caller model (operator gate, API key, route token, or onboarding token)",
+      "observed": "All service-role functions carry a gate",
+      "evidence_path": "",
+      "value_score": null,
+      "effort_score": null,
+      "check_id": "function.caller_model",
+      "verdict": "pass",
+      "detail": "Heuristic accounts for header-injected keys and route tokens to avoid false alarms."
+    },
+    {
+      "layer": "static",
+      "source": "script",
+      "severity": "high",
+      "category": "usability",
+      "surface": "/app/src/components/distribution/DistributionNav.jsx",
+      "expected": "Distribution nav includes a Buyers section linking to /distribution/buyers",
+      "observed": "Buyers section absent from nav; route /distribution/buyers exists but is unreachable from the distribution nav",
+      "evidence_path": "",
+      "value_score": null,
+      "effort_score": 1,
+      "check_id": "ui.nav.distribution_buyers_missing",
+      "verdict": "fail",
+      "detail": "Root cause of the DistributionNav test failures. Buyers Routing/Deliveries/Summary unreachable during configuration."
+    }
+  ]
+}

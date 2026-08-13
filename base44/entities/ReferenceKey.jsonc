@@ -1,0 +1,30 @@
+{
+  "name": "ReferenceKey",
+  "type": "object",
+  "properties": {
+    "field_name": {
+      "type": "string",
+      "description": "Token name e.g. injury_type"
+    },
+    "label": {
+      "type": "string",
+      "description": "Display label e.g. Injury Type"
+    },
+    "values": {
+      "type": "string",
+      "description": "JSON array of possible values for this field"
+    },
+    "note": {
+      "type": "string",
+      "description": "Optional note e.g. Primary input field"
+    },
+    "sort_order": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "required": [
+    "field_name",
+    "values"
+  ]
+}

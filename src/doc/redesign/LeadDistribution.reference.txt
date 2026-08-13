@@ -1,0 +1,241 @@
+// Performance OS redesign reference for the Lead Distribution > Distribution Dashboard CONTENT.
+// This is a layout/component/animation reference only. Do NOT import or render it.
+// Restyle src/pages/DistributionDashboard.jsx to match the DashboardPage section below,
+// porting the shared atoms (Tag, Panel, Btn, SubTabs, EmptyState, AINote, PulseDot, TableShell).
+// Keep ALL existing real data wiring; the arrays like `verifications`, `stages`, `chartData`
+// are mock placeholders and must be replaced by the page's existing real data sources.
+// Map these hardcoded colors to the app's existing theme tokens so BOTH light and dark themes work:
+//   C.bg #0A0E15        -> bg-background
+//   C.panel/panel2      -> bg-card   (dark card already carries the 180deg gradient via index.css)
+//   C.border #243044    -> border-border
+//   C.borderSoft        -> border-border/60
+//   C.text #EEF2F8      -> text-foreground
+//   C.mut  #8B95A8      -> text-muted-foreground
+//   C.dim  #5A6478      -> text-muted-foreground/70
+//   C.red  #E5484D      -> text-primary / bg-primary (accent)
+//   C.green #3DD68C     -> status-sold  (use the .status-sold / .bg-status-sold helpers)
+//   C.amber #E8A33D     -> status-unsold
+//   C.blue  #5B8DEF     -> status-duplicate
+// Keep the pulse and shimmer animations. Use framer-motion only if the project already includes it;
+// otherwise use equivalent CSS animations. Do not add new dependencies. No em dashes.
+
+const C = {
+  bg: "#0A0E15", panel: "#131924", panel2: "#182030", border: "#243044", borderSoft: "#1C2536",
+  red: "#E5484D", redSoft: "rgba(229,72,77,0.12)", green: "#3DD68C", greenSoft: "rgba(61,214,140,0.12)",
+  amber: "#E8A33D", amberSoft: "rgba(232,163,61,0.12)", blue: "#5B8DEF", blueSoft: "rgba(91,141,239,0.12)",
+  text: "#EEF2F8", mut: "#8B95A8", dim: "#5A6478"
+};
+
+// ---- Tag ----
+const Tag = ({ children, tone = "slate", mono }) => {
+  const map = {
+    slate: { bg: "rgba(139,149,168,0.10)", fg: C.mut, bd: C.border },
+    red: { bg: C.redSoft, fg: "#F2777B", bd: "rgba(229,72,77,0.35)" },
+    green: { bg: C.greenSoft, fg: C.green, bd: "rgba(61,214,140,0.35)" },
+    amber: { bg: C.amberSoft, fg: C.amber, bd: "rgba(232,163,61,0.35)" },
+    blue: { bg: C.blueSoft, fg: C.blue, bd: "rgba(91,141,239,0.35)" }
+  }[tone];
+  return (
+    <span className={`px-2 py-0.5 rounded-md text-[10.5px] font-medium tracking-wide border ${mono ? "font-mono" : ""}`}
+      style={{ background: map.bg, color: map.fg, borderColor: map.bd }}>
+      {children}
+    </span>
+  );
+};
+
+// ---- Panel ----
+const Panel = ({ children, className = "", glow, style = {} }) => (
+  <div className={`relative rounded-xl border ${className}`}
+    style={{
+      background: `linear-gradient(180deg, ${C.panel2} 0%, ${C.panel} 100%)`,
+      borderColor: C.border,
+      boxShadow: glow
+        ? `0 0 0 1px ${glow}22, 0 8px 40px -12px ${glow}33, 0 12px 32px -16px rgba(0,0,0,0.6)`
+        : "0 12px 32px -16px rgba(0,0,0,0.6)",
+      ...style
+    }}>
+    {children}
+  </div>
+);
+
+// ---- Btn ----
+const Btn = ({ icon: Icon, children, primary, onClick }) => (
+  <button onClick={onClick}
+    className="flex items-center gap-1.5 px-3 h-8 rounded-lg text-[11.5px] font-medium border"
+    style={primary
+      ? { background: C.red, color: "#fff", borderColor: C.red, boxShadow: `0 0 16px ${C.red}44` }
+      : { borderColor: C.border, background: "rgba(10,14,21,0.5)", color: C.mut }}>
+    {Icon && <Icon size={12} />} {children}
+  </button>
+);
+
+// ---- SubTabs ----
+const SubTabs = ({ tabs, active, onSelect }) => (
+  <div className="flex gap-1 p-1 rounded-lg border w-fit" style={{ borderColor: C.borderSoft, background: "rgba(10,14,21,0.5)" }}>
+    {tabs.map((t) => (
+      <button key={t} onClick={() => onSelect(t)}
+        className="px-3.5 h-8 rounded-md text-[12px] font-medium whitespace-nowrap"
+        style={active === t ? { background: C.panel2, color: C.text, boxShadow: `inset 0 0 0 1px ${C.border}` } : { color: C.mut }}>
+        {t}
+      </button>
+    ))}
+  </div>
+);
+
+// ---- EmptyState ----
+const EmptyState = ({ icon: Icon = Database, title, note, action }) => (
+  <div className="grid place-items-center px-6 py-10">
+    <div className="text-center max-w-[340px]">
+      <div className="w-10 h-10 mx-auto rounded-xl grid place-items-center" style={{ background: "rgba(139,149,168,0.08)", border: `1px solid ${C.border}` }}>
+        <Icon size={16} style={{ color: C.mut }} />
+      </div>
+      <div className="text-[12.5px] font-semibold mt-2.5" style={{ color: C.text }}>{title}</div>
+      <p className="text-[11px] mt-1 leading-relaxed" style={{ color: C.mut }}>{note}</p>
+      {action && (
+        <button className="mt-2.5 text-[11.5px] font-medium inline-flex items-center gap-1" style={{ color: "#F2777B" }}>
+          {action} <ArrowUpRight size={11} />
+        </button>
+      )}
+    </div>
+  </div>
+);
+
+// ---- AINote ----
+const AINote = ({ children }) => (
+  <div className="flex items-start gap-2.5 p-3 rounded-lg border" style={{ borderColor: "rgba(229,72,77,0.3)", background: C.redSoft }}>
+    <Brain size={13} style={{ color: "#F2777B" }} className="mt-0.5 shrink-0" />
+    <p className="text-[11.5px] leading-relaxed" style={{ color: C.mut }}>{children}</p>
+  </div>
+);
+
+// ---- PulseDot ----
+const PulseDot = ({ color = C.green, size = 7 }) => (
+  <span className="relative inline-flex" style={{ width: size, height: size }}>
+    <motion.span className="absolute inset-0 rounded-full" style={{ background: color }}
+      animate={{ scale: [1, 2.4], opacity: [0.5, 0] }}
+      transition={{ duration: 1.8, repeat: Infinity, ease: "easeOut" }} />
+    <span className="relative rounded-full w-full h-full" style={{ background: color }} />
+  </span>
+);
+
+// ---- DashboardPage (this is the Distribution Dashboard CONTENT to match) ----
+const DashboardPage = ({ go }) => (
+  <div className="space-y-5">
+    {/* Endpoint + verification stack: shimmer sweep, endpoint URL with Copy, verification chips (HLR, Email, TrustedForm, etc.) */}
+    <Panel className="overflow-hidden">
+      <motion.div className="absolute top-0 bottom-0 w-[120px] pointer-events-none"
+        style={{ background: `linear-gradient(90deg, transparent, ${C.green}0A 50%, transparent)` }}
+        animate={{ left: ["-12%", "112%"] }} transition={{ duration: 7, repeat: Infinity, ease: "linear" }} />
+      <div className="relative flex flex-col xl:flex-row xl:items-center gap-4 px-5 py-4">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-9 h-9 rounded-lg grid place-items-center shrink-0" style={{ background: C.greenSoft, border: "1px solid rgba(61,214,140,0.3)" }}>
+            <Link2 size={15} style={{ color: C.green }} />
+          </div>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-bold tracking-[0.14em]" style={{ color: C.dim }}>SUPPLIER ENDPOINT</span>
+              <span className="flex items-center gap-1 text-[10px]" style={{ color: C.green }}><PulseDot size={4} /> accepting POSTs</span>
+            </div>
+            <code className="block text-[13px] font-mono truncate mt-0.5" style={{ color: "#F2777B" }}>https://api.legenex.com/functions/leads</code>
+          </div>
+          <Btn icon={Copy}>Copy</Btn>
+        </div>
+        <div className="flex-1" />
+        <div className="flex flex-wrap gap-2">
+          {verifications.map((v) => (
+            <div key={v.name} className="flex items-center gap-2 px-3 h-9 rounded-lg border"
+              style={{ borderColor: v.ok ? "rgba(61,214,140,0.3)" : "rgba(229,72,77,0.3)", background: v.ok ? C.greenSoft : C.redSoft }}>
+              <v.icon size={13} style={{ color: v.ok ? C.green : "#F2777B" }} />
+              <span className="text-[11.5px] font-medium" style={{ color: C.text }}>{v.name}</span>
+              <span className="text-[10.5px]" style={{ color: v.ok ? C.green : "#F2777B" }}>{v.status}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </Panel>
+
+    {/* Pipeline stages: 8 stat tiles (Received, Processing, Sold, Unsold, Disqualified, Queued, Returned, Error) with rise-in + hover lift and a thin progress bar */}
+    <Panel>
+      <div className="flex items-center justify-between px-5 pt-4 pb-2">
+        <div className="flex items-center gap-2">
+          <Workflow size={15} style={{ color: C.mut }} />
+          <h3 className="text-[13px] font-semibold" style={{ color: C.text }}>Pipeline - This Month</h3>
+        </div>
+        <Tag tone="amber">2 unsold in flight</Tag>
+      </div>
+      <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-8 gap-3 px-5 pb-5">
+        {stages.map((s, i) => {
+          const col = toneColor(s.tone);
+          return (
+            <motion.div key={s.label} variants={rise} initial="hidden" animate="show" custom={i} whileHover={{ y: -3 }}
+              className="p-3.5 rounded-lg border"
+              style={{ borderColor: s.value > 0 && s.tone === "amber" ? "rgba(232,163,61,0.4)" : C.borderSoft, background: "rgba(10,14,21,0.45)" }}>
+              <div className="flex items-center justify-between">
+                <span className="text-[9.5px] font-semibold tracking-[0.1em] uppercase" style={{ color: C.mut }}>{s.label}</span>
+                <s.icon size={13} style={{ color: col, opacity: 0.85 }} />
+              </div>
+              <div className="text-[26px] font-bold tabular-nums mt-1.5" style={{ color: s.tone === "slate" ? C.text : col }}>{s.value}</div>
+              <div className="h-0.5 rounded-full mt-2" style={{ background: C.borderSoft }}>
+                <div className="h-full rounded-full" style={{ background: col, width: s.value > 0 ? "40%" : "3%", opacity: 0.7 }} />
+              </div>
+            </motion.div>
+          );
+        })}
+      </div>
+    </Panel>
+
+    {/* Chart + AI: left = Leads Over Time ComposedChart (Area volume + Line sold) over a faint grid; right = AI Insights panel with animated top accent, uses the existing distributionInsights output */}
+    <div className="grid grid-cols-1 xl:grid-cols-[1.6fr_1fr] gap-4">
+      <Panel className="flex flex-col">
+        <div className="flex items-center justify-between px-5 pt-4 pb-2">
+          <h3 className="text-[13px] font-semibold" style={{ color: C.text }}>Leads Over Time</h3>
+          <Tag>last 7 days</Tag>
+        </div>
+        <div className="relative flex-1 min-h-[220px] px-2 pb-3">
+          <ResponsiveContainer width="100%" height="100%">
+            <ComposedChart data={chartData} margin={{ top: 12, right: 16, bottom: 0, left: 0 }}>
+              <defs>
+                <linearGradient id="volFill2" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={C.amber} stopOpacity="0.25" />
+                  <stop offset="100%" stopColor={C.amber} stopOpacity="0" />
+                </linearGradient>
+              </defs>
+              <CartesianGrid stroke={`${C.border}40`} vertical={false} />
+              <XAxis dataKey="day" tick={{ fill: C.dim, fontSize: 10.5 }} axisLine={{ stroke: C.borderSoft }} tickLine={false} />
+              <YAxis tick={{ fill: C.dim, fontSize: 10.5 }} axisLine={false} tickLine={false} width={30} allowDecimals={false} />
+              <Tooltip contentStyle={{ background: C.panel2, border: `1px solid ${C.border}`, borderRadius: 10, fontSize: 12, color: C.text }} />
+              <Area type="monotone" dataKey="volume" stroke={C.amber} strokeWidth={1.5} fill="url(#volFill2)" name="Volume" />
+              <Line type="monotone" dataKey="sold" stroke={C.green} strokeWidth={1.5} dot={false} name="Sold" />
+            </ComposedChart>
+          </ResponsiveContainer>
+        </div>
+      </Panel>
+      <Panel glow={C.red} className="flex flex-col overflow-hidden">
+        <motion.div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: `linear-gradient(90deg, transparent, ${C.red}, transparent)` }}
+          animate={{ opacity: [0.3, 1, 0.3] }} transition={{ duration: 2.4, repeat: Infinity }} />
+        <div className="flex items-center gap-2 px-5 pt-4">
+          <Brain size={15} style={{ color: "#F2777B" }} />
+          <h3 className="text-[13px] font-semibold" style={{ color: C.text }}>AI Insights</h3>
+        </div>
+        <div className="px-5 py-3 space-y-3 flex-1">
+          {/* Render the existing distributionInsights narrative here */}
+          <div className="flex items-center gap-2 p-2.5 rounded-lg border" style={{ borderColor: C.borderSoft, background: "rgba(10,14,21,0.5)" }}>
+            <Sparkles size={13} style={{ color: "#F2777B" }} className="shrink-0" />
+            <p className="text-[11.5px]" style={{ color: C.mut }}>Top recommendation from the existing insights function.</p>
+          </div>
+        </div>
+      </Panel>
+    </div>
+  </div>
+);
+
+// ---- TableShell (used by Campaigns sub-views; align right on numeric columns) ----
+const TableShell = ({ head, template, children }) => (
+  <Panel className="overflow-hidden">
+    <div className="grid gap-2 px-4 py-2.5 border-b text-[9.5px] font-semibold tracking-[0.1em] uppercase"
+      style={{ gridTemplateColumns: template, borderColor: C.borderSoft, color: C.dim, background: "rgba(10,14,21,0.4)" }}>
+      {head.map((h) => (<span key={h}>{h}</span>))}
+    </div>
+    {children}
+  </Panel>
+);

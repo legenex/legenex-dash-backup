@@ -1,0 +1,87 @@
+{
+  "name": "StateStatus",
+  "type": "object",
+  "properties": {
+    "vertical": {
+      "type": "string",
+      "description": "The vertical code"
+    },
+    "state": {
+      "type": "string",
+      "description": "Two letter US state code, uppercase"
+    },
+    "active": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when at least one active buyer covers this state"
+    },
+    "effective_client_type": {
+      "type": "string",
+      "enum": [
+        "Law Firm",
+        "Aggregator",
+        "Reseller",
+        "Network"
+      ],
+      "description": "The winning coverage tier for this state. Nullable."
+    },
+    "highest_cpl": {
+      "type": "number",
+      "default": 0
+    },
+    "lowest_cpl": {
+      "type": "number",
+      "default": 0
+    },
+    "active_buyer_count": {
+      "type": "number",
+      "default": 0
+    },
+    "last_changed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this state status last changed. Nullable."
+    },
+    "last_change_direction": {
+      "type": "string",
+      "enum": [
+        "opened",
+        "closed",
+        "repriced"
+      ],
+      "description": "Direction of the last change. Nullable."
+    }
+  },
+  "required": [
+    "vertical",
+    "state"
+  ],
+  "unique": [
+    [
+      "vertical",
+      "state"
+    ]
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

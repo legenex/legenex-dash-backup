@@ -1,0 +1,111 @@
+{
+  "name": "PromptDraft",
+  "type": "object",
+  "properties": {
+    "reference": {
+      "type": "string",
+      "description": "Human reference, e.g. PR-014-2"
+    },
+    "change_request_id": {
+      "type": "string",
+      "description": "ChangeRequest this prompt implements"
+    },
+    "page_key": {
+      "type": "string"
+    },
+    "target": {
+      "type": "string",
+      "enum": [
+        "claude_chat_connector",
+        "claude_code",
+        "base44_builder",
+        "codex",
+        "human_developer"
+      ],
+      "default": "claude_chat_connector",
+      "description": "Who the prompt is written for. Changes tone, tool references and constraints."
+    },
+    "body": {
+      "type": "string",
+      "description": "The generated implementation prompt. Editable."
+    },
+    "body_original": {
+      "type": "string",
+      "description": "The generation output before any human edit, kept so edits are visible"
+    },
+    "generation_inputs": {
+      "type": "string",
+      "description": "JSON snapshot of what fed the generation: findings, threads, dependencies, evidence, commit"
+    },
+    "model": {
+      "type": "string",
+      "description": "Model that produced it"
+    },
+    "version": {
+      "type": "number",
+      "default": 1,
+      "description": "Incremented on every regenerate"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "needs_context",
+        "ready_for_review",
+        "approved",
+        "rejected",
+        "sent",
+        "superseded"
+      ],
+      "default": "draft",
+      "description": "Nothing is ever dispatched automatically. sent means a human copied or assigned it."
+    },
+    "review_notes": {
+      "type": "string",
+      "description": "Nick's comments on the prompt itself"
+    },
+    "approved_by": {
+      "type": "string"
+    },
+    "approved_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "red_surface_ack": {
+      "type": "boolean",
+      "default": false,
+      "description": "Set only when Nick has explicitly acknowledged the RED surfaces named in the change request"
+    },
+    "human_edited": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "change_request_id",
+    "body",
+    "status"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

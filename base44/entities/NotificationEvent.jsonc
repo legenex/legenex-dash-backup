@@ -1,0 +1,28 @@
+{
+  "name": "NotificationEvent",
+  "type": "object",
+  "properties": {
+    "rule_id": {
+      "type": "string",
+      "description": "Reference to NotificationRule"
+    },
+    "triggered_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "summary": {
+      "type": "string"
+    },
+    "channel": {
+      "type": "string"
+    },
+    "delivered": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "rule_id",
+    "summary"
+  ]
+}

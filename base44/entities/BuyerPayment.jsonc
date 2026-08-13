@@ -1,0 +1,40 @@
+{
+  "name": "BuyerPayment",
+  "type": "object",
+  "properties": {
+    "buyer_id": {
+      "type": "string"
+    },
+    "buyer_name": {
+      "type": "string"
+    },
+    "invoice_id": {
+      "type": "string",
+      "description": "Optional reference to the Invoice this payment settles"
+    },
+    "amount": {
+      "type": "number"
+    },
+    "method": {
+      "type": "string",
+      "enum": [
+        "manual",
+        "csv",
+        "stripe",
+        "bank"
+      ],
+      "default": "manual"
+    },
+    "paid_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "buyer_name",
+    "amount"
+  ]
+}

@@ -1,0 +1,117 @@
+{
+  "name": "SupplierAdAccount",
+  "type": "object",
+  "properties": {
+    "ad_account_id": {
+      "description": "Meta ad account node id (act_XXXX)",
+      "type": "string"
+    },
+    "ad_account_name": {
+      "type": "string"
+    },
+    "backfill_days": {
+      "default": 30,
+      "description": "How many days of history the first sync imports when no backfill_since date is set. Capped at 1100.",
+      "type": "number"
+    },
+    "backfill_done": {
+      "default": false,
+      "description": "Set true after the first successful sync.",
+      "type": "boolean"
+    },
+    "backfill_since": {
+      "description": "Optional absolute start date (YYYY-MM-DD) for the first import. Takes precedence over backfill_days when set.",
+      "format": "date",
+      "type": "string"
+    },
+    "business_id": {
+      "description": "Business Manager this account belongs to. Nullable.",
+      "type": "string"
+    },
+    "business_name": {
+      "type": "string"
+    },
+    "connection_id": {
+      "description": "Reference to the MetaConnection whose token can read this ad account.",
+      "type": "string"
+    },
+    "currency": {
+      "description": "Ad account currency code from Meta, for example USD",
+      "type": "string"
+    },
+    "enabled": {
+      "default": true,
+      "description": "When false the scheduled sync skips this account.",
+      "type": "boolean"
+    },
+    "last_success_at": {
+      "description": "When the sync last completed successfully for this account.",
+      "format": "date-time",
+      "type": "string"
+    },
+    "last_sync_error": {
+      "description": "Last sync error message. Empty when healthy.",
+      "type": "string"
+    },
+    "last_sync_status": {
+      "description": "Short human result of the last sync.",
+      "type": "string"
+    },
+    "last_synced_at": {
+      "description": "When the sync last attempted this account, success or failure.",
+      "format": "date-time",
+      "type": "string"
+    },
+    "platform": {
+      "default": "meta",
+      "enum": [
+        "meta"
+      ],
+      "type": "string"
+    },
+    "supplier_id": {
+      "description": "Optional reference to a Supplier. Left empty when an account is connected but not yet attributed. Account-level attribution fallback; primary attribution is the campaign-level AdSpendMapping.",
+      "type": "string"
+    },
+    "supplier_name": {
+      "description": "Denormalized supplier name snapshot for display and legacy joins.",
+      "type": "string"
+    },
+    "timezone_name": {
+      "description": "Ad account timezone from Meta, for example America/New_York.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "connection_id",
+    "ad_account_id"
+  ],
+  "unique": [
+    [
+      "platform",
+      "ad_account_id"
+    ]
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

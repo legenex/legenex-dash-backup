@@ -1,0 +1,110 @@
+// Campaigns section redesign reference. Restyle these four tab components to match:
+//   SettingsVerticals, CampaignBuyers, CampaignSuppliers, CampaignBrands.
+// Keep the existing shadcn Tabs wrapper in src/pages/Campaigns.jsx and ALL data, queries, and actions.
+// Reuse the same theme-token mapping as the Distribution Dashboard redesign (see
+// src/doc/redesign/LeadDistribution.reference.txt): panel gradient -> bg-card, #243044 -> border-border,
+// #EEF2F8 -> text-foreground, #8B95A8 -> text-muted-foreground, #5A6478 -> text-muted-foreground/70,
+// #E5484D -> primary, #3DD68C -> status-sold. Numeric columns are right-aligned and font-mono.
+// The arrays (verticals, suppliers, brands) and EmptyState copy are placeholders; render REAL data and
+// honest empty states. No mock/seed data. No em dashes.
+
+// ---- Row ----
+const Row = ({ template, children, i = 0 }) => (
+  <motion.div variants={rise} initial="hidden" animate="show" custom={i}
+    className="grid gap-2 px-4 py-3 border-b items-center hover:bg-white/[0.02]"
+    style={{ gridTemplateColumns: template, borderColor: C.borderSoft }}>
+    {children}
+  </motion.div>
+);
+
+// ---- TableShell (header row; right-align numeric headers) ----
+const TableShell = ({ head, template, children }) => (
+  <Panel className="overflow-hidden">
+    <div className="grid gap-2 px-4 py-2.5 border-b text-[9.5px] font-semibold tracking-[0.1em] uppercase"
+      style={{ gridTemplateColumns: template, borderColor: C.borderSoft, color: C.dim, background: "rgba(10,14,21,0.4)" }}>
+      {head.map((h) => (
+        <span key={h} className={["Leads","Campaigns","Accepted","Accepted %","Duplicate","DQ","Cost","Revenue","Profit","CPL","Conv Rate","Suppliers","FB / IG","Balance","Actions"].includes(h) ? "text-right" : ""}>{h}</span>
+      ))}
+    </div>
+    {children}
+  </Panel>
+);
+
+// ---- CampaignsPage: per-tab table layouts (column templates matter) ----
+const CampaignsPage = ({ sub }) => (
+  <div className="space-y-4">
+    {sub === "Verticals" && (
+      <>
+        <div className="flex justify-end"><Btn icon={Plus} primary>Add Vertical</Btn></div>
+        <TableShell head={["Vertical", "Code", "Description", "Status", "Actions"]} template="1.6fr 0.7fr 2fr 0.8fr 1.2fr">
+          {verticals.map((v, i) => (
+            <Row key={v.name} template="1.6fr 0.7fr 2fr 0.8fr 1.2fr" i={i}>
+              <span className="text-[13px] font-semibold" style={{ color: C.text }}>{v.name}</span>
+              <span><Tag tone={v.codeTone} mono>● {v.code}</Tag></span>
+              <span className="text-[12px]" style={{ color: C.mut }}>{v.desc}</span>
+              <span><Tag tone="green">Active</Tag></span>
+              <RowActions status={false} />
+            </Row>
+          ))}
+        </TableShell>
+      </>
+    )}
+
+    {sub === "Buyers" && (
+      <>
+        <div className="flex justify-end gap-2">
+          <Btn icon={Download}>Import / Export Fields</Btn>
+          <Btn icon={Plus} primary>New Buyer</Btn>
+        </div>
+        <TableShell head={["Buyer Name","Portal","Type","Vertical","Balance","Revenue","Cost","Profit"]} template="1.6fr 0.8fr 0.8fr 1.2fr 0.9fr 0.9fr 0.9fr 0.9fr">
+          <EmptyState icon={CreditCard} title="No buyers yet"
+            note="Buyers can be created manually or are auto-created from LeadByte sold responses."
+            action="Create first buyer" />
+        </TableShell>
+      </>
+    )}
+
+    {sub === "Suppliers" && (
+      <>
+        <div className="flex justify-end gap-2">
+          <Btn icon={Download}>Import / Export Fields</Btn>
+          <Btn icon={Plus} primary>Create Supplier</Btn>
+        </div>
+        <TableShell head={["Name","Leads","Campaigns","Accepted %","DQ","Cost","Revenue","Profit","CPL","Conv Rate"]} template="1.6fr repeat(9, 1fr)">
+          {suppliers.map((s, i) => (
+            <Row key={s.name} template="1.6fr repeat(9, 1fr)" i={i}>
+              <span>
+                <span className="text-[13px] font-semibold block" style={{ color: C.text }}>{s.name}</span>
+                <Tag tone="green">Active</Tag>
+              </span>
+              <span className="text-right font-mono text-[12px]" style={{ color: s.leads > 0 ? C.text : C.dim }}>{s.leads}</span>
+              <span className="text-right font-mono text-[12px]" style={{ color: C.green }}>{s.revenue}</span>
+            </Row>
+          ))}
+        </TableShell>
+      </>
+    )}
+
+    {sub === "Brands" && (
+      <>
+        <div className="flex justify-end gap-2">
+          <Btn icon={Download}>Import / Export Fields</Btn>
+          <Btn icon={Plus} primary>Create Brand</Btn>
+        </div>
+        <TableShell head={["Brand Name","Code","Website","Suppliers","FB / IG","Status","Actions"]} template="1.5fr 0.7fr 1.6fr 0.8fr 0.7fr 0.8fr 1.2fr">
+          {brands.map((b, i) => (
+            <Row key={b.name} template="1.5fr 0.7fr 1.6fr 0.8fr 0.7fr 0.8fr 1.2fr" i={i}>
+              <span className="text-[13px] font-semibold" style={{ color: C.text }}>{b.name}</span>
+              <span><Tag tone={b.codeTone} mono>{b.code}</Tag></span>
+              <span className="text-[12px] font-mono truncate" style={{ color: C.mut }}>{b.site}</span>
+              <span className="text-right font-mono text-[12px]" style={{ color: C.dim }}>0</span>
+              <span className="text-right font-mono text-[12px]" style={{ color: C.dim }}>0 / 0</span>
+              <span><Tag tone="green">Active</Tag></span>
+              <RowActions status={false} />
+            </Row>
+          ))}
+        </TableShell>
+      </>
+    )}
+  </div>
+);

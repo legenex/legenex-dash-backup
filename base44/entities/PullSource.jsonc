@@ -1,0 +1,157 @@
+{
+  "name": "PullSource",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Display name for this pull, e.g. Ringba Calls"
+    },
+    "provider": {
+      "type": "string",
+      "enum": [
+        "ringba",
+        "http"
+      ],
+      "default": "ringba",
+      "description": "ringba builds the Ringba call logs request itself. http is a generic request where the operator supplies method, URL and the path to the record array."
+    },
+    "target": {
+      "type": "string",
+      "enum": [
+        "call_logs"
+      ],
+      "default": "call_logs",
+      "description": "What the fetched records are written as. call_logs writes CallRecord."
+    },
+    "enabled": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether the scheduler runs this pull"
+    },
+    "account_id": {
+      "type": "string",
+      "description": "Provider account identifier, e.g. the Ringba account the call logs belong to"
+    },
+    "api_key": {
+      "type": "string",
+      "description": "The API key or token this connection authenticates with, stored on the record. Admin-only by RLS. Never rendered in a list view; the UI shows a masked hint and reveals the value only on an explicit action."
+    },
+    "credential_env": {
+      "type": "string",
+      "description": "NAME of the environment secret holding the API token, never the token itself. The value is read server side at request time and is never returned to the browser or written to a record."
+    },
+    "method": {
+      "type": "string",
+      "enum": [
+        "GET",
+        "POST"
+      ],
+      "default": "GET",
+      "description": "HTTP method for the http provider. The ringba provider always POSTs, because the Ringba call logs endpoint requires it."
+    },
+    "url": {
+      "type": "string",
+      "description": "Absolute https URL for the http provider. Ignored for ringba, which builds its own URL from account_id."
+    },
+    "auth_header": {
+      "type": "string",
+      "description": "Authorization header value template for the http provider, e.g. 'Token {{secret}}' or 'Bearer {{secret}}'. {{secret}} is replaced server side with the value of credential_env."
+    },
+    "body_template": {
+      "type": "string",
+      "description": "JSON request body template for a POST on the http provider. Supports {{start}} and {{end}} placeholders, filled with the run's UTC window."
+    },
+    "records_path": {
+      "type": "string",
+      "description": "Dot path to the record array in the response, e.g. report.records. Blank means the response is itself an array."
+    },
+    "page_size": {
+      "type": "number",
+      "default": 1000,
+      "description": "Records requested per page. The pull keeps paging until a short page comes back."
+    },
+    "backfill_days": {
+      "type": "number",
+      "default": 7,
+      "description": "How many days the FIRST run reaches back, so the Calls section is not empty until tomorrow. Applies once, while last_synced_at is unset. Every run after that requests today only, because the provider keeps updating a call in flight and re-reading today is what refreshes it."
+    },
+    "field_map": {
+      "type": "string",
+      "description": "JSON object mapping provider field name -> our CallRecord field name. Overrides the provider's built-in defaults per key."
+    },
+    "supplier_rules": {
+      "type": "string",
+      "description": "JSON array of supplier attribution rules. Each rule matches a field on the incoming record and sets sid, ssid and supplier_name. First match wins. See src/lib/supplierRules.js."
+    },
+    "dedupe_field": {
+      "type": "string",
+      "description": "Provider field whose value identifies a record uniquely, used to upsert rather than duplicate on a re-read. Defaults to the provider's own call id."
+    },
+    "sync_interval": {
+      "type": "string",
+      "enum": [
+        "15m",
+        "1h",
+        "6h",
+        "daily"
+      ],
+      "default": "1h",
+      "description": "How often the scheduled run pulls. Ringba reports today only, so a shorter interval simply refreshes today's rows."
+    },
+    "last_synced_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_sync_status": {
+      "type": "string",
+      "description": "Short result of the last run, e.g. 'Wrote 42, updated 11'"
+    },
+    "last_run_counts": {
+      "type": "string",
+      "description": "JSON object of the last run's outcome counts: fetched, created, updated, skipped, unattributed, errored"
+    },
+    "ingested_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Total records written through this pull"
+    },
+    "error_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Total failed runs on this pull"
+    },
+    "last_error": {
+      "type": "string",
+      "description": "Summary of the most recent failure. Never contains the credential."
+    },
+    "notes": {
+      "type": "string",
+      "description": "Free text note, e.g. which report this pull replaces"
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

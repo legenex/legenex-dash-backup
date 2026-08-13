@@ -1,0 +1,57 @@
+{
+  "name": "ResponseMapping",
+  "type": "object",
+  "properties": {
+    "field_path": {
+      "type": "string",
+      "description": "Dot path into LeadByte response e.g. records[0].status",
+      "default": "records[0].status"
+    },
+    "operator": {
+      "type": "string",
+      "enum": [
+        "equals",
+        "not_equals",
+        "contains",
+        "not_contains",
+        "starts_with",
+        "ends_with",
+        "is_empty",
+        "is_not_empty"
+      ],
+      "default": "contains"
+    },
+    "lb_status": {
+      "type": "string",
+      "description": "Value to compare against, or * for fallback"
+    },
+    "response_label": {
+      "type": "string",
+      "description": "Label returned to supplier in Response field"
+    },
+    "final_status": {
+      "type": "string",
+      "enum": [
+        "Sold",
+        "Unsold",
+        "Queued",
+        "Duplicate",
+        "Error"
+      ],
+      "default": "Sold"
+    },
+    "sort_order": {
+      "type": "number",
+      "default": 0
+    },
+    "is_fallback": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "lb_status",
+    "response_label",
+    "final_status"
+  ]
+}

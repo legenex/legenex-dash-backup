@@ -1,0 +1,107 @@
+{
+  "name": "AdSpend",
+  "properties": {
+    "ad_account_id": {
+      "type": "string"
+    },
+    "ad_id": {
+      "type": "string"
+    },
+    "ad_name": {
+      "type": "string"
+    },
+    "adset_id": {
+      "type": "string"
+    },
+    "adset_name": {
+      "type": "string"
+    },
+    "brand": {
+      "type": "string"
+    },
+    "clicks": {
+      "default": 0,
+      "type": "number"
+    },
+    "cost_source": {
+      "type": "string"
+    },
+    "currency": {
+      "description": "Ad account currency code the spend value is denominated in",
+      "type": "string"
+    },
+    "date": {
+      "description": "Spend date in the ad account's timezone",
+      "format": "date",
+      "type": "string"
+    },
+    "impressions": {
+      "default": 0,
+      "type": "number"
+    },
+    "leads": {
+      "default": 0,
+      "type": "number"
+    },
+    "level": {
+      "default": "account",
+      "enum": [
+        "account",
+        "campaign",
+        "ad"
+      ],
+      "type": "string"
+    },
+    "mapping_id": {
+      "description": "Reference to AdSpendMapping",
+      "type": "string"
+    },
+    "meta_campaign_id": {
+      "type": "string"
+    },
+    "meta_campaign_name": {
+      "type": "string"
+    },
+    "platform": {
+      "default": "meta",
+      "type": "string"
+    },
+    "spend": {
+      "default": 0,
+      "type": "number"
+    },
+    "supplier_ad_account_id": {
+      "description": "Reference to the SupplierAdAccount association this row was imported through.",
+      "type": "string"
+    },
+    "supplier_id": {
+      "description": "Reference to the Supplier this spend is attributed to, resolved from SupplierAdAccount at sync time. Primary attribution key.",
+      "type": "string"
+    },
+    "supplier_key": {
+      "description": "lowercased trimmed supplier_name, used to join spend to leads case-insensitively",
+      "type": "string"
+    },
+    "supplier_name": {
+      "type": "string"
+    },
+    "vertical": {
+      "type": "string"
+    },
+    "video_3s_views": {
+      "default": 0,
+      "description": "Meta video_play_actions (3 second views). Ad level only. Thumbstop rate is this divided by impressions.",
+      "type": "number"
+    },
+    "video_thruplays": {
+      "default": 0,
+      "description": "Meta video_thruplay_watched_actions. Ad level only. Hold rate is this divided by impressions.",
+      "type": "number"
+    }
+  },
+  "required": [
+    "date",
+    "spend"
+  ],
+  "type": "object"
+}

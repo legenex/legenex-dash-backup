@@ -1,0 +1,33 @@
+// Report views, Ad Performance. Create src/components/reports/views/AdReport.jsx and route active === 'std:ad' to it
+// in Reports.jsx (extend the existing daily/pnl routing; keep PerformanceCanvas for performance_overview + custom + other views).
+// Add queries in Reports.jsx: AdSpendMapping.list() as adMappings, IntegrationConfig.list() as integrations. Pass adSpend,
+// adMappings, integrations, leads, filters to AdReport. Use ReportKpi + AINote from '@/components/reports/reportViewAtoms'.
+// ALL values REAL, honest zeros, no fabricated numbers, no mock/seed data. No em dashes. Tokens for surfaces/text;
+// tone accents inline hex (red #E5484D, green #3DD68C).
+
+// Props: { adSpend, adMappings, integrations, leads, filters }.
+// const f = applyFilters(leads, filters); const m = computeMetrics(f, adSpend); const totalSpend = sum(adSpend.spend).
+// Platform connected: integrations.find(c => c.name === '<meta|google_ads|tiktok>') truthy. syncedCount = number connected of the 3.
+// Per-platform spend = sum adSpend where (row.platform || 'meta') === that platform.
+// KPI tiles (ReportKpi):
+//   Total Ad Spend  -> money(totalSpend); hint `${syncedCount}/3 platforms synced`.
+//   Blended CPL     -> money(totalSpend / f.length) or "-" when totalSpend is 0; hint "no spend basis" when 0.
+//   ROAS            -> (m.revenue / totalSpend).toFixed(2) or "-" when totalSpend is 0; hint "needs revenue + spend".
+//   CAPI Events Sent-> count of leads in f whose capi_log records a sent event (parse capi_log; 0 if none);
+//                      tone 'risk' when 0; hint `${3 - syncedCount} connectors idle`.
+// Platform cards (Meta Ads, Google Ads, TikTok): each a Panel with a dot + name, a connected/Not connected Tag,
+//   a 3-col Spend / CPL / ROAS mini grid (real per-platform values, "-" when none), and a Connect button.
+// Spend by Campaign Mapping table: THead ["Mapping","Platform","Supplier","Spend","Leads","True CPL"]
+//   template "1.8fr 1fr 1.2fr 1fr 0.8fr 1fr". One TRow per adMappings row (real spend, leads, true CPL). When
+//   adMappings is empty, show the "No campaign mappings" empty state with an Add mapping link to Settings Integrations.
+// AINote: factual, e.g. when totalSpend is 0 -> "no ad spend is synced, so CPL falls back to supplier-declared cost and
+//   real acquisition economics are not visible."
+
+const AdReport = ({ adSpend, adMappings, integrations, leads, filters }) => (
+  <div className="space-y-5">
+    <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">{/* four ReportKpi tiles */}</div>
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">{/* three platform Panels (Meta, Google, TikTok) */}</div>
+    <div className="rounded-xl border border-border bg-card shadow-[0_12px_32px_-16px_rgba(0,0,0,0.35)]">{/* Spend by Campaign Mapping */}</div>
+    {/* AINote */}
+  </div>
+);

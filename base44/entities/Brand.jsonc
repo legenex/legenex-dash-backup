@@ -1,0 +1,42 @@
+{
+  "name": "Brand",
+  "type": "object",
+  "properties": {
+    "brand_name": {
+      "type": "string",
+      "description": "Display name of the brand"
+    },
+    "brand_code": {
+      "type": "string",
+      "description": "Short code e.g. CAC = Check A Case, CMC = Check My Claim"
+    },
+    "website_url": {
+      "type": "string",
+      "description": "Brand website URL"
+    },
+    "optin_url": {
+      "type": "string",
+      "description": "Default optin/landing page URL for this brand"
+    },
+    "supplier_names": {
+      "type": "string",
+      "description": "JSON array of Supplier names linked to this brand"
+    },
+    "facebook_pages": {
+      "type": "string",
+      "description": "JSON array of linked Facebook Page names/ids for additional metrics"
+    },
+    "instagram_accounts": {
+      "type": "string",
+      "description": "JSON array of linked Instagram account handles for additional metrics"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "brand_name",
+    "brand_code"
+  ]
+}

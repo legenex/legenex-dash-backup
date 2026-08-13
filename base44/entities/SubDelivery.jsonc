@@ -1,0 +1,31 @@
+{
+  // Additive (lead distribution platform). A single outbound endpoint tier within a
+  // Delivery. RouteMember.sub_delivery_id points here as the canonical destination.
+  //
+  // CREDENTIAL HARD RULE: outbound buyer API keys and auth headers are NEVER stored
+  // in this entity's JSON and NEVER returned to the browser. `credential_ref` holds
+  // only an opaque reference; the real secret is resolved server-side at send time
+  // from secret storage. `headers` holds NON-secret headers only. The UI shows
+  // presence/last-updated/replace, never the value.
+  // Caller model: OPERATOR writes; read by processLead (snapshot loader) + delivery adapter.
+  "name": "SubDelivery",
+  "type": "object",
+  "properties": {
+    "delivery_id": { "type": "string", "description": "Parent Delivery. Required." },
+    "name": { "type": "string", "description": "Tier label (e.g. Primary, Backup)" },
+    "active": { "type": "boolean", "default": true, "description": "Only active sub-deliveries can route." },
+    "order_index": { "type": "number", "default": 0, "description": "Tab order within the parent delivery" },
+    "target_url": { "type": "string", "description": "Outbound endpoint URL" },
+    "method": { "type": "string", "enum": ["POST", "PUT", "GET"], "default": "POST" },
+    "encoding": { "type": "string", "enum": ["json", "form"], "default": "json", "description": "Outbound body encoding" },
+    "headers": { "type": "string", "description": "JSON of NON-secret headers only. Never store auth/API keys here." },
+    "credential_ref": { "type": "string", "description": "Opaque reference to a secret in secret storage. NEVER the secret value itself." },
+    "credential_updated_at": { "type": "string", "format": "date-time", "description": "When the referenced credential was last replaced (presence/audit only)." },
+    "field_map": { "type": "string", "description": "JSON: outbound field -> lead field/path mapping" },
+    "transforms": { "type": "string", "description": "JSON: ordered transform steps applied before send" },
+    "response_mapping": { "type": "string", "description": "JSON: paths for accepted/rejected/duplicate/queued, revenue, buyer_lead_id" },
+    "timeout_ms": { "type": "number", "default": 10000, "description": "Per-request timeout" },
+    "retry_policy": { "type": "string", "description": "JSON: max_attempts + backoff config" }
+  },
+  "required": ["delivery_id"]
+}

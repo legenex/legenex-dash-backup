@@ -1,0 +1,65 @@
+{
+  "name": "ApiKey",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Friendly label for this key"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "master",
+        "supplier"
+      ],
+      "default": "supplier",
+      "description": "master keys have no linked supplier; supplier keys link to exactly one supplier"
+    },
+    "supplier_name": {
+      "type": "string",
+      "description": "Supplier display name (denormalized for fast lookup)"
+    },
+    "supplier_id": {
+      "type": "string",
+      "description": "Reference to Supplier record (optional for master keys)"
+    },
+    "vertical": {
+      "type": "string",
+      "description": "Optional vertical code this key is used for"
+    },
+    "key": {
+      "type": "string",
+      "description": "Full key value \u2014 only present at creation; should be hashed in production"
+    },
+    "key_prefix": {
+      "type": "string",
+      "description": "First 16 chars of key, shown in UI"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    },
+    "last_used_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "request_count": {
+      "type": "number",
+      "default": 0
+    },
+    "allowed_ips": {
+      "type": "string",
+      "description": "JSON array of allowed IP addresses, optional"
+    },
+    "expose_revenue": {
+      "type": "boolean",
+      "default": false,
+      "description": "When true, supplier responses may include revenue"
+    }
+  },
+  "required": [
+    "name",
+    "key",
+    "key_prefix"
+  ]
+}

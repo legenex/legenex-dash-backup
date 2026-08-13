@@ -1,0 +1,21 @@
+{
+  // Additive (lead distribution platform). IMMUTABLE published configuration
+  // snapshot. Created on every publish of a RouteGroup and never modified or hard
+  // deleted (archive only). A historical RouteDecisionTrace.config_version resolves
+  // to exactly one of these by config_hash, so any past lead is explainable with
+  // the exact config that routed it. Caller model: operator-only via distributionConfig.
+  "name": "RouteConfigVersion",
+  "type": "object",
+  "properties": {
+    "route_group_id": { "type": "string", "description": "The RouteGroup this version was published from" },
+    "campaign_id": { "type": "string" },
+    "version": { "type": "number", "default": 1, "description": "Monotonic version number per group" },
+    "config_hash": { "type": "string", "description": "Content hash; matches RouteDecisionTrace.config_version" },
+    "snapshot": { "type": "string", "description": "JSON immutable snapshot of the group + members (non-secret)" },
+    "published_by": { "type": "string", "description": "Operator user id who published" },
+    "published_at": { "type": "string", "format": "date-time" },
+    "change_reason": { "type": "string" },
+    "status": { "type": "string", "enum": ["published", "archived"], "default": "published" }
+  },
+  "required": ["route_group_id", "config_hash"]
+}

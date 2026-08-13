@@ -1,0 +1,61 @@
+{
+  "name": "ChatMemory",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "User this memory belongs to"
+    },
+    "fact": {
+      "type": "string",
+      "description": "A concise learned fact or preference extracted from conversation, e.g. 'User prefers revenue figures net of IPL fees' or 'User's top buyer is LeadFlow'"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "preference",
+        "business_rule",
+        "data_insight",
+        "definition",
+        "other"
+      ],
+      "default": "other",
+      "description": "What kind of memory this is"
+    },
+    "source_conversation_id": {
+      "type": "string",
+      "description": "Conversation this memory was learned from. Nullable."
+    },
+    "confidence": {
+      "type": "number",
+      "default": 1,
+      "description": "How confident the bot is in this memory, 1-5"
+    },
+    "times_referenced": {
+      "type": "number",
+      "default": 0,
+      "description": "How many times this memory has been used as context"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true,
+      "description": "False when the user dismisses or corrects this memory"
+    }
+  },
+  "required": [
+    "user_id",
+    "fact"
+  ],
+  "rls": {
+    "create": true,
+    "read": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    }
+  }
+}

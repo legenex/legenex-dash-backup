@@ -1,0 +1,68 @@
+{
+  "name": "AppSettings",
+  "type": "object",
+  "properties": {
+    "brand_name": {
+      "type": "string",
+      "default": "Legenex"
+    },
+    "brand_tagline": {
+      "type": "string",
+      "default": "Lead Gateway"
+    },
+    "public_base_url": {
+      "type": "string",
+      "default": "https://api.legenex.com"
+    },
+    "default_fail_mode": {
+      "type": "string",
+      "enum": [
+        "fail_open",
+        "fail_closed",
+        "forward_blank"
+      ],
+      "default": "fail_open"
+    },
+    "adaptive_fields_enabled": {
+      "type": "boolean",
+      "default": true,
+      "description": "When true, new inbound keys are auto-cataloged as CustomFields"
+    },
+    "adaptive_fields_ignore_list": {
+      "type": "string",
+      "description": "JSON array of field names (case-insensitive) that must never be cataloged or forwarded"
+    },
+    "require_trustedform_cert": {
+      "type": "boolean",
+      "default": true,
+      "description": "When true, leads without a valid TrustedForm cert URL are queued before reaching LeadByte"
+    },
+    "fb_api_version": {
+      "type": "string",
+      "default": "v25.0",
+      "description": "Facebook Graph API version used for CAPI calls"
+    },
+    "fb_api_version_auto": {
+      "type": "boolean",
+      "default": true,
+      "description": "When true, the Facebook Graph API version is auto-selected from the latest available"
+    },
+    "distribution_mode": {
+      "type": "string",
+      "enum": [
+        "legacy_only",
+        "shadow",
+        "canary",
+        "new_primary_with_legacy_fallback",
+        "new_only"
+      ],
+      "default": "legacy_only",
+      "description": "Additive. Native lead distribution engine mode. legacy_only (default) keeps LeadByte authoritative and runs no new code; later modes require explicit approval before use."
+    },
+    "distribution_canary_allowlist": {
+      "type": "string",
+      "description": "Additive. JSON allowlist that defines which leads canary mode may deliver natively, e.g. {\"supplierKeys\":[\"...\"],\"campaignIds\":[\"...\"],\"sourceMarker\":\"...\"}. Empty or absent means canary delivers nothing and legacy stays authoritative."
+    }
+  },
+  "required": []
+}

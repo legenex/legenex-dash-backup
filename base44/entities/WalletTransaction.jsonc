@@ -1,0 +1,46 @@
+{
+  "name": "WalletTransaction",
+  "type": "object",
+  "properties": {
+    "buyer_id": {
+      "type": "string",
+      "description": "Reference to Buyer record"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "credit",
+        "debit",
+        "recharge",
+        "adjustment"
+      ],
+      "default": "credit"
+    },
+    "amount": {
+      "type": "number"
+    },
+    "balance_after": {
+      "type": "number"
+    },
+    "description": {
+      "type": "string"
+    },
+    "idempotency_key": {
+      "type": "string",
+      "description": "Additive. Dedupe key so a debit/credit applies at most once (native ledger)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "applied",
+        "rejected"
+      ],
+      "description": "Additive. applied = balance moved; rejected = insufficient/over-limit, no balance change"
+    }
+  },
+  "required": [
+    "buyer_id",
+    "type",
+    "amount"
+  ]
+}

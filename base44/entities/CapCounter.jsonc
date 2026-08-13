@@ -1,0 +1,27 @@
+{
+  // Additive (lead distribution platform). Concurrency-safe windowed counter for cap enforcement.
+  // Updated ONLY via optimistic-lock compare-and-swap (updateMany on {id, count} -> {count+1}),
+  // the same proven primitive as Counter.nextLeadId. scope_key is the single lookup key the CAS
+  // store adapter uses (encodes scope_type + scope_id + window + window_start); the descriptive
+  // fields are retained for reporting. Caller model: processLead / retry worker (service role) only.
+  "name": "CapCounter",
+  "type": "object",
+  "properties": {
+    "scope_key": { "type": "string", "description": "Single canonical key (e.g. buyer:B1:daily:2026-07-13). Primary CAS lookup." },
+    "count": { "type": "number", "default": 0, "description": "Consumed count within the current window" },
+    "scope_type": {
+      "type": "string",
+      "enum": ["buyer", "route_member", "campaign", "state", "supplier", "claim"],
+      "description": "Dimension the cap applies to (reporting)"
+    },
+    "scope_id": { "type": "string", "description": "Id of the scoped entity (reporting)" },
+    "window": {
+      "type": "string",
+      "enum": ["total", "hourly", "daily", "weekly", "monthly", "claim"],
+      "description": "Time window the counter aggregates over (reporting)"
+    },
+    "window_start": { "type": "string", "format": "date-time", "description": "Start of the current window bucket (reporting)" },
+    "limit": { "type": "number", "description": "Cap limit for this window (reporting)" }
+  },
+  "required": ["scope_key"]
+}
