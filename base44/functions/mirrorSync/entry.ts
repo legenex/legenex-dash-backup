@@ -242,6 +242,7 @@ Deno.serve(async (req) => {
             for (const s of (page.rows || [])) {
               const want = remap(strip(s), idMap);
               want.migration_source_id = s.id;
+              want.source_created_date = s.created_date;
               toCreate.push(want);
             }
           }
@@ -251,6 +252,10 @@ Deno.serve(async (req) => {
           seen.add(s.id);
           const want = remap(strip(s), idMap);
           want.migration_source_id = s.id;
+          // Base44 will not accept a created_date on insert, so the primary's
+          // real timestamp rides along in its own column and the app's read
+          // layer swaps it back in.
+          want.source_created_date = s.created_date;
           const have = bySourceId[s.id];
           if (!have) { toCreate.push(want); continue; }
           if (differs(want, have)) {
