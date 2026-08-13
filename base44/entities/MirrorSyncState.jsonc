@@ -1,0 +1,50 @@
+{
+  "name": "MirrorSyncState",
+  "type": "object",
+  "properties": {
+    "entity_name": {
+      "type": "string",
+      "description": "Entity this row tracks, or __cursor__ for the round-robin position of the sync job"
+    },
+    "cursor": {
+      "type": "number",
+      "default": 0,
+      "description": "Round-robin index into the entity list, used only on the __cursor__ row"
+    },
+    "last_sync_at": {
+      "type": "string",
+      "description": "ISO timestamp of the last completed pass over this entity"
+    },
+    "source_count": {
+      "type": "number",
+      "description": "Record count in the primary app at the last pass"
+    },
+    "mirror_count": {
+      "type": "number",
+      "description": "Record count in this app at the last pass"
+    },
+    "created": {
+      "type": "number",
+      "description": "Records created during the last pass"
+    },
+    "updated": {
+      "type": "number",
+      "description": "Records updated during the last pass"
+    },
+    "deleted": {
+      "type": "number",
+      "description": "Records deleted during the last pass because they no longer exist upstream"
+    },
+    "in_sync": {
+      "type": "boolean",
+      "description": "True when source_count equalled mirror_count at the end of the last pass"
+    },
+    "last_error": {
+      "type": "string",
+      "description": "Error message from the last pass, empty when the pass succeeded"
+    }
+  },
+  "required": [
+    "entity_name"
+  ]
+}
