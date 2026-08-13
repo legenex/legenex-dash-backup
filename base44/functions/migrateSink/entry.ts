@@ -40,6 +40,13 @@ Deno.serve(async (req) => {
       return Response.json({ entity: body.entity, count: total });
     }
 
+    if (body.op === 'read') {
+      const limit = Math.min(Math.max(Number(body.limit) || 200, 1), 500);
+      const skip = Math.max(Number(body.skip) || 0, 0);
+      const rows = await ent.list('created_date', limit, skip);
+      return Response.json({ entity: body.entity, skip, limit, rows: rows || [] });
+    }
+
     if (body.op === 'purge') {
       let deleted = 0;
       for (let round = 0; round < 200; round++) {
