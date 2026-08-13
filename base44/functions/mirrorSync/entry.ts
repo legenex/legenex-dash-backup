@@ -24,7 +24,7 @@ const SOURCE_FN = 'https://base44.app/api/apps/6a4957e7b03e9b10c170d29e/function
 const SECRET = 'lgx-migrate-9f3a2b7c4d8e1055';
 
 // System columns the platform owns. Never copied, never compared.
-const SYSTEM_FIELDS = ['id', 'created_date', 'updated_date', 'created_by_id', 'created_by', 'is_sample'];
+const SYSTEM_FIELDS = ['id', 'created_date', 'updated_date', 'created_by_id', 'created_by', 'is_sample', 'migration_source_id', 'source_created_date'];
 
 // Append-only, very high volume. Synced on id presence alone: no field level
 // diffing, because rewriting 90k log rows every pass is not worth the calls.
