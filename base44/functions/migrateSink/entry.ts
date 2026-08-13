@@ -43,6 +43,31 @@ Deno.serve(async (req) => {
 
     if (body.op === 'ping') return Response.json({ ok: true });
 
+    // Probe: can any write path preserve the original created_date? Tries the
+    // file import endpoint and a raw REST insert, then reports what stuck.
+    if (body.op === 'probeimport') {
+      const ent2: any = (db.entities as any).Counter;
+      const stamp = '2026-07-05T15:47:27.758Z';
+      const out: Record<string, any> = {};
+
+      try {
+        const csv = `name,value,created_date\n__probe_csv__,1,${stamp}\n`;
+        const file = new File([csv], 'probe.csv', { type: 'text/csv' });
+        out.import_response = await ent2.importEntities(file);
+      } catch (e) { out.import_error = (e as Error).message.slice(0, 300); }
+
+      try {
+        const made = await ent2.create({ name: '__probe_json__', value: 1, created_date: stamp, created_at: stamp });
+        out.create_id = made && made.id;
+      } catch (e) { out.create_error = (e as Error).message.slice(0, 300); }
+
+      const rows = await ent2.filter({ name: { $in: ['__probe_csv__', '__probe_json__'] } }, 'created_date', 10, 0);
+      out.rows = (rows || []).map((r: any) => ({ name: r.name, created_date: r.created_date }));
+      out.wanted = stamp;
+      for (const r of (rows || [])) { try { await ent2.delete(r.id); } catch { /* best effort */ } }
+      return Response.json(out);
+    }
+
     const ent: any = body.entity ? (db.entities as any)[body.entity] : null;
     if (!ent) return Response.json({ error: `Unknown entity: ${body.entity}` }, { status: 400 });
 
