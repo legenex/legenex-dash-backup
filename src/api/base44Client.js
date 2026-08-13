@@ -18,9 +18,9 @@ const _client = createClient({
 //
 // This app is a mirror of the primary Legenex dashboard. Base44 stamps its own
 // created_date whenever a record is inserted and will not accept one from the
-// caller, so every mirrored row carries a created_date of "whenever the sync
-// ran" rather than when the lead actually arrived. Left alone that makes every
-// date filter in the dashboard wrong: This Month would show the entire history.
+// caller, so every mirrored row's created_date is "whenever the sync ran"
+// rather than when the lead actually arrived. Left alone that makes every date
+// filter wrong: This Month would show the entire history.
 //
 // The sync job copies the primary's real timestamp into source_created_date.
 // This layer swaps it back in on the way out, and rewrites created_date in
@@ -38,10 +38,7 @@ const restoreRecord = (rec) => {
   return { ...rec, created_date: rec[MIRROR_DATE] };
 };
 
-const restore = (result) => {
-  if (Array.isArray(result)) return result.map(restoreRecord);
-  return restoreRecord(result);
-};
+const restore = (result) => Array.isArray(result) ? result.map(restoreRecord) : restoreRecord(result);
 
 // '-created_date' -> '-source_created_date'
 const rewriteSort = (sort) => {
@@ -60,6 +57,24 @@ const rewriteQuery = (query) => {
     out[nextKey] = (value && typeof value === 'object') ? rewriteQuery(value) : value;
   }
   return out;
+};
+
+// Server-side aggregation happens inside backend functions, which read the
+// database directly and so need the same correction. Those functions exist as
+// mirror-aware copies suffixed V3 (they had to ship under new names: this
+// platform does not redeploy an edited function file, only a new one). Calls
+// are redirected here so no page has to know which variant it is talking to.
+const MIRROR_FUNCTIONS = {
+  operationsData: 'operationsDataV3',
+  operatorData: 'operatorDataV3',
+  portalData: 'portalDataV3',
+  supplierPortalData: 'supplierPortalDataV3',
+  generateBillingRun: 'generateBillingRunV3',
+  dataBot: 'dataBotV3',
+  metaSyncHistory: 'metaSyncHistoryV3',
+  progressReadiness: 'progressReadinessV3',
+  listUsers: 'listUsersV3',
+  contract: 'contractV3',
 };
 
 // Base44 entity read methods (list, filter) can resolve to null when an entity
@@ -103,9 +118,18 @@ const entitiesProxy = new Proxy(_client.entities, {
   },
 });
 
+const functionsProxy = new Proxy(_client.functions, {
+  get(target, prop) {
+    const value = target[prop];
+    if (prop !== 'invoke' || typeof value !== 'function') return value;
+    return (name, ...rest) => value.apply(target, [MIRROR_FUNCTIONS[name] || name, ...rest]);
+  },
+});
+
 export const base44 = new Proxy(_client, {
   get(target, prop) {
     if (prop === 'entities') return entitiesProxy;
+    if (prop === 'functions') return functionsProxy;
     return target[prop];
   },
 });
