@@ -7,6 +7,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 // Ops (POST JSON):
 //   { secret, op: 'ping' }
 //   { secret, op: 'count',  entity }
+//   { secret, op: 'read',   entity, skip, limit }
 //   { secret, op: 'purge',  entity }
 //   { secret, op: 'write',  entity, records: [...] }   -> { created: [ids] }
 //   { secret, op: 'update', entity, updates: [{ id, data }] }
