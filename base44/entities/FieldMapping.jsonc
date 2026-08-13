@@ -13,6 +13,11 @@
     "migration_source_id": {
       "type": "string",
       "description": "Backup mirror only. The record id this row was copied from in the primary Legenex dashboard app. Used by the sync job to keep this app 1:1 with the primary. Not used by any dashboard logic."
+    },
+    "source_created_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Backup mirror only. The created_date this record has in the primary Legenex dashboard app. Base44 stamps its own created_date on insert, so this column carries the real event time and the app's read layer substitutes it for created_date."
     }
   },
   "required": [
