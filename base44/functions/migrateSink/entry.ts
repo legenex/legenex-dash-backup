@@ -103,6 +103,27 @@ Deno.serve(async (req) => {
       return Response.json({ created, mode: 'single', errors });
     }
 
+    // Query-based bulk rewrite. Used to repoint foreign keys on very high
+    // volume entities where per-record updates are not practical.
+    if (body.op === 'updatemany') {
+      const field = String(body.field || '');
+      const from = body.from;
+      const to = body.to;
+      if (!field || from === undefined || to === undefined) {
+        return Response.json({ error: 'updatemany needs field, from, to' }, { status: 400 });
+      }
+      let touched = 0;
+      for (let round = 0; round < 400; round++) {
+        const before = await ent.filter({ [field]: from }, 'created_date', 1, 0, ['id']);
+        if (!before || before.length === 0) break;
+        const res: any = await withRetry(() => ent.updateMany({ [field]: from }, { $set: { [field]: to } }));
+        const n = Number((res && (res.updated ?? res.modified_count ?? res.matched_count)) || 0);
+        touched += n;
+        if (!n) break;
+      }
+      return Response.json({ entity: body.entity, field, from, to, touched });
+    }
+
     if (body.op === 'update') {
       const updates = Array.isArray(body.updates) ? body.updates : [];
       if (updates.length === 0) return Response.json({ updated: 0, failed: [] });
