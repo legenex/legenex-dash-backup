@@ -216,11 +216,15 @@ Deno.serve(async (req) => {
           : await sourceAll(entity);
         const mirRows = await mirrorAll(db, entity, appendOnly ? ['id', 'migration_source_id'] : undefined);
 
+        // Orphans are rows that no longer belong here: ones with no source id,
+        // duplicates of a source id already claimed by another row, and (further
+        // down) ones whose source record has since been deleted upstream.
         const bySourceId: Record<string, any> = {};
         const orphans: string[] = [];
         for (const m of mirRows) {
-          if (m.migration_source_id) bySourceId[m.migration_source_id] = m;
-          else orphans.push(m.id);
+          if (!m.migration_source_id) { orphans.push(m.id); continue; }
+          if (bySourceId[m.migration_source_id]) { orphans.push(m.id); continue; }
+          bySourceId[m.migration_source_id] = m;
         }
 
         const seen = new Set<string>();
@@ -286,6 +290,7 @@ Deno.serve(async (req) => {
         }
 
         result.source_count = srcRows.length;
+        result.duplicates_removed = orphans.length;
         result.mirror_count = mirRows.length + result.created - result.deleted;
         result.in_sync = result.source_count === result.mirror_count;
 
