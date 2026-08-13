@@ -19,6 +19,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 //
 // Scheduled runs arrive with no user. Interactive runs must be an admin.
 
+const MIRROR_SYNC_VERSION = 'v3-source-created-date';
 const SOURCE_APP = '6a4957e7b03e9b10c170d29e';
 const SOURCE_FN = 'https://base44.app/api/apps/6a4957e7b03e9b10c170d29e/functions/migrateSource';
 const SECRET = 'lgx-migrate-9f3a2b7c4d8e1055';
@@ -330,6 +331,7 @@ Deno.serve(async (req) => {
     const outOfSync = report.filter((r) => r.in_sync === false).map((r) => r.entity);
     return Response.json({
       ok: true,
+      version: MIRROR_SYNC_VERSION,
       dry_run: dryRun,
       duration_ms: Date.now() - startedAt,
       entities_processed: processed,
