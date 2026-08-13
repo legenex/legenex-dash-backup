@@ -99,6 +99,18 @@ async function sourceAll(entity: string, fields?: string[]) {
   return out;
 }
 
+// Just the ids of an entity in the primary app.
+async function sourceIds(entity: string) {
+  const out: any[] = [];
+  for (let skip = 0; skip < 400000; skip += 500) {
+    const page = await source({ op: 'ids', entity, skip, limit: 500 });
+    const rows = page.rows || [];
+    out.push(...rows);
+    if (rows.length < 500) break;
+  }
+  return out;
+}
+
 // Every record of an entity in this app.
 async function mirrorAll(db: any, entity: string, fields?: string[]) {
   const out: any[] = [];
@@ -197,7 +209,11 @@ Deno.serve(async (req) => {
       const result: any = { entity, created: 0, updated: 0, deleted: 0, errors: [] as string[] };
 
       try {
-        const srcRows = await sourceAll(entity);
+        // Append-only entities are compared on ids alone: pulling 90k full log
+        // rows every pass would blow the time budget for no benefit.
+        const srcRows = appendOnly
+          ? await sourceIds(entity)
+          : await sourceAll(entity);
         const mirRows = await mirrorAll(db, entity, appendOnly ? ['id', 'migration_source_id'] : undefined);
 
         const bySourceId: Record<string, any> = {};
@@ -210,13 +226,29 @@ Deno.serve(async (req) => {
         const seen = new Set<string>();
         const toCreate: any[] = [];
 
-        for (const s of srcRows) {
+        // For append-only entities srcRows only carries ids, so the bodies of
+        // anything missing here have to be fetched before they can be written.
+        if (appendOnly) {
+          const missingIds = srcRows.filter((s: any) => !bySourceId[s.id]).map((s: any) => s.id);
+          for (const s of srcRows) seen.add(s.id);
+          for (let i = 0; i < missingIds.length; i += 200) {
+            if (Date.now() - startedAt > budgetMs) break;
+            const chunk = missingIds.slice(i, i + 200);
+            const page = await source({ op: 'filter', entity, query: { id: { $in: chunk } }, limit: 500 });
+            for (const s of (page.rows || [])) {
+              const want = remap(strip(s), idMap);
+              want.migration_source_id = s.id;
+              toCreate.push(want);
+            }
+          }
+        }
+
+        for (const s of (appendOnly ? [] : srcRows)) {
           seen.add(s.id);
           const want = remap(strip(s), idMap);
           want.migration_source_id = s.id;
           const have = bySourceId[s.id];
           if (!have) { toCreate.push(want); continue; }
-          if (appendOnly) continue;
           if (differs(want, have)) {
             if (!dryRun) {
               try { await withRetry(() => db.entities[entity].update(have.id, want)); result.updated++; }
