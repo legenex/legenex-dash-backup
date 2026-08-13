@@ -1,5 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
-import { mirrorClock } from './mirrorClock.ts';
+import { mirrorClock } from './mirrorClock.generated.js';
 
 // Server-side aggregation endpoint for the Operations Dashboard. Never returns
 // raw Lead rows: all counts are computed here via the service role.

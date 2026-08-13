@@ -1,5 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
-import { mirrorClock } from './mirrorClock.ts';
+import { mirrorClock } from './mirrorClock.generated.js';
 
 // Returns every User record for this app using the service role, bypassing the
 // row-level security that scopes base44.entities.User.list() to the caller.

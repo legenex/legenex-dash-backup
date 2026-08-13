@@ -1,5 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
-import { mirrorClock } from './mirrorClock.ts';
+import { mirrorClock } from './mirrorClock.generated.js';
 
 // Read-only Lead data endpoint for operator users. Lead has admin-only RLS, so
 // platform role "user" (base_role manager) gets empty results from client-side

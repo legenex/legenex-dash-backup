@@ -1,5 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
-import { mirrorClock } from './mirrorClock.ts';
+import { mirrorClock } from './mirrorClock.generated.js';
 
 const OPERATOR_PERMISSION_KEYS = ['leads', 'reports', 'overview', 'finances', 'distribution', 'operations'];
 function isOperator(caller: any): boolean {

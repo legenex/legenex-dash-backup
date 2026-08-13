@@ -1,5 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
-import { mirrorClock } from './mirrorClock.ts';
+import { mirrorClock } from './mirrorClock.generated.js';
 
 // Caller model: SUPPLIER-SCOPED. Authenticated supplier-portal data endpoint.
 // Returns everything the supplier portal needs, strictly scoped to a single

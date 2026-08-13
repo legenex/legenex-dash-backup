@@ -1,5 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
-import { mirrorClock } from './mirrorClock.ts';
+import { mirrorClock } from './mirrorClock.generated.js';
 
 // Caller model: BUYER-SCOPED. Authenticated buyer-portal data endpoint. Returns
 // everything the portal needs, strictly scoped to a single buyer_id. Uses the
