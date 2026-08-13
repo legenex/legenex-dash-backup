@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { mirrorClock } from './mirrorClock.ts';
 
 // Read-only, machine-readable intake contract per Campaign. Lets external
 // landers, quizzes, and AI intake builders discover exactly which fields to
@@ -187,7 +188,7 @@ Deno.serve(async (req) => {
   }
 
   const base44 = createClientFromRequest(req);
-  const db = base44.asServiceRole;
+  const db = mirrorClock(base44.asServiceRole);
 
   try {
     // ── AUTH ──────────────────────────────────────────────────────────────

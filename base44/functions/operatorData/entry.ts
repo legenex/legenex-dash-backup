@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { mirrorClock } from './mirrorClock.ts';
 
 // Read-only Lead data endpoint for operator users. Lead has admin-only RLS, so
 // platform role "user" (base_role manager) gets empty results from client-side
@@ -24,7 +25,7 @@ Deno.serve(async (req) => {
 
     // Load the caller's User record via service role so we can read fields that
     // may be admin-scoped.
-    const record = await base44.asServiceRole.entities.User.get(user.id).catch(() => null);
+    const record = await mirrorClock(base44.asServiceRole).entities.User.get(user.id).catch(() => null);
     const caller = record || user;
 
     if (caller.base_role === 'supplier' || caller.base_role === 'buyer') {
@@ -57,7 +58,7 @@ Deno.serve(async (req) => {
     let skip = Number(body.skip);
     if (!Number.isFinite(skip) || skip < 0) skip = 0;
 
-    const svc = base44.asServiceRole;
+    const svc = mirrorClock(base44.asServiceRole);
     const rows = query
       ? await svc.entities.Lead.filter(query, sort, limit, skip)
       : await svc.entities.Lead.list(sort, limit, skip);

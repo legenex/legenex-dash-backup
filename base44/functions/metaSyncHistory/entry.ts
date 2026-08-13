@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { mirrorClock } from './mirrorClock.ts';
 
 const OPERATOR_PERMISSION_KEYS = ['leads', 'reports', 'overview', 'finances', 'distribution', 'operations'];
 function isOperator(caller: any): boolean {
@@ -23,7 +24,7 @@ Deno.serve(async (req) => {
     try { body = await req.json(); } catch { body = {}; }
     const limit = Math.min(Math.max(Number(body.limit) || 50, 1), 200);
 
-    const svc = base44.asServiceRole;
+    const svc = mirrorClock(base44.asServiceRole);
     const filter: any = { platform: 'meta' };
     if (body.supplier_id) filter.supplier_id = body.supplier_id;
     if (body.supplier_ad_account_id) filter.supplier_ad_account_id = body.supplier_ad_account_id;

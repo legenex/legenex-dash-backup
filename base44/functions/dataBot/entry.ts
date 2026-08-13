@@ -1,5 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 import { callLLM } from './llmClient.generated.js';
+import { mirrorClock } from './mirrorClock.ts';
 
 // DataBot: answers questions about the app's own data + a curated Knowledge Base.
 // Uses OpenAI (OPENAI_API_KEY secret).
@@ -210,7 +211,7 @@ Deno.serve(async (req) => {
     };
     const isPartner = user.base_role === 'supplier' || user.base_role === 'buyer' || !!user.linked_supplier_id || !!user.linked_buyer_id;
     const perms = resolvePerms(user);
-    const svc = base44.asServiceRole;
+    const svc = mirrorClock(base44.asServiceRole);
 
     // Per-bot allow list, configured on the bot itself in Settings > ChatBot.
     //

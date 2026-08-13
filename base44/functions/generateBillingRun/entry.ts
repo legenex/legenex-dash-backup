@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { mirrorClock } from './mirrorClock.ts';
 
 // generateBillingRun
 //
@@ -149,7 +150,7 @@ Deno.serve(async (req) => {
     try { user = await base44.auth.me(); } catch { user = null; }
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const record = await base44.asServiceRole.entities.User.get(user.id).catch(() => null);
+    const record = await mirrorClock(base44.asServiceRole).entities.User.get(user.id).catch(() => null);
     const caller = record || user;
 
     if (caller.base_role === 'supplier' || caller.base_role === 'buyer') {
@@ -201,7 +202,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'period_end must not be before period_start' }, { status: 400 });
     }
 
-    const svc = base44.asServiceRole;
+    const svc = mirrorClock(base44.asServiceRole);
     const notes: string[] = [];
     const { startMs, endMs } = periodBoundsUtc(periodStart, periodEnd);
 

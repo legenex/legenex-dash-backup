@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { mirrorClock } from './mirrorClock.ts';
 
 // Returns every User record for this app using the service role, bypassing the
 // row-level security that scopes base44.entities.User.list() to the caller.
@@ -10,7 +11,7 @@ Deno.serve(async (req) => {
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
     if (user.role !== 'admin') return Response.json({ error: 'Forbidden' }, { status: 403 });
 
-    const all = await base44.asServiceRole.entities.User.list();
+    const all = await mirrorClock(base44.asServiceRole).entities.User.list();
     const users = (all || []).map((u) => ({
       id: u.id,
       full_name: u.full_name,
@@ -29,7 +30,7 @@ Deno.serve(async (req) => {
     const existingEmails = new Set(users.map((u) => (u.email || '').toLowerCase()));
     let pending = [];
     try {
-      const invites = await base44.asServiceRole.entities.Invitation.filter({ status: 'pending' });
+      const invites = await mirrorClock(base44.asServiceRole).entities.Invitation.filter({ status: 'pending' });
       pending = (invites || [])
         .filter((inv) => inv.email && !existingEmails.has(inv.email.toLowerCase()))
         .map((inv) => ({

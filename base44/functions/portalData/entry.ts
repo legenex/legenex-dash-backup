@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { mirrorClock } from './mirrorClock.ts';
 
 // Caller model: BUYER-SCOPED. Authenticated buyer-portal data endpoint. Returns
 // everything the portal needs, strictly scoped to a single buyer_id. Uses the
@@ -17,7 +18,7 @@ async function resolveBuyerScope(base44: any, user: any, requestedBuyerId: strin
   // Operator using "View as → Buyer" with no specific target: preview the first
   // portal-enabled buyer so the portal renders a real example.
   if (isOperator && previewRole) {
-    const enabled = await base44.asServiceRole.entities.Buyer.filter({ portal_enabled: true }, '-created_date', 1).catch(() => []);
+    const enabled = await mirrorClock(base44.asServiceRole).entities.Buyer.filter({ portal_enabled: true }, '-created_date', 1).catch(() => []);
     if (enabled && enabled.length > 0) return enabled[0].id;
   }
   return null;
@@ -35,16 +36,16 @@ Deno.serve(async (req) => {
     const buyerId = await resolveBuyerScope(base44, user, requestedBuyerId, previewRole);
     if (!buyerId) return Response.json({ error: 'No buyer linked to this account' }, { status: 403 });
 
-    const buyer = await base44.asServiceRole.entities.Buyer.get(buyerId).catch(() => null);
+    const buyer = await mirrorClock(base44.asServiceRole).entities.Buyer.get(buyerId).catch(() => null);
     if (!buyer) return Response.json({ error: 'Buyer not found' }, { status: 404 });
     if (!buyer.portal_enabled && user.role !== 'admin') {
       return Response.json({ error: 'Portal is not enabled for this buyer' }, { status: 403 });
     }
 
     // Only leads delivered to this buyer.
-    const leads = await base44.asServiceRole.entities.Lead.filter({ buyer_id: buyerId }, '-created_date', 2000);
-    const feedback = await base44.asServiceRole.entities.BuyerFeedback.filter({ buyer_id: buyerId }, '-created_date', 2000);
-    const returns = await base44.asServiceRole.entities.ReturnRequest.filter({ buyer_id: buyerId }, '-created_date', 2000);
+    const leads = await mirrorClock(base44.asServiceRole).entities.Lead.filter({ buyer_id: buyerId }, '-created_date', 2000);
+    const feedback = await mirrorClock(base44.asServiceRole).entities.BuyerFeedback.filter({ buyer_id: buyerId }, '-created_date', 2000);
+    const returns = await mirrorClock(base44.asServiceRole).entities.ReturnRequest.filter({ buyer_id: buyerId }, '-created_date', 2000);
 
     // Trim lead payloads to portal-safe fields (never expose raw payloads / traces).
     const safeLeads = leads.map((l: any) => ({

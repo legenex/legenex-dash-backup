@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { mirrorClock } from './mirrorClock.ts';
 
 // Server-side aggregation endpoint for the Operations Dashboard. Never returns
 // raw Lead rows: all counts are computed here via the service role.
@@ -39,7 +40,7 @@ Deno.serve(async (req) => {
     try { user = await base44.auth.me(); } catch { user = null; }
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const record = await base44.asServiceRole.entities.User.get(user.id).catch(() => null);
+    const record = await mirrorClock(base44.asServiceRole).entities.User.get(user.id).catch(() => null);
     const caller = record || user;
 
     if (caller.base_role === 'supplier' || caller.base_role === 'buyer') {
@@ -74,7 +75,7 @@ Deno.serve(async (req) => {
     const sevenDaysAgoIso = sevenDaysAgo.toISOString();
     const twentyFourHoursAgoIso = new Date(now - DAY_MS).toISOString();
 
-    const svc = base44.asServiceRole;
+    const svc = mirrorClock(base44.asServiceRole);
 
     // Load the reference tables (small, operator-scoped).
     const [buyers, suppliers, campaigns, stateStatuses, stateChangeAll] = await Promise.all([

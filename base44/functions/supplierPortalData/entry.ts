@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { mirrorClock } from './mirrorClock.ts';
 
 // Caller model: SUPPLIER-SCOPED. Authenticated supplier-portal data endpoint.
 // Returns everything the supplier portal needs, strictly scoped to a single
@@ -19,7 +20,7 @@ async function resolveSupplierScope(base44: any, user: any, requestedSupplierId:
   // Operator using "View as → Supplier" with no specific target: preview the
   // first portal-enabled supplier so the portal renders a real example.
   if (isOperator && previewRole) {
-    const enabled = await base44.asServiceRole.entities.Supplier.filter({ portal_enabled: true }, '-created_date', 1).catch(() => []);
+    const enabled = await mirrorClock(base44.asServiceRole).entities.Supplier.filter({ portal_enabled: true }, '-created_date', 1).catch(() => []);
     if (enabled && enabled.length > 0) return enabled[0].id;
   }
   return null;
@@ -43,20 +44,20 @@ Deno.serve(async (req) => {
     const supplierId = await resolveSupplierScope(base44, user, requestedSupplierId, previewRole);
     if (!supplierId) return Response.json({ error: 'No supplier linked to this account' }, { status: 403 });
 
-    const supplier = await base44.asServiceRole.entities.Supplier.get(supplierId).catch(() => null);
+    const supplier = await mirrorClock(base44.asServiceRole).entities.Supplier.get(supplierId).catch(() => null);
     if (!supplier) return Response.json({ error: 'Supplier not found' }, { status: 404 });
     if (!supplier.portal_enabled && user.role !== 'admin') {
       return Response.json({ error: 'Portal is not enabled for this supplier' }, { status: 403 });
     }
 
     // Only leads this supplier sent (matched by supplier_name).
-    const leads = await base44.asServiceRole.entities.Lead.filter({ supplier_name: supplier.name }, '-created_date', 3000);
+    const leads = await mirrorClock(base44.asServiceRole).entities.Lead.filter({ supplier_name: supplier.name }, '-created_date', 3000);
 
     // Returns for this supplier's leads.
     const leadIds = new Set(leads.map((l: any) => l.id));
     let returns: any[] = [];
     try {
-      const allReturns = await base44.asServiceRole.entities.ReturnRequest.list('-created_date', 3000);
+      const allReturns = await mirrorClock(base44.asServiceRole).entities.ReturnRequest.list('-created_date', 3000);
       returns = allReturns.filter((r: any) => leadIds.has(r.lead_id));
     } catch { returns = []; }
 
@@ -83,8 +84,8 @@ Deno.serve(async (req) => {
     // Their API key(s).
     let apiKey: any = null;
     try {
-      const keys = await base44.asServiceRole.entities.ApiKey.filter({ supplier_id: supplier.id });
-      const byName = keys.length ? keys : await base44.asServiceRole.entities.ApiKey.filter({ supplier_name: supplier.name });
+      const keys = await mirrorClock(base44.asServiceRole).entities.ApiKey.filter({ supplier_id: supplier.id });
+      const byName = keys.length ? keys : await mirrorClock(base44.asServiceRole).entities.ApiKey.filter({ supplier_name: supplier.name });
       const active = byName.find((k: any) => k.active) || byName[0];
       // Deny-by-default: never return the raw secret. Prefix + metadata only.
       if (active) apiKey = {
@@ -100,9 +101,9 @@ Deno.serve(async (req) => {
     let adReporting: any = null;
     if (isInternalFacebook) {
       try {
-        const mappings = await base44.asServiceRole.entities.AdSpendMapping.filter({ supplier_name: supplier.name });
+        const mappings = await mirrorClock(base44.asServiceRole).entities.AdSpendMapping.filter({ supplier_name: supplier.name });
         const mappingIds = new Set(mappings.map((m: any) => m.id));
-        const allSpend = await base44.asServiceRole.entities.AdSpend.filter({ supplier_name: supplier.name }, '-date', 3000);
+        const allSpend = await mirrorClock(base44.asServiceRole).entities.AdSpend.filter({ supplier_name: supplier.name }, '-date', 3000);
         const spendRows = allSpend.filter((s: any) => !s.mapping_id || mappingIds.has(s.mapping_id));
         adReporting = {
           enabled: true,

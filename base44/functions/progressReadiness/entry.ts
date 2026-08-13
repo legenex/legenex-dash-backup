@@ -1,5 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 import {
+import { mirrorClock } from './mirrorClock.ts';
   pageReadiness,
   weightedAverage,
   sectionBreakdown,
@@ -65,7 +66,7 @@ Deno.serve(async (req) => {
     try { user = await base44.auth.me(); } catch { user = null; }
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const record = await base44.asServiceRole.entities.User.get(user.id).catch(() => null);
+    const record = await mirrorClock(base44.asServiceRole).entities.User.get(user.id).catch(() => null);
     const caller = record || user;
     if (caller.base_role === 'supplier' || caller.base_role === 'buyer') {
       return Response.json({ error: 'Forbidden' }, { status: 403 });
@@ -86,7 +87,7 @@ Deno.serve(async (req) => {
     const persist = body?.persist !== false; // default true
     const snapshot = body?.snapshot !== false; // default true
 
-    const svc = base44.asServiceRole.entities;
+    const svc = mirrorClock(base44.asServiceRole).entities;
     const [pages, findings, verifications, gates, requirements] = await Promise.all([
       loadAll(svc.ProgressPage),
       loadAll(svc.AuditFinding),
