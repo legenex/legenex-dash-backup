@@ -12,29 +12,41 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 // source-id -> mirror-id map from the low volume entities each run and rewrites
 // reference fields through it before writing.
 //
+// Base44 also stamps its own created_date and refuses one from the caller, so
+// the primary's real timestamp is carried in `source_created_date` and swapped
+// back in by the read layer (src/api/base44Client.js on the frontend,
+// base44/functions/_shared/mirrorClock.ts on the service-role side).
+//
 // Invocation:
 //   POST {}                          run from the stored round-robin cursor
 //   POST { entities: ["Lead"] }      run just these entities
 //   POST { budget_ms: 90000 }        override the wall clock budget
+//   POST { dry_run: true }           report what would change, write nothing
 //
 // Scheduled runs arrive with no user. Interactive runs must be an admin.
 
-// Bump this whenever the sync logic changes; it is echoed in the response so a
-// caller can tell which build actually answered.
+// Echoed in the response so a caller can tell which build actually answered.
 const MIRROR_SYNC_VERSION = 'v3-source-created-date';
-const SOURCE_APP = '6a4957e7b03e9b10c170d29e';
+
 const SOURCE_FN = 'https://base44.app/api/apps/6a4957e7b03e9b10c170d29e/functions/migrateSource';
 const SECRET = 'lgx-migrate-9f3a2b7c4d8e1055';
 
-// System columns the platform owns. Never copied, never compared.
-const SYSTEM_FIELDS = ['id', 'created_date', 'updated_date', 'created_by_id', 'created_by', 'is_sample', 'migration_source_id', 'source_created_date'];
+// Columns the platform owns. Never copied from the source, never compared.
+// The two mirror-only columns live here too: they are bookkeeping this job
+// writes itself, so they must not register as drift against the source record.
+const SYSTEM_FIELDS = [
+  'id', 'created_date', 'updated_date', 'created_by_id', 'created_by', 'is_sample',
+  'migration_source_id', 'source_created_date',
+];
 
-// Append-only, very high volume. Synced on id presence alone: no field level
+// Append-only and very high volume. Synced on id presence alone: no field level
 // diffing, because rewriting 90k log rows every pass is not worth the calls.
+// MetaSyncRun carries its own started_at / finished_at, which is what the
+// history view reads, so it does not need the created_date correction.
 const APPEND_ONLY = new Set(['MetaSyncRun']);
 
-// Never mirrored. User is a built-in entity the platform manages, and
-// MirrorSyncState belongs to this app only.
+// Never mirrored. User is a built-in entity the platform manages and refuses
+// creates on; MirrorSyncState belongs to this app only.
 const EXCLUDED = new Set(['User', 'MirrorSyncState']);
 
 // Entities big enough that loading them into the reference map is wasteful.
@@ -91,10 +103,10 @@ async function source(body: Record<string, unknown>) {
 }
 
 // Every record of an entity in the primary app.
-async function sourceAll(entity: string, fields?: string[]) {
+async function sourceAll(entity: string) {
   const out: any[] = [];
   for (let skip = 0; skip < 400000; skip += 500) {
-    const page = await source({ op: fields ? 'read' : 'read', entity, skip, limit: 500, fields });
+    const page = await source({ op: 'read', entity, skip, limit: 500 });
     const rows = page.rows || [];
     out.push(...rows);
     if (rows.length < 500) break;
@@ -143,6 +155,14 @@ function remap(rec: Record<string, any>, idMap: Record<string, string>) {
   return out;
 }
 
+// Build the record this app should hold for a given source record.
+function desired(s: Record<string, any>, idMap: Record<string, string>) {
+  const want = remap(strip(s), idMap);
+  want.migration_source_id = s.id;
+  want.source_created_date = s.created_date;
+  return want;
+}
+
 function differs(want: Record<string, any>, have: Record<string, any>) {
   for (const [k, v] of Object.entries(want)) {
     const a = v === undefined || v === '' ? null : v;
@@ -179,11 +199,10 @@ Deno.serve(async (req) => {
     const budgetMs = Math.min(Math.max(Number(body.budget_ms) || 100000, 10000), 500000);
     const dryRun = body.dry_run === true;
 
-    let queue: string[] = Array.isArray(body.entities) && body.entities.length
-      ? body.entities.filter((e: string) => ENTITIES.includes(e))
-      : [];
+    const explicit = Array.isArray(body.entities) && body.entities.length > 0;
+    let queue: string[] = explicit ? body.entities.filter((e: string) => ENTITIES.includes(e)) : [];
     let cursorRow: any = null;
-    if (queue.length === 0) {
+    if (!explicit) {
       cursorRow = await loadState(db, '__cursor__');
       const start = cursorRow ? (Number(cursorRow.cursor) || 0) % ENTITIES.length : 0;
       queue = [...ENTITIES.slice(start), ...ENTITIES.slice(0, start)];
@@ -212,16 +231,12 @@ Deno.serve(async (req) => {
       const result: any = { entity, created: 0, updated: 0, deleted: 0, errors: [] as string[] };
 
       try {
-        // Append-only entities are compared on ids alone: pulling 90k full log
-        // rows every pass would blow the time budget for no benefit.
-        const srcRows = appendOnly
-          ? await sourceIds(entity)
-          : await sourceAll(entity);
+        const srcRows = appendOnly ? await sourceIds(entity) : await sourceAll(entity);
         const mirRows = await mirrorAll(db, entity, appendOnly ? ['id', 'migration_source_id'] : undefined);
 
         // Orphans are rows that no longer belong here: ones with no source id,
-        // duplicates of a source id already claimed by another row, and (further
-        // down) ones whose source record has since been deleted upstream.
+        // duplicates of a source id already claimed by another row, and (below)
+        // ones whose source record has since been deleted upstream.
         const bySourceId: Record<string, any> = {};
         const orphans: string[] = [];
         for (const m of mirRows) {
@@ -233,39 +248,29 @@ Deno.serve(async (req) => {
         const seen = new Set<string>();
         const toCreate: any[] = [];
 
-        // For append-only entities srcRows only carries ids, so the bodies of
-        // anything missing here have to be fetched before they can be written.
         if (appendOnly) {
-          const missingIds = srcRows.filter((s: any) => !bySourceId[s.id]).map((s: any) => s.id);
+          // srcRows only carries ids here, so the bodies of anything missing
+          // have to be fetched before they can be written.
           for (const s of srcRows) seen.add(s.id);
+          const missingIds = srcRows.filter((s: any) => !bySourceId[s.id]).map((s: any) => s.id);
           for (let i = 0; i < missingIds.length; i += 200) {
             if (Date.now() - startedAt > budgetMs) break;
             const chunk = missingIds.slice(i, i + 200);
             const page = await source({ op: 'filter', entity, query: { id: { $in: chunk } }, limit: 500 });
-            for (const s of (page.rows || [])) {
-              const want = remap(strip(s), idMap);
-              want.migration_source_id = s.id;
-              want.source_created_date = s.created_date;
-              toCreate.push(want);
-            }
+            for (const s of (page.rows || [])) toCreate.push(desired(s, idMap));
           }
-        }
-
-        for (const s of (appendOnly ? [] : srcRows)) {
-          seen.add(s.id);
-          const want = remap(strip(s), idMap);
-          want.migration_source_id = s.id;
-          // Base44 will not accept a created_date on insert, so the primary's
-          // real timestamp rides along in its own column and the app's read
-          // layer swaps it back in.
-          want.source_created_date = s.created_date;
-          const have = bySourceId[s.id];
-          if (!have) { toCreate.push(want); continue; }
-          if (differs(want, have)) {
-            if (!dryRun) {
-              try { await withRetry(() => db.entities[entity].update(have.id, want)); result.updated++; }
-              catch (e) { if (result.errors.length < 3) result.errors.push(`update ${have.id}: ${(e as Error).message}`); }
-            } else result.updated++;
+        } else {
+          for (const s of srcRows) {
+            seen.add(s.id);
+            const want = desired(s, idMap);
+            const have = bySourceId[s.id];
+            if (!have) { toCreate.push(want); continue; }
+            if (differs(want, have)) {
+              if (!dryRun) {
+                try { await withRetry(() => db.entities[entity].update(have.id, want)); result.updated++; }
+                catch (e) { if (result.errors.length < 3) result.errors.push(`update ${have.id}: ${(e as Error).message}`); }
+              } else result.updated++;
+            }
           }
         }
 
@@ -298,7 +303,6 @@ Deno.serve(async (req) => {
         }
 
         result.source_count = srcRows.length;
-        result.duplicates_removed = orphans.length;
         result.mirror_count = mirRows.length + result.created - result.deleted;
         result.in_sync = result.source_count === result.mirror_count;
 
@@ -317,7 +321,13 @@ Deno.serve(async (req) => {
       } catch (e) {
         result.errors.push((e as Error).message);
         result.in_sync = false;
-        if (!dryRun) await saveState(db, entity, { last_sync_at: new Date().toISOString(), in_sync: false, last_error: (e as Error).message.slice(0, 400) }).catch(() => {});
+        if (!dryRun) {
+          await saveState(db, entity, {
+            last_sync_at: new Date().toISOString(),
+            in_sync: false,
+            last_error: (e as Error).message.slice(0, 400),
+          }).catch(() => {});
+        }
       }
 
       report.push(result);
@@ -325,28 +335,30 @@ Deno.serve(async (req) => {
     }
 
     // Advance the round-robin cursor so the next run picks up where this stopped.
-    if (!dryRun && !(Array.isArray(body.entities) && body.entities.length)) {
+    if (!dryRun && !explicit) {
       const start = cursorRow ? (Number(cursorRow.cursor) || 0) : 0;
       await saveState(db, '__cursor__', { cursor: (start + processed) % ENTITIES.length }).catch(() => {});
     }
 
-    const outOfSync = report.filter((r) => r.in_sync === false).map((r) => r.entity);
     return Response.json({
       ok: true,
       version: MIRROR_SYNC_VERSION,
       dry_run: dryRun,
       duration_ms: Date.now() - startedAt,
       entities_processed: processed,
-      entities_remaining: ENTITIES.length - processed,
       totals: {
         created: report.reduce((a, r) => a + r.created, 0),
         updated: report.reduce((a, r) => a + r.updated, 0),
         deleted: report.reduce((a, r) => a + r.deleted, 0),
       },
-      out_of_sync: outOfSync,
+      out_of_sync: report.filter((r) => r.in_sync === false).map((r) => r.entity),
       report,
     });
   } catch (error) {
-    return Response.json({ error: (error as Error).message, duration_ms: Date.now() - startedAt }, { status: 500 });
+    return Response.json({
+      error: (error as Error).message,
+      version: MIRROR_SYNC_VERSION,
+      duration_ms: Date.now() - startedAt,
+    }, { status: 500 });
   }
 });
