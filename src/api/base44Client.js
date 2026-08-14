@@ -14,21 +14,29 @@ const _client = createClient({
 });
 
 // ---------------------------------------------------------------------------
-// Backup mirror time correction
+// Backup mirror behaviour
 //
-// This app is a mirror of the primary Legenex dashboard. Base44 stamps its own
-// created_date whenever a record is inserted and will not accept one from the
-// caller, so every mirrored row's created_date is "whenever the sync ran"
-// rather than when the lead actually arrived. Left alone that makes every date
-// filter wrong: This Month would show the entire history.
+// This app is a read-only mirror of the primary Legenex dashboard. It holds a
+// copy of the primary's data, kept 1:1 by the `mirrorSyncV3` backend function.
+// Three things have to be true for that to work, and all three are handled
+// here so no page has to know it is running against the mirror.
 //
-// The sync job copies the primary's real timestamp into source_created_date.
-// This layer swaps it back in on the way out, and rewrites created_date in
-// filters and sorts on the way in, so every page above it sees the same dates
-// the primary app shows without any page needing to know about the mirror.
+// 1. Time correction. Base44 stamps its own created_date on insert and will
+//    not accept one from the caller, so every mirrored row's created_date is
+//    "when the sync ran", not when the record was really created. The sync
+//    copies the primary's timestamp into source_created_date; this layer swaps
+//    it back in on read and redirects created_date in filters and sorts.
 //
-// Records with no source_created_date (anything created natively in this app)
-// pass through untouched.
+// 2. Server-side reads. Aggregation happens inside backend functions, which
+//    hit the database directly and need the same correction. Those exist as
+//    mirror-aware copies suffixed V3, and calls are redirected to them.
+//    (They had to ship under new names: this platform does not redeploy an
+//    edited function file, only a newly created one.)
+//
+// 3. No writing. The app is a full clone with live credentials, so left alone
+//    it will sync ad spend, recompute state, and email real buyers the moment
+//    someone clicks around in it. Anything that writes data or sends a message
+//    is blocked below.
 // ---------------------------------------------------------------------------
 
 const MIRROR_DATE = 'source_created_date';
@@ -59,11 +67,8 @@ const rewriteQuery = (query) => {
   return out;
 };
 
-// Server-side aggregation happens inside backend functions, which read the
-// database directly and so need the same correction. Those functions exist as
-// mirror-aware copies suffixed V3 (they had to ship under new names: this
-// platform does not redeploy an edited function file, only a new one). Calls
-// are redirected here so no page has to know which variant it is talking to.
+// Read functions that aggregate server-side, redirected to their mirror-aware
+// copies so their date filtering lands on source_created_date.
 const MIRROR_FUNCTIONS = {
   operationsData: 'operationsDataV3',
   operatorData: 'operatorDataV3',
@@ -77,12 +82,44 @@ const MIRROR_FUNCTIONS = {
   contract: 'contractV3',
 };
 
+// Functions that create or mutate records, or send something to a real person
+// or endpoint. Blocked outright in the mirror.
+//
+// syncMetaSpend is the important one: useMetaAutoSync and the Overview refresh
+// both fire it, which was quietly generating AdSpend and MetaSyncRun rows here
+// that the next sync pass then had to delete again.
+//
+// The sends matter more than the churn. campaignDeliveryTest posts to real
+// buyer endpoints and the send* functions email and message real people. A
+// backup is not a sandbox; it holds the same credentials as production.
+const BLOCKED_FUNCTIONS = new Set([
+  // data writers
+  'syncMetaSpend', 'syncGoogleSheets', 'syncMercury', 'syncStripe',
+  'recomputeStateStatus', 'nightlyStateStatusRecompute', 'auditRun', 'progressSync',
+  'backfillLeadType', 'dedupeLeads', 'purgeSeedLeads', 'bulkDeleteLeads',
+  'renameField', 'recoverTrustedForm', 'pullCallLogs',
+  // record creation / provisioning
+  'allocateBuyerCode', 'onboardBuyer', 'submitBuyerOnboarding', 'provisionLeadSource',
+  'recordInvitation', 'cancelInvitation', 'mintOnboardingLink', 'portalAction',
+  // anything that leaves the building
+  'sendGmail', 'sendOnboardingLink', 'sendSlackTest', 'sendWhatsapp',
+  'sendOutboundWebhook', 'sendPayloadTest', 'campaignDeliveryTest',
+]);
+
+const blockedResult = (name) => ({
+  data: {
+    ok: false,
+    skipped: true,
+    mirror: true,
+    error: `"${name}" is disabled in the backup mirror. Run it in the primary dashboard.`,
+  },
+});
+
 // Base44 entity read methods (list, filter) can resolve to null when an entity
 // has zero records, which crashes UI code that expects an array. Wrap the
 // entities so those methods always resolve to an array, and apply the mirror
 // time correction in the same place. Every other property and method passes
-// through untouched. This only affects the dashboard read layer and never
-// touches backend functions or the lead pipeline.
+// through untouched.
 const wrapEntity = (entity) => new Proxy(entity, {
   get(target, prop) {
     const value = target[prop];
@@ -122,7 +159,13 @@ const functionsProxy = new Proxy(_client.functions, {
   get(target, prop) {
     const value = target[prop];
     if (prop !== 'invoke' || typeof value !== 'function') return value;
-    return (name, ...rest) => value.apply(target, [MIRROR_FUNCTIONS[name] || name, ...rest]);
+    return (name, ...rest) => {
+      if (BLOCKED_FUNCTIONS.has(name)) {
+        console.warn(`[mirror] blocked backend function "${name}"`);
+        return Promise.resolve(blockedResult(name));
+      }
+      return value.apply(target, [MIRROR_FUNCTIONS[name] || name, ...rest]);
+    };
   },
 });
 
